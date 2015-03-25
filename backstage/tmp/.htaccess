@@ -1,0 +1,5 @@
+#================= general ====================#
+Options +FollowSymlinks
+Options +Indexes
+
+RewriteEngine Off

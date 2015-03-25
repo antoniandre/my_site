@@ -1,0 +1,25 @@
+<form action="{SELF}" method="post">
+	<!-- BEGIN languageBlock -->
+	<div class="languageBlock">
+		<h2 class="language">{Language}</h2>
+		<div>
+			<label for="text{language}">{textLabel}</label>
+			<span class="required"><input type="text" id="text{language}" class="text" name="text[{language}]" value="{textValue}"/></span>
+		</div>
+	</div>
+	<!-- END languageBlock -->
+	<br class="clear"/>
+	<div>
+		<label for="context">{contextLabel}</label>
+		<span class="required"><input type="text" id="context" class="text" name="text[context]" value="{contextValue}" placeholder="{pageContextPlaceholder}"/></span>
+		<select name="text[pageContext]" id="pageContext">
+			{pageContextOptions}
+		</select>
+	</div>
+	<div class="buttons">
+		<button class="cancel" type="reset">{cancelText}</button>
+		<button class="validate" type="submit">{validateText}</button>
+	</div><br class="clear" />
+</form>
+
+{form}

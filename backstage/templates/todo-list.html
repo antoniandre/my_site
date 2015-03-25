@@ -1,0 +1,35 @@
+<div class="todoListWrapper {archiveClass}">
+    <div id="lightbox">
+        <div class="inner"></div>
+    </div>
+    <div id="messageWrapper"><div id="message"></div></div>
+    <div id="trashWrapper">
+        <div id="trash"><span class="count"></span></div>
+    </div>
+
+    <div id="tableWrapper">
+    <table id="mainTable" cellspacing="0" cellpadding="0">
+        <header>{tableHeaderTitle}</header>
+        <tr><th style="width:10px" class="noContent handle"></th>
+            <!-- BEGIN tableHeader -->
+            <th style="width:{cellWidth}"{cellColspan}>{cellIcon}{cellText}</th>
+            <!-- END tableHeader -->
+        </tr>
+        {tableRows}
+    </table>
+    <div class="buttons">
+        <div class="left">
+            <button id="toggleAll" class="i-eye-close" title="Hide selected rows"> Hide all</button>
+            <a href="{selfLink}" class="i-{seeTasksClass}"> {seeTasksText}</a>
+        </div>
+        <div class="center">
+            <button id="newRow" class="i-plus"> Add a row</button>
+        </div>
+        <div class="right">
+            <button id="save" class="i-valid"> Save</button>
+            <button id="copyToClipboard" class="i-copy" title="Copy tasks to your clipboard"> Copy</button>
+        </div>
+    </div>
+    </div>
+    <br class="clear"/>
+</div>

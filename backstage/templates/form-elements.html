@@ -1,0 +1,64 @@
+<!-- BEGIN labelBlock -->
+<label for="{formId}{id}">{label}</label>
+<!-- END labelBlock -->
+
+<!-- BEGIN textBlock -->
+<span class="{validation}{state}">
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+</span>
+<!-- END textBlock -->
+
+<!-- BEGIN emailBlock -->
+<span class="{validation}{state}">
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text email{class}" value="{value}"{attr} />
+</span>
+<!-- END emailBlock -->
+
+<!-- BEGIN phoneBlock -->
+<span class="{validation}{state}">
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text phone{class}" value="{value}"{attr} />
+</span>
+<!-- END phoneBlock -->
+
+<!-- BEGIN hiddenBlock -->
+<span class="{validation}{state}">
+	<input type="hidden" name="{formId}{name}" id="{formId}{id}" value="{value}" />
+</span>
+<!-- END hiddenBlock -->
+
+<!-- BEGIN textareaBlock -->
+<span class="{validation}{state}">
+	<textarea name="{formId}{name}" id="{formId}{id}" class="text {class}"{attr}>{value}</textarea>
+</span>
+<!-- END textareaBlock -->
+
+<!-- BEGIN selectBlock -->
+<span class="{validation}{state}">
+	<select name="{formId}{name}" id="{formId}{id}" class="text {class}">
+		<option value="-"> - </option>
+		<!-- BEGIN optionBlock -->
+		<option value="{value}">{label}</option>
+		<!-- END optionBlock -->	
+	</select>
+</span>
+<!-- END selectBlock -->
+
+<!-- BEGIN checkboxBlock -->
+<span class="{validation}{state}">
+	<input type="checkbox" name="{formId}{name}[]" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+</span>
+<!-- END checkboxBlock -->
+
+<!-- BEGIN radioBlock -->
+<span class="{validation}{state}">
+	<input type="radio" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+</span>
+<!-- END radioBlock -->
+
+<!-- BEGIN headerBlock -->
+<h{level}{attr}>{text}</h{level}>
+<!-- END headerBlock -->
+
+<!-- BEGIN paragraphBlock -->
+<p{attr}>{text}</p>
+<!-- END paragraphBlock -->

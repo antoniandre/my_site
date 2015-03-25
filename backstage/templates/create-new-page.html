@@ -1,0 +1,86 @@
+<form action="{SELF}" method="post">
+	<div class="panes">
+		<div class="newPage pane">
+			<h2 class="title">Create a new page</h2>
+			<div class="inner">
+				<p class="intro">{newPageIntro}</p>
+				<div>
+					<!-- BEGIN languageBlock -->
+					<div class="languageBlock">
+						<h3 class="language">{Language}</h3>
+						<div>
+							<label for="pageUrl">{pageUrlLabel}</label>
+							<input type="text" id="pageUrl" class="text" name="page[url][{language}]" value="{pageUrlValue}"/>
+						</div>
+						<div>
+							<label for="pageText">{pageTitleLabel}</label>
+							<input type="text" id="pageText" class="text" name="page[title][{language}]" value="{pageTitleValue}"/>
+						</div>
+						<div>
+							<label for="pageMetaDesc">{pageMetaDescLabel}</label>
+							<textarea id="pageMetaDesc" class="text" name="page[metaDesc][{language}]" cols="30" rows="10">{pageMetaDescValue}</textarea>
+						</div>
+						<div>
+							<label for="pageMetaKey">{pageMetaKeyLabel}</label>
+							<textarea id="pageMetaKey" class="text" name="page[metaKey][{language}]" cols="30" rows="10">{pageMetaKeyValue}</textarea>
+						</div>
+					</div>
+					<!-- END languageBlock -->
+					<br class="clear"/>
+					<div>
+						<label for="pageName">{pageNameLabel}</label>
+						<input type="text" id="pageName" class="text" name="page[name]" value="{pageNameValue}" placeholder="{pageNamePlaceholder}"/>
+					</div>
+					<div>
+						<label for="pagePath">{pagePathLabel}</label>
+						<input type="text" id="pagePath" class="text" name="page[path]" value="{pagePathValue}" placeholder="{pagePathPlaceholder}"/>
+					</div>
+					<div>
+						<label for="pageParent">{pageParentLabel}</label>
+						<select id="pageParent" name="page[parent]" cols="30" rows="10">{pageParentValue}</select>
+					</div>
+					<div>
+						<label for="pageTypePHP">{pageTypeLabel}</label> &nbsp;
+						<input id="pageTypePHP" type="radio" name="page[type]" value="php" />
+						<label for="pageTypePHP">{pageTypePHPLabel}</label> &nbsp;
+						<input id="pageTypeArticle" type="radio" name="page[type]" value="article" />
+						<label for="pageTypeArticle">{pageTypeArticleLabel}</label>
+					</div>
+					<div class="buttons">
+						<button class="cancel" type="reset">{cancelText}</button>
+						<button class="validate" type="submit">{validateText}</button>
+					</div><br class="clear" />
+				</div>
+			</div>
+		</div>
+		<div class="newArticle pane">
+			<h2 class="title">Create a new article</h2>
+			<div class="inner nopadding">
+				<!-- BEGIN languageBlock2 -->
+				<label for="articleContent">{articleContentLabel}</label>
+				<textarea class="articleContent" name="article[content][{language}]">
+					<h2>Please, scroll down</h2>
+					<p>I never did quite grasp him, though he endeavored to explain it to me upon numerous occasions.  I suggested telepathy, but he said no, that it was not telepathy since they could only communicate when in each others' presence, nor could they talk with the Sagoths or the other inhabitants of Pellucidar by the same method they used to converse with one another.</p>
+					<p>"What they do," said Perry, "is to project their thoughts into the fourth dimension, when they become appreciable to the sixth sense of their listener.  Do I make myself quite clear?"</p>
+					<p>"You do not, Perry," I replied.  He shook his head in despair, and returned to his work.  They had set us to carrying a great accumulation of Maharan literature from one apartment to another, and there arranging it upon shelves.  I suggested to Perry that we were in the public library of Phutra, but later, as he commenced to discover the key to their written language, he assured me that we were handling the ancient archives of the race.</p>
+					<p>During this period my thoughts were continually upon Dian the Beautiful.  I was, of course, glad that she had escaped the Mahars, and the fate that had been suggested by the Sagoth who had threatened to purchase her upon our arrival at Phutra.  I often wondered if the little party of fugitives had been overtaken by the guards who had returned to search for them.  Sometimes I was not so sure but that I should have been more contented to know that Dian was here in Phutra, than to think of her at the mercy of Hooja the Sly One.  Ghak, Perry, and I often talked together of possible escape, but the Sarian was so steeped in his lifelong belief that no one could escape from the Mahars except by a miracle, that he was not much aid to us—his attitude was of one who waits for the miracle to come to him.</p>
+					<p>I never did quite grasp him, though he endeavored to explain it to me upon numerous occasions.  I suggested telepathy, but he said no, that it was not telepathy since they could only communicate when in each others' presence, nor could they talk with the Sagoths or the other inhabitants of Pellucidar by the same method they used to converse with one another.</p>
+					<p>"What they do," said Perry, "is to project their thoughts into the fourth dimension, when they become appreciable to the sixth sense of their listener.  Do I make myself quite clear?"</p>
+					<p>"You do not, Perry," I replied.  He shook his head in despair, and returned to his work.  They had set us to carrying a great accumulation of Maharan literature from one apartment to another, and there arranging it upon shelves.  I suggested to Perry that we were in the public library of Phutra, but later, as he commenced to discover the key to their written language, he assured me that we were handling the ancient archives of the race.</p>
+					<p>During this period my thoughts were continually upon Dian the Beautiful.  I was, of course, glad that she had escaped the Mahars, and the fate that had been suggested by the Sagoth who had threatened to purchase her upon our arrival at Phutra.  I often wondered if the little party of fugitives had been overtaken by the guards who had returned to search for them.  Sometimes I was not so sure but that I should have been more contented to know that Dian was here in Phutra, than to think of her at the mercy of Hooja the Sly One.  Ghak, Perry, and I often talked together of possible escape, but the Sarian was so steeped in his lifelong belief that no one could escape from the Mahars except by a miracle, that he was not much aid to us—his attitude was of one who waits for the miracle to come to him.</p>
+				</textarea>
+				<br />
+				<!-- END languageBlock2 -->
+				<div>
+					<label for="articlePublished">{articlePublishedLabel}</label>
+					<input id="articlePublished" type="checkbox" name="article[published]"{articlePublishedSelected} />
+				</div>
+				<br />
+				<div class="buttons">
+					<button class="cancel" type="reset">{cancelText}</button>
+					<button class="validate" type="submit">{validateText}</button>
+				</div><br class="clear" />
+			</div>
+		</div>
+	</div>
+</form>

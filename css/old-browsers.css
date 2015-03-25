@@ -1,0 +1,7 @@
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {display:block;}
+
+#frame > .inner
+{background: rgb(255,255,255);
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#66ffffff,endColorstr=#66ffffff);
+zoom: 1;}

@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /backstage/
+Disallow: /not-found.php
+Allow: /

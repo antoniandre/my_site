@@ -1,0 +1,329 @@
+<?php
+/**
+ * Design pattern: singleton
+ *
+ * Example of where usage:
+ * $where= $db->where("column_name1 ='value1'");
+ * $where->and("column_name2='value2'")
+ *       ->or("column_name3 LIKE 'value3'", $where->or("column_name4<=4"), $where->or("column_name5<=5"), $where->or("column_name6<=6"))
+ *       ->and("column_name7='value7'", $where->or("column_name8<=8", $where->and("column_name9='value9'", $where->and("column_name10 IN (1,2,3,4,5)"))));
+ *
+ * Will produce:
+ * column_name1 ='value1'
+ * AND column_name2='value2'
+ * OR (column_name3 LIKE 'value3' OR column_name4<=4 OR column_name5<=5 OR column_name6<=6)
+ * AND (column_name7='value7' OR (column_name8<=8 AND column_name9='value9' AND column_name10 IN (1,2,3,4,5))))
+ **/
+Class Where extends DatabaseEntity
+{
+	private static $instance= null;
+	private $where;
+
+	/**
+	 * Class constructor.
+	 */
+	protected function __construct($args= [])
+	{
+		parent::__construct();
+		$this->tempPieces= [];
+		if (count($args))
+		{
+			$this->tempPieces[0]= $this->gatherArgs($args);
+			$this->where= $this->tempPieces[0];
+		}
+	}
+
+	/**
+	 * Get the only instance of this class.
+	 *
+	 * @return the only instance of this class.
+	 */
+	public static function getInstance($condition= null)
+	{
+		if (!isset(self::$instance)) self::$instance = new self($condition);
+		return self::$instance;
+	}
+
+	/**
+	 * Intercept any call to a method to redispatch to the proper method.
+	 * This is used to allow a call to a reserved-keyword-method like or() and and()
+	 * whereas you can't define this method.
+	 *
+	 * @param  string $method: the name of the method that was initially called.
+	 * @param  array $args: the parameters to provide to the method that was initially called.
+	 * @return the current Where instance.
+	 */
+    function __call($method, $args)
+    {
+    	$return= null;
+
+        switch ($method)
+        {
+        	case 'or':
+        	case 'and':
+        		$method= "_$method";
+	        	break;
+        	case 'run':
+        		return Query::getInstance()->run();
+	        	break;
+        	default:
+	        	break;
+        }
+		if (!method_exists($this, $method)) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
+        else return call_user_func_array(array(self::$instance, $method), $args);
+    }
+
+	/**
+	 * Get where.
+	 *
+	 * @return string the processed where.
+	 */
+	public function get()
+	{
+		return $this->where;
+	}
+
+	/**
+	 * Supposed to be named and() but can't redefine a reserved keyword.
+	 * Secure the mysqli AND command with the given arguments.
+	 *
+	 * @param  mixed func_get_args(): array or string.
+	 * @return Where: the current instance.
+	 *
+	 * Usage:
+     * $q= $db->query();
+     * $q->select('pages', [$q->col('page'), $q->concat($q->col('url_en'), ' && ', $q->col('url_fr'))->as('concat')]);
+     * $w= $q->where();
+     *
+     * 2 possible syntaxes for where clause:
+	 * 1.    $w->and($w->col('page')->eq("sitemap"), $w->col('url_fr')->eq("accueil"));
+     * 2.    $w->col('page')->eq("sitemap")->and($w->col('url_fr')->eq("accueil"));
+     *
+	 */
+	public function _and()
+	{
+		$args= $this->gatherArgs(func_get_args());
+		$this->tempPieces[]= (count($args)> 1) ? (' ('.implode(" AND ", $args).')') : (' AND '.$args[0]);
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Supposed to be named or() but can't redefine a reserved keyword.
+	 * Secure the mysqli OR command with the given arguments.
+	 *
+	 * @param  mixed func_get_args(): array or string.
+	 * @return Where: the current instance.
+	 *
+	 * Usage:
+     * $q= $db->query();
+     * $q->select('pages', [$q->col('page'), $q->concat($q->col('url_en'), ' && ', $q->col('url_fr'))->as('concat')]);
+     * $w= $q->where();
+     *
+     * 2 possible syntaxes for where clause:
+	 * 1.    $w->or($w->col('page')->eq("sitemap"), $w->col('page')->eq("home"));
+     * 2.    $w->col('page')->eq("sitemap")->or($w->col('page')->eq("home"));
+     *
+	 */
+	public function _or()
+	{
+		$args= $this->gatherArgs(func_get_args());
+		$this->tempPieces[]= (count($args)> 1) ? (' ('.implode(" OR ", $args).')') : (' OR '.$args[0]);
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Secure the mysqli IN command with the given arguments.
+	 *
+	 * @param  array func_get_args(): array of strings.
+	 * @return Where: the current instance.
+	 *
+	 * Usage:
+     * $q= $db->query()->select('pages', '*');
+     * $q->where()->col('page')->in("sitemap", "home");
+	 */
+	public function in()
+	{
+		$currIndex= count($this->tempPieces)-1;
+		$this->tempPieces[$currIndex].= ' IN ('.implode(', ', $this->gatherArgs(func_get_args())).')';
+		$this->where= implode("\nAND ", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function eq($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' = '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function lt($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' < '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function lte($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' <= '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function gt($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' > '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function gte($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' >= '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	public function dif($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' <> '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+	public function ne($rightHandArg)
+	{
+		$currIndex= count($this->tempPieces)-1;
+		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex].= ' <> '.$this->gatherArgs(func_get_args())[0];
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Secure the mysqli CONCAT command with the given arguments.
+	 *
+	 * @param array func_get_args(): the arguments to concat.
+	 * @return Where: The current where instance.
+	 */
+	public function concat()
+	{
+		// PHP5.6+
+		// parent::{__FUNCTION__}(...func_get_args());
+		// PHP5.5-
+		call_user_func_array(['parent', __FUNCTION__], func_get_args());
+		$this->where= implode("\nAND ", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Prepares a mysqli COUNT command and stores it in the $this->tempPieces.
+	 *
+	 * @param  string $string: what you want to count.
+	 * @return Where: The current where instance.
+	 */
+	public function _count($string)
+	{
+		parent::{__FUNCTION__}(func_get_arg(0));
+		$this->where= implode("\nAND ", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Tells the query this word is not a string but a column name.
+	 *
+	 * @param string $column: the column name.
+	 * @return Where: The current where instance.
+	 */
+	public function col($column)
+	{
+		parent::{__FUNCTION__}(func_get_arg(0));
+		$this->where= implode("\n", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	protected function lower($string)
+	{
+		parent::{__FUNCTION__}(func_get_arg(0));
+		$this->where= implode("\nAND ", $this->tempPieces);
+		return $this;
+	}
+
+	/**/
+	protected function upper($string)
+	{
+		parent::{__FUNCTION__}(func_get_arg(0));
+		$this->where= implode("\nAND ", $this->tempPieces);
+		return $this;
+	}
+
+	/**
+	 * Check the fields we want to select.
+	 *
+	 * @param  string $field.
+	 * @return string: secured field string.
+	 */
+	protected function checkField($field)
+	{
+		return parent::{__FUNCTION__}(func_get_arg(0));
+	}
+
+	/**
+	 * Gather function args: if args are instanceOf Query, they are treated previously and
+	 * appended to the $this->fields attribute. So This function get the treated args from this array
+	 * and return all the params in the right order.
+	 * If a param is non-database-entity-object (Query or Where) it is treated as a simple string.
+	 *
+	 * Ex:
+	 * $q->select('pages', [
+     *                         $q->concat($q->col('id'), $q->col('page'), ': ', $q->col('url_en'))->as('c'),
+     *                         'value',
+     *                         $q->count('*')->as('cd')
+     *                     ]);
+     *
+     * @param  array $args: the arguments raw array to treat.
+     * @return array: All the args in the right order.
+     */
+	protected function gatherArgs($args)
+	{
+		return parent::gatherArgs($args);
+	}
+
+	/**
+	 * Private clone method to prevent cloning of the instance of the
+	 * *Singleton* instance.
+	 *
+	 * @return void
+	 */
+	private function __clone()
+	{
+	}
+
+	/**/
+	public function kill()
+	{
+		$this->where= '';
+		$this->tempPieces= [];
+	}
+}
+?>

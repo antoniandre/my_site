@@ -1,0 +1,115 @@
+<!doctype html>
+<!--[if !IE]><!--><html prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" lang="{language}" class="nojs {language}"><!--<![endif]-->
+<!--[if IE]><html prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" lang="{language}" class="nojs {language} ie"><![endif]-->
+<head>
+	<title>{pageTitle}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta http-equiv="Content-language" content="{language}" />
+	<!-- BEGIN seoMetas -->
+	<meta name="Author" content="{author}" />
+	<meta name="description" content="{metaDesc}" />
+	<meta name="keywords" content="{metaKey}" />
+	<meta name="Revisit-after" content="2 days" />
+	<meta property="og:author" content="{author}" />
+	<meta property="og:locale" content="{languageFull}" />
+	<meta property="og:site_name" content="{siteName}" />
+	<meta property="og:title" content="{pageTitle}" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="{siteUrl}" />
+	<!--<meta property="og:image" content="{facebookImgSrc}" />-->
+	<meta property="og:description" content="{metaDesc}" />
+	<!-- GOOGLE+ -->
+	<meta itemprop="name" content="{pageTitle}" />
+	<meta itemprop="description" content="{metaDesc}" />
+	<meta itemprop="image" content="{facebookImgSrc}" />
+	<!-- END seoMetas -->
+	<meta name="Robots" content="{noCrawl}index, {noCrawl}follow" />
+	<link href="{ROOT}images/?i=favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	<!--[if IE 6]><link rel="stylesheet" media="screen" type="text/css" href="{ROOT}css/?p={page}{backstage}&amp;ie=6" /><![endif]-->
+	<!--[if IE 7]><link rel="stylesheet" media="screen" type="text/css" href="{ROOT}css/?p={page}{backstage}&amp;ie=7" /><![endif]-->
+	<!--[if IE 8]><link rel="stylesheet" media="screen" type="text/css" href="{ROOT}css/?p={page}{backstage}&amp;ie=8" /><![endif]-->
+	<!--[if !IE]><!--><link rel="stylesheet" media="screen" type="text/css" href="{ROOT}css/?p={page}{backstage}" /><!--<![endif]-->
+	<script type="text/javascript"><!--
+	document.documentElement.className= document.documentElement.className.replace('nojs', 'js');
+	var ROOT= '{ROOT}';
+	<!-- BEGIN googleAnalytics -->
+	var _gaq= _gaq || [];
+	_gaq.push(['_setAccount','{GAtracker}'],['_setDomainName','none'],['_trackPageview']);
+	(function(){
+	var ga= document.createElement('script');ga.type= 'text/javascript';ga.async= 'true';
+	ga.src= 'http://www.google-analytics.com/ga.js';
+	var s= document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);
+	})();
+	<!-- END googleAnalytics -->
+	--></script>
+	<script type="text/javascript" src="{ROOT}js/?p={page}{backstage}&amp;l={language}"></script>
+	</head>
+<body id="{pageId}Page" class="{pageId}">
+<div class="overlay"></div>
+<div id="lightbox" class="hide">
+	<div class="overlay"></div>
+	<div class="wrapper">
+		<div class="inner">
+			<div class="close i-cross"></div>
+			<div class="content contentHolder">
+				<div class="content-inner content-x content-y"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="spinner">
+	<div class="bokeh">
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
+</div>
+{headerMessage}
+<nav id="menu" role="navigation" aria-label="Primary">
+	<ul>
+		<li><a href="{homeUrl}" class="home">{homeText}</a></li>
+		<li><a href="{contactUrl}" class="contact">{contactText}</a></li>
+	</ul>
+	<form id="lang" action="{SELF}" method="post">
+		<div>
+		<button type="submit" name="lang" value="en" class="en{classEn}">English (US)</button>
+		<button type="submit" name="lang" value="fr" class="fr{classFr}">Fran&ccedil;ais</button>
+		</div>
+	</form>
+</nav>
+<div id="frame"><a name="top"></a>
+	<div class="inner" role="main">
+		<h1 id="title"{icon}>{h1}</h1>
+		<div id="contentWrapper">
+			{breadcrumbs}{error}{debug}<div class="content">
+			{contentMessage}{content}
+			</div>
+			<div class="loading"></div>
+		</div>
+		<div id="bottom">
+			<a href="#top" id="goTop" class="tooltip i-chevron-u" title="{goTopText}"><span>{goTopText}</span></a>
+		</div>
+	</div>
+	<div id="footer">
+		<div id="copyright" class="left" role="contentinfo">{copyright}</div>
+		<ul class="menu right" role="navigation" aria-label="Secondary">
+			<li><a href="{sitemapUrl}">{sitemapText}</a></li>
+			<li><a href="{legalTermsUrl}">{legalTermsText}</a></li>
+			<li><a href="{contactUrl}">{contactText}</a></li>
+		</ul>
+	</div>
+	<!-- BEGIN cookieNotice -->
+	<div id="cookieNotice">
+	    <div class="floatLeft i-cookie">{cookieNoticeText}</div>
+	    <div class="floatRight">
+	        <a href="#" class="floatLeft ok flat i-check">{iAgree}</a>
+	        <a href="{legalTermsUrl}#USE_OF_COOKIES" class="floatLeft no flat i-info">{learnMore}</a>
+	    </div>
+	</div>
+	<!-- END cookieNotice -->
+</div>
+</body>
+</html>

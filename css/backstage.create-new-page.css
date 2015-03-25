@@ -1,0 +1,17 @@
+.languageBlock {float:left;border-left:1px solid #ddd;margin:5px 0 5px 15px;padding-left:15px;}
+.languageBlock .language {text-align:right;}
+.languageBlock h2
+{text-align:right;
+color:#666;
+letter-spacing:5px;
+padding-bottom:5px;
+margin-bottom:15px;
+border-bottom:1px solid #999;}
+.languageBlock:first-child {border-left:none;margin-left:0;padding-left:0;}
+.newPage label {text-align:right;width:110px;display:inline-block;}
+.newPage input[type="radio"] + label {display:inline;}
+.languageBlock label {display:none;vertical-align:middle;}
+.languageBlock input, .languageBlock textarea {width:260px;vertical-align:middle;}
+.languageBlock:first-child label {display:inline-block;}
+.panes .nopadding {padding:5px 0;}
+.panes .pane p.intro {padding:10px 0 10px 0px;}

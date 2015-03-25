@@ -1,0 +1,6 @@
+#sitemapPage .lvl0 {margin-left:0}
+#sitemapPage .lvl1 {margin-left:30px;}
+#sitemapPage .lvl2 {margin-left:60px;}
+#sitemapPage .lvl3 {margin-left:90px;}
+#sitemapPage .home > a:before {content:'d ';font-size:3em;}
+#sitemapPage .home > a > span {display:none;}

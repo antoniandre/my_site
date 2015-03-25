@@ -1,0 +1,37 @@
+<div class="gmap"></div>
+
+<div class="message"></div>
+<form method="post" action="{SELF}">
+<h2>{introText}</h2>
+<div class="row">
+	<label for="textarea">{messageText}</label>
+	<textarea name="message" id="textarea" class="text" cols="50" rows="10" data-validation="alphanumericxtd" required="required" placeholder="{messagePlaceholder}" pattern="[^<>(){}\[\]\\]+"></textarea>
+</div>
+<div class="row">
+	<label for="lastname">{lastNameText}</label>
+	<input type="text" id="lastname" class="text" name="lastname" data-validation="name" required="required" pattern="[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ'-]+" />
+</div>
+<div class="row">
+	<label for="firstname">{firstNameText}</label>
+	<input type="text" id="firstname" class="text" name="firstname" data-validation="name" required="required" pattern="[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ'-]+" />
+</div>
+<div class="row">
+	<label for="email">{emailText}</label>
+	<input type="email" id="email" class="text" name="email" data-validation="email" required="required" />
+</div>
+<div class="row" id="captcha">
+    <label id="securityCodeLabel" for="securityCode">
+    <span id="captchaReloader" title="{captchaReloadTitle}" class="i-reload"></span>&nbsp;
+    <img id="captchaImg" src="{captchaSrc}" alt="captcha image" />
+    </label>
+    <input type="text" id="securityCode" name="securityCode" class="field reqField" />
+    <small{ifCaptchaError}>{captchaText}</small>
+    <br class="clear" />
+</div>
+<div id="send" class="buttons">
+	<div id="captchaSwitch"><div class="flatTooltip bottom">{activateSwitchText}</div></div>
+	<button class="cancel" type="reset">{cancelText}</button>
+	<button class="validate" type="submit" name="send">{sendText}</button>
+	<br class="clear"/>
+</div>
+</form>
