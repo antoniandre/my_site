@@ -7,9 +7,9 @@ include __DIR__.'/../classes/database.query.php';
 
 Class Database
 {
-	const connectionError= '<p>Un probleme de connection &agrave; la base de donn&eacute;es est survenu.<br />Ce probl&egrave;me temporaire sera r&eacute;solu d&egrave;s que possible aupr&egrave;s de notre h&eacute;bergeur.<br />Merci de votre compr&eacute;hension.</p><hr /><p>A database connection error occured.<br />We are already working on solving this problem with our host.<br />Thank you for your understanding.</p>';
-	const minimumDbSqlFile= 'backstage/install/minimum-db.sql';
-	private static $instance= null;
+	const connectionError = '<p>Un probleme de connection &agrave; la base de donn&eacute;es est survenu.<br />Ce probl&egrave;me temporaire sera r&eacute;solu d&egrave;s que possible aupr&egrave;s de notre h&eacute;bergeur.<br />Merci de votre compr&eacute;hension.</p><hr /><p>A database connection error occured.<br />We are already working on solving this problem with our host.<br />Thank you for your understanding.</p>';
+	const minimumDbSqlFile = 'backstage/install/minimum-db.sql';
+	private static $instance = null;
 	private $mysqli;
 
 	/**
@@ -17,7 +17,7 @@ Class Database
 	 */
 	private function __construct()
 	{
-		$this->mysqli= null;
+		$this->mysqli = null;
 		$this->connect();
 	}
 
@@ -40,8 +40,8 @@ Class Database
 	{
 		global $settings;
 
-		$this->mysqli= IS_LOCAL? new mysqli($settings->localDBhost, $settings->localUser, $settings->localPassword)
-							   : new mysqli($settings->DBhost, $settings->DBuser, $settings->DBpassword);
+		$this->mysqli = IS_LOCAL ? new mysqli($settings->localDBhost, $settings->localUser, $settings->localPassword)
+							     : new mysqli($settings->DBhost, $settings->DBuser, $settings->DBpassword);
 
 		if ($this->mysqli->connect_errno)
 		{
@@ -50,10 +50,10 @@ Class Database
 		}
 		else
 		{
-			$this->mysqli->select_db(IS_LOCAL? $settings->localDBname : $settings->DBname);
+			$this->mysqli->select_db(IS_LOCAL ? $settings->localDBname : $settings->DBname);
 
 			// Unknown database.
-			if ($this->mysqli->errno === 1049) $this->createDB(IS_LOCAL? $settings->localDBname : $settings->DBname);
+			if ($this->mysqli->errno === 1049) $this->createDB(IS_LOCAL ? $settings->localDBname : $settings->DBname);
 			$this->mysqli->set_charset('utf8');
 		}
 	}
@@ -67,14 +67,14 @@ Class Database
 	{
 		if (is_file(__DIR__.'/../../'.self::minimumDbSqlFile))
 		{
-			$result= $this->mysqli->query($q= "CREATE DATABASE `$dbName`");
+			$result = $this->mysqli->query($q = "CREATE DATABASE `$dbName`");
 			if (!$result) $this->setError(__FUNCTION__, $q);
 			else
 			{
 				$this->mysqli->select_db($dbName);
 				// First set the DB charset to utf8 before importing utf8-encoded file into DB (for accents and special chars).
 				$this->mysqli->set_charset('utf8');
-				$result= $this->mysqli->multi_query($q= file_get_contents(__DIR__.'/../../'.self::minimumDbSqlFile));
+				$result = $this->mysqli->multi_query($q = file_get_contents(__DIR__.'/../../'.self::minimumDbSqlFile));
 				if (!$result) $this->setError(__FUNCTION__, $q);
 				else
 				{
@@ -109,93 +109,107 @@ Class Database
 	/**
 	 * Create a table.
 	 *
-	 * @param string $table
-	 * @param array $fields
+	 * @param string $table: the table name to create.
+	 * @param array $fields: indexed array of fields (columns) to add in database (pairs of column_name => column_attributes).
+	 *                       Expected column attributes:
+	 *                       data type, max length, primary, auto increment, not null, default value, column description
 	 * @return void
 	 *
 	 * Example of use:
-     * $db= database::getInstance();
-     * $db->create('pages', array('page' => array('varchar', 80, true, false, true, null, 'The real page name in site folders'),
-     *                            'path' => array('varchar', 255, false, false, true, 'pages/', 'The page path in site folders'),
-     *                            'urlEn' => array('varchar', 255, false, false, true, null, 'The URL to access the page when rewrite engine is on'),
-     *                            'urlFr' => array('varchar', 255, false, false, true, null, 'The URL to access the page when rewrite engine is on'),
-     *                            'titleEn' => array('varchar', 255, false, false, true, null, 'The page title'),
-     *                            'titleFr' => array('varchar', 255, false, false, true, null, 'The page title'),
-     *                            'metaDescEn' => array('text', 0, false, false, true, null, 'The page meta description En'),
-     *                            'metaDescFr' => array('text', 0, false, false, true, null, 'The page meta description Fr'),
-     *                            'metaKeyEn' => array('text', 0, false, false, true, null, 'The page meta keywords En'),
-     *                            'metaKeyFr' => array('text', 0, false, false, true, null, 'The page meta keywords Fr'),
-     *                            'parent' => array('varchar', 0, false, false, true, null, 'The parent real page name in site folders, for the breadcrumbs.')));
+     * $db = database::getInstance();
+     * $db->create('pages', ['page' => ['varchar', 80, true, false, true, null, 'The real page name in site folders'],
+     *                       'path' => ['varchar', 255, false, false, true, 'pages/', 'The page path in site folders'],
+     *                       'urlEn' => ['varchar', 255, false, false, true, null, 'The URL to access the page when rewrite engine is on'],
+     *                       'urlFr' => ['varchar', 255, false, false, true, null, 'The URL to access the page when rewrite engine is on'],
+     *                       'titleEn' => ['varchar', 255, false, false, true, null, 'The page title'],
+     *                       'titleFr' => ['varchar', 255, false, false, true, null, 'The page title'],
+     *                       'metaDescEn' => ['text', 0, false, false, true, null, 'The page meta description En'],
+     *                       'metaDescFr' => ['text', 0, false, false, true, null, 'The page meta description Fr'],
+     *                       'metaKeyEn' => ['text', 0, false, false, true, null, 'The page meta keywords En'],
+     *                       'metaKeyFr' => ['text', 0, false, false, true, null, 'The page meta keywords Fr'],
+     *                       'parent' => array('varchar', 0, false, false, true, null, 'The parent real page name in site folders, for the breadcrumbs.']);
 	 */
-	public function create($table, $fields= array())
+	public function create($table, $fields = [])
 	{
-		$fieldOutput= '';
-		$primary= '';
-		$i= 0;
+		$fieldOutput = '';
+		$primary = '';
+		$i = 0;
 		foreach ($fields as $column => $fieldSettings)
 		{
-			$settings= $fieldSettings[0]
-					  .($fieldSettings[1]? "($fieldSettings[1])" : ($fieldSettings[0]== 'varchar' ? '(255)' : ''))
-					  .($fieldSettings[3]? ' AUTO_INCREMENT' : '')
-					  .($fieldSettings[4]? ' NOT NULL' : '')
-					  .($fieldSettings[5]? " DEFAULT \"$fieldSettings[5]\"" : '')
-					  .($fieldSettings[6]? " COMMENT \"$fieldSettings[6]\"" : '');
-			if ($fieldSettings[2]) $primary= $column;
+			$settings = $this->getSettingsString($fieldSettings);
+			if ($fieldSettings[2]) $primary = $column;
 
-			$fieldOutput.= ($i? ',' : '')."\n`$column` $settings";
+			$fieldOutput .= ($i? ',' : '')."\n`$column` $settings";
 			$i++;
 		}
-		if ($primary) $primary= ",\nPRIMARY KEY (`$primary`)";
+		if ($primary) $primary = ",\nPRIMARY KEY (`$primary`)";
 
-		$result= $this->mysqli->query($q= "CREATE TABLE `$table` ($fieldOutput$primary)");
+		$result = $this->mysqli->query($q = "CREATE TABLE `$table` ($fieldOutput$primary)");
 		if (!$result) $this->setError(__FUNCTION__, $q);
-		// return ;
 	}
 
 	/**
 	 * Alter a table
 	 *
 	 * @todo: ALTER TABLE `pages` ADD `article` INT NULL DEFAULT NULL COMMENT 'Article id if any' AFTER `aliases`;
-	 * @param string $table
-	 * @param array $fields
+	 * @param string $table: the table name to alter.
+	 * @param array $fields: indexed array of fields (columns) to alter.
 	 * @return void
 	 *
 	 * Example of use:
-     * $db= database::getInstance();
-	 * $db->alter('pages', array('path' => array('varchar', 255, false, false, true, 'pages/', 'The page path in site folders'),
-	 *                           'parent' => array('varchar', 0, false, false, true, 'home', 'The parent real page name in site folders, for the breadcrumbs.')));
+     * $db = database::getInstance();
+	 * $db->alter('pages', ['path' => ['varchar', 255, false, false, true, 'pages/', 'The page path in site folders'],
+	 *                      'parent' => ['varchar', 0, false, false, true, 'home', 'The parent real page name in site folders, for the breadcrumbs.']]);
 	 */
-	public function alter($table, $fields= array())
+	public function alter($table, $fields = array())
 	{
-		$fieldOutput= '';
-		//$primary= '';
-		$i= 0;
+		$fieldOutput = '';
+		//$primary = '';
+		$i = 0;
 		foreach ($fields as $column => $fieldSettings)
 		{
+			$settings= $this->getSettingsString($fieldSettings);
+			//if ($fieldSettings[2]) $primary= $column;
+
+			$fieldOutput .= ($i? ',' : '')."\nCHANGE `$column` `$column` $settings";
+			$i++;
+		}
+		//if ($primary) $primary = ",\nPRIMARY KEY (`$primary`)";
+
+		$result = $this->mysqli->query($q = "ALTER TABLE `$table` $fieldOutput");
+		if (!$result) $this->setError(__FUNCTION__, $q);
+	}
+
+	/**
+	 * Get the settings description]
+	 * @param array $fieldSettings:
+	 * @return array
+	 */
+	private function getSettingsString($fieldSettings)
+	{
 			// `id` int(11) NOT NULL AUTO_INCREMENT
 			// 				(type,  maxlength= 0, primary= false, auto-increment= false, not-null= false, default= null, desc= '')
 			// 'id' => array('int', 11,           true,           true,                  true)
 			$settings= $fieldSettings[0]
-					  .($fieldSettings[1]? "($fieldSettings[1])" : ($fieldSettings[0]== 'varchar' ? '(255)' : ''))
-					  .($fieldSettings[3]? ' AUTO_INCREMENT' : '')
-					  .($fieldSettings[4]? ' NOT NULL' : '')
-					  .($fieldSettings[5]? " DEFAULT \"$fieldSettings[5]\"" : '')
-					  .($fieldSettings[6]? " COMMENT \"$fieldSettings[6]\"" : '');
+					  .($fieldSettings[1] ? "($fieldSettings[1])" : ($fieldSettings[0]== 'varchar' ? '(255)' : ''))
+					  .($fieldSettings[3] ? ' AUTO_INCREMENT' : '')
+					  .($fieldSettings[4] ? ' NOT NULL' : '')
+					  .($fieldSettings[5] ? " DEFAULT \"$fieldSettings[5]\"" : '')
+					  .($fieldSettings[6] ? " COMMENT \"$fieldSettings[6]\"" : '');
 			//if ($fieldSettings[2]) $primary= $column;
 
-			$fieldOutput.= ($i? ',' : '')."\nCHANGE  `$column` `$column` $settings";
-			$i++;
-		}
-		//if ($primary) $primary= ",\nPRIMARY KEY (`$primary`)";
-
-		$result= $this->mysqli->query($q= "ALTER TABLE `$table` $fieldOutput");
-		if (!$result) $this->setError(__FUNCTION__, $q);
+		return $settings;
 	}
 
-	/**/
+	/**
+	 * Rename
+	 * @param string $table:
+	 * @param string $newName
+	 * @return void
+	 */
 	public function rename($table, $newName)
 	{
-		$result= $this->mysqli->query($q= "RENAME TABLE  `$table` TO `$newName`");
+		$result = $this->mysqli->query($q = "RENAME TABLE  `$table` TO `$newName`");
 		if (!$result) $this->setError(__FUNCTION__, $q);
 	}
 

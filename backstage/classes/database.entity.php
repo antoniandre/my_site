@@ -15,7 +15,7 @@ abstract Class DatabaseEntity
 	 */
 	protected function __construct()
 	{
-		$this->tempPieces= [];
+		$this->tempPieces = [];
 	}
 
 	/**
@@ -34,7 +34,7 @@ abstract Class DatabaseEntity
 	 */
 	protected function concat()
 	{
-		$this->tempPieces[]= 'CONCAT('.implode(', ', $this->gatherArgs(func_get_args())).')';
+		$this->tempPieces[] = 'CONCAT('.implode(', ', $this->gatherArgs(func_get_args())).')';
 		return $this;
 	}
 
@@ -47,7 +47,7 @@ abstract Class DatabaseEntity
 	 */
 	public function _count($string)
 	{
-		$this->tempPieces[]= 'COUNT('.($string== '*'? '*' : $this->gatherArgs(func_get_args())[0]).')';
+		$this->tempPieces[] = 'COUNT('.($string == '*'? '*' : $this->gatherArgs(func_get_args())[0]).')';
 		return $this;
 	}
 
@@ -59,7 +59,7 @@ abstract Class DatabaseEntity
 	 */
 	public function col($column)
 	{
-		$this->tempPieces[]= "`$column`";
+		$this->tempPieces[] = "`$column`";
 		return $this;
 	}
 
@@ -72,7 +72,7 @@ abstract Class DatabaseEntity
 	 */
 	protected function lower($string)
 	{
-		$this->tempPieces[]= 'LOWER('.implode('', $this->gatherArgs(func_get_arg(0))).')';
+		$this->tempPieces[] = 'LOWER('.implode('', $this->gatherArgs(func_get_arg(0))).')';
 		return $this;
 	}
 
@@ -85,22 +85,22 @@ abstract Class DatabaseEntity
 	 */
 	protected function upper($string)
 	{
-		$this->tempPieces[]= 'UPPER('.implode('', $this->gatherArgs(func_get_arg(0))).')';
+		$this->tempPieces[] = 'UPPER('.implode('', $this->gatherArgs(func_get_arg(0))).')';
 		return $this;
 	}
 
 	/**
 	 * Check the fields we want to select.
 	 *
-	 * @param  string $field.
+	 * @param  string $field: the field to check.
 	 * @return string: secured field string.
 	 */
 	protected function checkField($field)
 	{
-		$field= preg_replace('~^\((.*)\)$~', '$1', $field);// Remove extra parenthesis if any.
+		$field = preg_replace('~^\((.*)\)$~', '$1', $field);// Remove extra parenthesis if any.
 
 		// Handles simple alphanumeric, backquoted or not
-		if (preg_match('~^`?(\w+)`?$~i', $field, $matches)) $field= "`$matches[1]`";
+		if (preg_match('~^`?(\w+)`?$~i', $field, $matches)) $field = "`$matches[1]`";
 		else return $this->abort(ucfirst(__FUNCTION__)."(): The field syntax \"$field\" is not recognized.");
 		return $field;
 	}
@@ -123,10 +123,10 @@ abstract Class DatabaseEntity
      */
 	protected function gatherArgs($args)
 	{
-		$return= array();
-		$treatedArgs= 0;
-		$i= 0;
-		$currIndex= count($this->tempPieces);
+		$return = array();
+		$treatedArgs = 0;
+		$i = 0;
+		$currIndex = count($this->tempPieces);
 
 		// First count arguments that are already stored in the $this->tempPieces array.
 		foreach ($args as $arg) if (is_object($arg) && get_class($arg) === get_called_class()) $treatedArgs++;
@@ -137,14 +137,14 @@ abstract Class DatabaseEntity
 		{
 			if (is_object($arg) && get_class($arg) === get_called_class())
 			{
-				$return[]= $this->tempPieces[$currIndex-$treatedArgs+$i];
+				$return[] = $this->tempPieces[$currIndex-$treatedArgs+$i];
 				unset($this->tempPieces[$currIndex-$treatedArgs+$i]);
 				$i++;
 			}
 			// If the argument is not an instance of Where then it is treated as a simple string.
-			else $return[]= "'$arg'";
+			else $return[] = "'$arg'";
 		}
-		$this->tempPieces= array_values($this->tempPieces);// Reindex the array after unsetting some keys.
+		$this->tempPieces = array_values($this->tempPieces);// Reindex the array after unsetting some keys.
 
 		return $return;
 	}

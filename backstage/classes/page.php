@@ -22,7 +22,7 @@ Class Page
 	private $rewriteEngine;
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	private function __construct()
 	{
@@ -43,9 +43,9 @@ Class Page
 	}
 
 	/**
-	 * Get the only instance of this class
+	 * Get the only instance of this class.
 	 *
-	 * @return the only instance of this class
+	 * @return Page object: the only instance of this class.
 	 */
 	public static function getInstance()
 	{
@@ -54,8 +54,9 @@ Class Page
 	}
 
 	/**
-	 * Set the language
-	 * @param [type] $language [description]
+	 * Set the language.
+	 *
+	 * @param String $language: the language to display the texts in.
 	 */
 	public function setLanguage($language)
 	{
@@ -64,7 +65,9 @@ Class Page
 	}
 
 	/**
+	 * get the title of the current page.
 	 *
+	 * @return String: the title of the page.
 	 */
 	public function getTitle()
 	{
@@ -72,7 +75,9 @@ Class Page
 	}
 
 	/**
+	 * detect the current page.
 	 *
+	 * @return void.
 	 */
 	private function detectCurrentPage()
 	{
@@ -153,7 +158,9 @@ Class Page
 	}
 
 	/**
-	 * update the URL if the lang is not allowed or has changed.
+	 * Update the URL if the lang is not allowed or has changed.
+	 *
+	 * @return void.
 	 */
 	public function refresh()
 	{
@@ -163,6 +170,7 @@ Class Page
 
 	/**
 	 * Render the current page.
+	 *
 	 * @return the HTML of the full page
 	 */
 	public function render()
@@ -251,7 +259,7 @@ Class Page
 	}
 
 	/**
-	 * Toggle the visibility of the breadrcumbs
+	 * Toggle the visibility of the breadrcumbs.
 	 *
 	 * @param boolean $bool: visible if true, hidden and not processed if false from beginning.
 	 */
@@ -261,25 +269,37 @@ Class Page
 	}
 
 	/**
+	 * Calculate the breadcrumbs.
+	 * Recursive function that looks for the parent page of a given page until it reaches the top parent.
+	 * The generated breadcrumbs is then stored in the current page object attribute: $this->breadcrumbs for later use.
 	 *
+	 * @param Page Object $page: the current page.
+	 * @param Integer $maxDepth: the maximum depth allowed before an error is triggered (to prevent infinite loop).
+	 *                           Default to 10.
+	 * @return void.
 	 */
-	function calculateBreadcrumbs($page)
+	function calculateBreadcrumbs($page, $maxDepth = 10)
 	{
 		if ($page->parent)
 		{
 			$matchedPage = getPageByProperty('id', $page->parent, $this->language);
 			array_unshift($this->breadcrumbs, $matchedPage);
-			if (count($this->breadcrumbs) >= 10) Error::getInstance()->add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
+
+			// Prevent an infinite loop if there is an error (too deep).
+			if ($maxDepth && count($this->breadcrumbs) >= $maxDepth) Error::getInstance()->add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
+
 			if ($matchedPage->parent) $this->calculateBreadcrumbs($matchedPage);
 		}
 	}
 
 	/**
+	 * Render the breadcrumbs.
 	 *
+	 * @return string: The breadcrumbs generated html.
 	 */
 	function renderBreadcrumbs()
 	{
-		$output= '';
+		$output = '';
 		foreach ($this->breadcrumbs as $k => $page)
 		{
 			if ($k !== count($this->breadcrumbs)-1) $output .= ($k? '<span class="separator i-play"> </span>' : '').'<a href="'.url("$page->page.php").'" class="'.$page->id.'"><span>'.$page->title->{$this->language}.'</span></a>';
@@ -290,9 +310,9 @@ Class Page
 
 	/**
 	 * Private clone method to prevent cloning of the instance of the
-	 * *Singleton* instance.
+	 * Singleton instance.
 	 *
-	 * @return void
+	 * @return void.
 	 */
 	private function __clone()
 	{
