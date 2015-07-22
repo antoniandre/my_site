@@ -15,6 +15,7 @@ Class Form
 	public $class;// Custom class.
 	public $captcha;// Captcha presence.
 	private $elements = [];
+	private $buttons = [];
 
 	/**
 	 * Class constructor.
@@ -29,7 +30,7 @@ Class Form
 	{
 		$this->id = self::$idCounter+1;
 		$this->method = isset($option['method']) ? $option['method'] : 'POST';
-		$this->action = isset($option['action']) ? $option['action'] : SELF;
+		$this->action = isset($option['action']) ? $option['action'] : url('SELF');
 		$this->class = isset($option['class']) ? $option['class'] : null;
 	}
 
@@ -121,6 +122,18 @@ Class Form
 	public function addButton($type, $label)
 	{
 		// @TODO: implement.
+		switch ($type)
+		{
+		 	case 'validate':
+		 		$this->buttons[] = (object)['type' => 'submit', 'class' => $type, 'label' => $label, 'name' => 'submit'];
+		 		break;
+		 	case 'cancel':
+		 		$this->buttons[] = (object)['type' => 'reset', 'class' => $type, 'label' => $label];
+		 		break;
+		 	// We do not want an unknown button to be appended.
+		 	default:
+		 		break;
+		 }
 	}
 
 	/**
@@ -140,6 +153,7 @@ Class Form
 			$tpl->set_block('form-element-tpl', $existingElement.'Block', 'the'.ucfirst($existingElement).'Block');
 		}
 		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
+		$tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
 
 		$tpl->set_var(['formId' => "form$this->id",
 					   'method' => $this->method,
@@ -152,36 +166,48 @@ Class Form
 		//========================= ELEMENTS RENDERING =========================//
 		foreach ($this->elements as $element)
 		{
-			$rowSpan = isset($element->options->rowSpan) && $element->options->rowSpan > 1 ? $element->options->rowSpan : $rowSpan;
-
-			$tpl->set_var(['wrapperBegin' => '',
-						   'wrapperEnd' => '',
+			$tpl->set_var(['wrapperBegin' => $wrapFollowingElmts && $wrapperClass ? "<div class=\"$wrapperClass\">" : '',
+						   'wrapperEnd' => $wrapFollowingElmts && $wrapFollowingElmts == 1 ? '</div>' : '',
 						   'rowClass' => isset($element->options->rowClass) ? " {$element->options->rowClass}" : '']);
+
+			// If element is a wrapper, skip the current lap setting the $wrapFollowingElmts var for next loop lap.
 			if ($element->type === 'wrapper')
 			{
 				$wrapFollowingElmts = $element->numberElements;
 				$wrapperClass = $element->class;
 				continue;
 			}
-			if ($wrapperClass)
-			{
-				$tpl->set_var('wrapperBegin', "<div class=\"$wrapperClass\">");
-				$wrapperClass = '';
-			}
+			
+			// First lap within a wrapper element.
+			if ($wrapFollowingElmts && $wrapperClass) $wrapperClass = '';
+
+			if ($wrapFollowingElmts) $wrapFollowingElmts--;
+			// dbg($element->type, $rowSpan);
+
 
 			$this->renderElement($element, $tpl);
 			$this->renderLabel($element, $tpl);
-			$tpl->parse('theElementBlock', 'elementBlock', $rowSpan-1);
 
-			if ($wrapFollowingElmts == 1)
-			{
-				$tpl->set_var('wrapperEnd', '</div>');
-			}
-			dbg($element->type, $rowSpan);
-			if ($wrapFollowingElmts) $wrapFollowingElmts--;
 
-			$tpl->parse('theRowBlock', 'rowBlock', !($rowSpan-1));
+			// $tpl->parse('theElementBlock', 'elementBlock', false);
+			// $tpl->parse('theRowBlock', 'rowBlock', true);
+
+			$tpl->parse('theElementBlock', 'elementBlock', $rowSpan);
+			$rowSpan = isset($element->options->rowSpan) && $element->options->rowSpan > 1 ? $element->options->rowSpan : $rowSpan;
 			if ($rowSpan) $rowSpan--;
+			if (!$rowSpan) $tpl->parse('theRowBlock', 'rowBlock', !($rowSpan));
+		}
+		//======================================================================//
+
+		//========================== BUTTONS RENDERING =========================//
+		foreach ($this->buttons as $k => $button)
+		{
+			$tpl->set_var(['btnText' => $button->label,
+						   'btnClass' => $button->class,
+						   'btnType' => $button->type,
+						   'btnName' => isset($button->name) && $button->name ? " name=\"form{$this->id}[$button->name]\"" : '',
+						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '']);
+			$tpl->parse('theButtonBlock', 'buttonBlock', true);
 		}
 		//======================================================================//
 
@@ -199,16 +225,15 @@ Class Form
 	private function renderElement($element, $tpl)
 	{
 		$attrHtml = '';
-		$name = '';
-		$id = '';
+		$name = '';// Html name attribute of the form element.
+		$id = '';// Html id attribute of the form element.
 
 		// Element name.
 		// Convert subdata names from 'name[subname][subsubname]' to '[name][subname][subsubname]', or 'name' to '[name]'.
 		if (isset($element->attributes->name))
 		{
 			foreach (explode('[', str_replace(']', '', $element->attributes->name)) as $bit) $name .= "[$bit]";
-			$id = new text($name);
-			$id = $id->format(['sef'])->get().((int)self::$elementId++);
+			$id = text($name, ['formats' => ['sef']]).((int)self::$elementId++);
 		}
 
 		// Element HTML attributes.
@@ -224,7 +249,7 @@ Class Form
 		$tpl->set_var(['name' => $name,
 				       'id' => $id,
 				       'class' => isset($element->attributes->class) ? " {$element->attributes->class}" : '',
-				       'validation' => isset($element->options->validation) ? $element->options->validation : $element->options->validation,
+				       'validation' => isset($element->options->validation) ? $element->options->validation : null,
 				       'state' => '',// Validation state.
 				       'attr' => $attrHtml,
 				       'value' => isset($element->attributes->value) ? $element->attributes->value : '']);
@@ -271,13 +296,28 @@ Class Form
 			$tpl->set_var(['labelBefore' => $labelAfter ? '' : $labelHtml,
 						   'labelAfter' => $labelAfter ? $labelHtml : '']);
 		}
-		else $tpl->set_var('labelBlock', '');
+		else $tpl->set_var(['labelBefore' => '', 'labelAfter' => '']);
 	}
 
 	/**/
 	public function validate()
 	{
 		// @TODO: implement.
+	}
+
+	/**/
+	public function checkPostedData()
+	{
+		$posts = Userdata::$post;
+		if ($posts) validate($this);
+		return $posts->{"form$this->id"};
+	}
+
+	/**/
+	public function getPostedData()
+	{
+		$posts = Userdata::$post;
+		return $posts->{"form$this->id"};
 	}
 }
 ?>
