@@ -7,6 +7,15 @@
 Class Form
 {
 	const existingElements = ['select', 'text', 'checkbox', 'radio', 'textarea', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph'];
+	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
+								 'alpha' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
+								 'alpha+' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
+								 'alphanum' => ['pattern' => '~^[a-z0-9._ -]+$~i', 'message' => 'This field must contain alphanumeric chars only.'],
+								 'alphanum+' => ['pattern' => '~^[a-z0-9._ -]+$~i', 'message' => 'This field must contain alphanumeric chars only.'],
+								 'num' => ['pattern' => '~^[0-9]+$~', 'message' => 'This field must contain numeric chars only.'],
+								 'num+' => ['pattern' => '~^[0-9.,]+$~', 'message' => 'This field must contain numeric chars only.'],
+								 'phone' => ['pattern' => '~^[0-9+ ()-]+$~', 'message' => 'This field must contain phone numbers only.'],
+								 'mail' => ['pattern' => '~^[a-z0-9]+$~i', 'message' => 'This field must contain alphabetic chars only.']];
 	static private $idCounter = 0;
 	static private $elementId = 1;
 	private $id;
@@ -16,6 +25,7 @@ Class Form
 	public $captcha;// Captcha presence.
 	private $elements = [];
 	private $buttons = [];
+	private $validElements = [];
 
 	/**
 	 * Class constructor.
@@ -37,6 +47,8 @@ Class Form
 	/**
 	 * Add a form element to the form.
 	 *
+	 * @see  existingElements const.
+	 * @see  existingValidations const.
 	 * @param string $type: the type of element you want to add to the form.
 	 *        possible values: select, text, checkbox, radio, textarea, hidden, email, phone, and more to come.
 	 * @param array $attributes: an indexed array (attr_name=>attr_value) of html attributes to apply to the form element.
@@ -57,7 +69,7 @@ Class Form
 	 *            default => (string/number)
 	 *            label => (string)
 	 *            labelPosition => (string) before, after
-	 *            validation => (string/array) required, alpha, alphanum, num, mail
+	 *            validation => (string/array) see the existingValidations constant.
 	 *
 	 * Usage:
 	 * $form->addElement('text',
@@ -66,7 +78,28 @@ Class Form
 	 * $form->addElement('text',
 	 *                   ['name' => 'text[fr]', 'value' => ''],
 	 *                   ['validation' => 'required', 'label' => 'Text Fr', 'labelPosition' => 'after']);
-	 */
+     *
+     * Element Object Example:
+     * stdClass Object
+     * (
+     *     [type] => text
+     *     [attributes] => stdClass Object
+     *         (
+     *             [name] => text[fr]
+     *             [value] => 
+     *             [placeholder] => Text Fr
+     *         )
+     * 
+     *     [options] => stdClass Object
+     *         (
+     *             [validation] => required
+     *         )
+     * 
+     *     [userdata] => 
+     *     [message] => This field is required.
+     *     [error] => 1
+     * )
+     **/
 	public function addElement($type, $attributes = [], $options = [])
 	{
 		if (!is_string($type)) Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
@@ -95,10 +128,8 @@ Class Form
 			switch ($type)
 			{
 				case 'text':
-					# code...
 					break;
 				default:
-					# code...
 					break;
 			}
 			 // 'name' => $name,
@@ -121,7 +152,7 @@ Class Form
 	 */
 	public function addButton($type, $label)
 	{
-		// @TODO: implement.
+		if (!$label) return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
 		switch ($type)
 		{
 		 	case 'validate':
@@ -132,6 +163,7 @@ Class Form
 		 		break;
 		 	// We do not want an unknown button to be appended.
 		 	default:
+				Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is unknown.', 'WRONG DATA', true);
 		 		break;
 		 }
 	}
@@ -139,6 +171,7 @@ Class Form
 	/**
 	 * render function.
 	 * Render the generated form and return the full HTML.
+	 *
 	 * @return (string) generated form HTML.
 	 */
 	public function render()
@@ -218,8 +251,9 @@ Class Form
 	 * renderElement function.
 	 * Used internally to separate each form element render.
 	 *
-	 * @param Object $element:
-	 * @param Object $tpl:
+	 * @see addElement() for a description of the element object.
+	 * @param Object $element: the form element object to render.
+	 * @param Object $tpl: the current page $tpl var to render the element in.
 	 * @return void
 	 */
 	private function renderElement($element, $tpl)
@@ -232,7 +266,7 @@ Class Form
 		// Convert subdata names from 'name[subname][subsubname]' to '[name][subname][subsubname]', or 'name' to '[name]'.
 		if (isset($element->attributes->name))
 		{
-			foreach (explode('[', str_replace(']', '', $element->attributes->name)) as $bit) $name .= "[$bit]";
+			$name = $this->convertName2subname($element->attributes->name);
 			$id = text($name, ['formats' => ['sef']]).((int)self::$elementId++);
 		}
 
@@ -249,10 +283,11 @@ Class Form
 		$tpl->set_var(['name' => $name,
 				       'id' => $id,
 				       'class' => isset($element->attributes->class) ? " {$element->attributes->class}" : '',
-				       'validation' => isset($element->options->validation) ? $element->options->validation : null,
-				       'state' => '',// Validation state.
+				       'validation' => isset($element->options->validation) ? implode(' ', (array)$element->options->validation) : null,
+				       'state' => isset($element->error) && $element->error ? ' invalid' : (isset($element->userdata) ? ' valid' : ''),// Validation state.
 				       'attr' => $attrHtml,
-				       'value' => isset($element->attributes->value) ? $element->attributes->value : '']);
+				       'value' => isset($element->userdata) ? stripslashes($element->userdata)
+				       			  : (isset($element->attributes->value) ? $element->attributes->value : '')]);
 
 		switch ($element->type)
 		{
@@ -266,7 +301,9 @@ Class Form
 		 		$tpl->set_block('selectBlock', 'optionBlock', 'theOptionBlock');
 		 		foreach ($element->options->options as $value => $label)
 		 		{
-					$tpl->set_var(['value' => $value, 'label' => $label]);
+					$tpl->set_var(['value' => $value,
+								   'label' => $label,
+								   'selected' => isset($element->userdata) && $element->userdata == $value ? 'selected="selected"' : '']);
 		 			$tpl->parse('theOptionBlock', 'optionBlock', true);
 		 		}
 		 		break;
@@ -282,8 +319,8 @@ Class Form
 	 * renderLabel function.
 	 * Used internally to separate each form element label render.
 	 *
-	 * @param Object $element:
-	 * @param Object $tpl:
+	 * @param Object $element: the form element object (containing the label text) to add the label to.
+	 * @param Object $tpl: the current page $tpl var to render the element label in.
 	 * @return void
 	 */
 	private function renderLabel($element, $tpl)
@@ -299,25 +336,184 @@ Class Form
 		else $tpl->set_var(['labelBefore' => '', 'labelAfter' => '']);
 	}
 
-	/**/
-	public function validate()
-	{
-		// @TODO: implement.
-	}
-
-	/**/
+	/**
+	 * checkPostedData check if there is any post for the current form, if so call validate function
+	 * otherwise do nothing.
+	 *
+	 * @return array: the form posts object.
+	 */
 	public function checkPostedData()
 	{
-		$posts = Userdata::$post;
-		if ($posts) validate($this);
-		return $posts->{"form$this->id"};
+		// If no posted data do not go further.
+		return ($posts = $this->getPostedData()) ? $this->validate($posts) : false;
 	}
 
-	/**/
+	/**
+	 * getPostedData check if there is any post for the current form and return the posts object or null if unset.
+	 *
+	 * @return array: the form posts object.
+	 */
 	public function getPostedData()
 	{
 		$posts = Userdata::$post;
-		return $posts->{"form$this->id"};
+		return $posts && isset($posts->{"form$this->id"}) ? $posts->{"form$this->id"} : null;
+	}
+
+	/**
+	 * validate function: check each user post and save it into the appropriate form element object.
+	 * Used to - and convenient to - check ALL the fields!
+	 *
+	 * @return StdClass object: 
+	 */
+	public function validate()
+	{
+		// Init few vars to keep track of the validation result.
+		$countFillableElements = 0;
+		$countFilledElements = 0;
+		$countInvalidElements = 0;
+
+		// Loop through all the element that have a set name (html attr)
+		foreach ($this->elements as $k => $element)
+		{
+			if (isset($element->attributes->name))
+			{
+				$countFillableElements++;
+
+				// Divide name like form1[text][en] into ['form1','text','en'] to check if user post is set.
+				$elementNameParts = explode('[', str_replace(']', '', $element->attributes->name));
+
+				// Now look into the posts to find user data: construct the path in posts from the provided name.
+				$userDataFromPath = $this->getPostedData();
+				foreach($elementNameParts as $key)
+				{
+					if (isset($userDataFromPath->$key)) $userDataFromPath = $userDataFromPath->$key;
+					else
+					{
+						$userDataFromPath = null;
+						break;// if the path we look into in posts does not exist break the current loop.
+					}
+				}
+
+				// The path is found in posted data, now validate the field.
+				if (isset($userDataFromPath))
+				{
+					// Save the posted user data into the form element object.
+					$this->elements[$k]->userdata = $userDataFromPath;
+					$countFilledElements++;
+
+					// If element has a validation set then call the checkElementValidations() method.
+					// The element is valid if no validation is set.
+					$isValid = isset($this->elements[$k]->options->validation) ? $this->checkElementValidations($this->elements[$k]) : true;
+					$this->elements[$k]->error = !$isValid;
+					
+					if (!$isValid) $countInvalidElements++;
+
+					// Save only valid elements in a private array for easier later access!
+					else $this->validElements[] = $element->attributes->name;
+				}
+			}
+		}
+
+		// Call a potential validate function if it is set in calling file.
+		if (function_exists('validate')) validate($this);
+
+		return (object)['fillable' => $countFillableElements, 'filled' => $countFilledElements, 'invalid' => $countInvalidElements];
+	}
+
+	/**
+	 * INTERNAL checkElementValidations function called by checkPostedData() to check each validation set for a given element.
+	 *
+	 * @param  Object $element: the Object of the element to check. See addElement() to know more about the expected object.
+	 * @return boolean: true if valid or false otherwise.
+	 */
+	private function checkElementValidations($element)
+	{
+		$return = true;
+		// Loop through the multiple element validations.
+		foreach ((array)$element->options->validation as $validation)
+		{
+			// Only perform a validation if it is a known one!
+			if (array_key_exists($validation, self::existingValidations))
+			{
+				// Perform a preg_match on user posted data with the pattern set in the definition of the validation.
+				// See the existingValidations constant.
+				$return = preg_match(self::existingValidations[$validation]['pattern'], (string)$element->userdata);
+				if (!$return)
+				{
+					// If the preg_match fails, save the resulting error message in the element object.
+					$element->message = self::existingValidations[$validation]['message'];
+					break;// keep only the first message then break the loop.
+				}
+			}
+			/*// May be used if a specific validation is required.
+			switch ($validation)
+			{
+				case 'required':
+				case 'alpha':
+				case 'alphanum':
+				default:
+					// This cases are already handled by above preg_match.
+					break;
+			}*/
+			// dbg($element, $return);
+		}
+		return $return;
+	}
+
+	/**
+	 * EXTERNAL checkElements function convenient to check the validations result of a given element only (from html name)
+	 * or an array of specific elements and return the detailed/summup result.
+	 *
+	 * @param array/string $elementNames: an array of names of elements to check.
+	 * @param boolean $details: whether to return a detailed or summup result.
+	 * @return array/boolean: the detailed or summup result depending on $details param:
+	 *     - an array of results indexed by element names if $details is set to true
+	 *         like [elementName => status, elementName => status, ...]
+	 *     - a boolean set to true if all the provided elements are valid and false if at least one is invalid.
+	 */
+	public function checkElements($elementNames = [], $details = false)
+	{
+		$return = $details ? [] : 0;
+
+		if (count((array)$elementNames))
+		{
+			foreach ((array)$elementNames as $name)
+			{
+				if ($details) $return[$name] = in_array($name, $this->validElements);
+				elseif (in_array($name, $this->validElements)) $return++;
+			}
+			if ($details && count((array)$elementNames) == 1) $return = (boolean)$return[$name];
+		}
+
+		return $details ? $return : $return == count((array)$elementNames);
+	}
+
+	/**
+	 * checkElement shortcut function for checkElements().
+	 *
+	 * @param string $elementNames: the name of the element to check.
+	 * @param boolean $details: whether to return a detailed or summup result.
+	 * @return array/boolean: the detailed or summup result depending on $details param:
+	 *     - an array of results indexed by element names if $details is set to true
+	 *         like [elementName => status, elementName => status, ...]
+	 *     - a boolean set to true if all the provided elements are valid and false if at least one is invalid.
+	 */
+	public function checkElement($elementName, $details = false)
+	{
+		return checkElements([$elementName], $details);
+	}
+
+	/**
+	 * convertName2subname converts subdata names from 'name[subname][subsubname]' to '[name][subname][subsubname]', or 'name' to '[name]'.
+	 *
+	 *  @param  string $name: the name to convert
+	 * @return string: the converted name
+	 */
+	private function convertName2subname($name)
+	{
+		$nameOut = '';
+		foreach (explode('[', str_replace(']', '', $name)) as $bit) $nameOut .= "[$bit]";
+		return $nameOut;
 	}
 }
 ?>
