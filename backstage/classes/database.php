@@ -1,8 +1,8 @@
 <?php
 /**
  * Database Model.
- * Design pattern: singleton.
- */
+ * Design pattern: singleton
+ *  */
 include __DIR__.'/../classes/database.query.php';
 
 Class Database
@@ -60,6 +60,7 @@ Class Database
 
 	/**
 	 * Create the minimum required database from a backup file if DB not found.
+	 *
 	 * @param  string $dbName: the database name.
 	 * @return void
 	 */
@@ -110,10 +111,10 @@ Class Database
 	 * Create a table.
 	 *
 	 * @param string $table: the table name to create.
-	 * @param array $fields: indexed array of fields (columns) to add in database (pairs of column_name => column_attributes).
+	 * @param array $columns: indexed array of columns to add in table (pairs of column_name => column_attributes).
 	 *                       Expected column attributes:
 	 *                       data type, max length, primary, auto increment, not null, default value, column description
-	 * @return void
+	 * @return Boolean: true if success false otherwise.
 	 *
 	 * Example of use:
      * $db = database::getInstance();
@@ -129,76 +130,84 @@ Class Database
      *                       'metaKeyFr' => ['text', 0, false, false, true, null, 'The page meta keywords Fr'],
      *                       'parent' => array('varchar', 0, false, false, true, null, 'The parent real page name in site folders, for the breadcrumbs.']);
 	 */
-	public function create($table, $fields = [])
+	public function create($table, $columns = [])
 	{
-		$fieldOutput = '';
-		$primary = '';
-		$i = 0;
-		foreach ($fields as $column => $fieldSettings)
-		{
-			$settings = $this->getSettingsString($fieldSettings);
-			if ($fieldSettings[2]) $primary = $column;
+		$columnsString = $this->getSettingsString($columns);
 
-			$fieldOutput .= ($i? ',' : '')."\n`$column` $settings";
-			$i++;
-		}
-		if ($primary) $primary = ",\nPRIMARY KEY (`$primary`)";
+		$result = $this->mysqli->query($q = "CREATE TABLE `$table` ($columnsString)");
+		if (!$result) return $this->setError(__FUNCTION__, $q);
 
-		$result = $this->mysqli->query($q = "CREATE TABLE `$table` ($fieldOutput$primary)");
-		if (!$result) $this->setError(__FUNCTION__, $q);
+		return true;
 	}
 
 	/**
-	 * Alter a table
+	 * Alter a table.
 	 *
 	 * @todo: ALTER TABLE `pages` ADD `article` INT NULL DEFAULT NULL COMMENT 'Article id if any' AFTER `aliases`;
+	 * @todo: ALTER TABLE `pages` DROP COLUMN `article`;
+	 *
 	 * @param string $table: the table name to alter.
-	 * @param array $fields: indexed array of fields (columns) to alter.
-	 * @return void
+	 * @param array $columns: indexed array of columns (columns) to alter.
+	 * @return Boolean: true if success false otherwise.
 	 *
 	 * Example of use:
      * $db = database::getInstance();
 	 * $db->alter('pages', ['path' => ['varchar', 255, false, false, true, 'pages/', 'The page path in site folders'],
 	 *                      'parent' => ['varchar', 0, false, false, true, 'home', 'The parent real page name in site folders, for the breadcrumbs.']]);
 	 */
-	public function alter($table, $fields = array())
+	public function alter($table, $columns = [])
 	{
-		$fieldOutput = '';
-		//$primary = '';
-		$i = 0;
-		foreach ($fields as $column => $fieldSettings)
-		{
-			$settings= $this->getSettingsString($fieldSettings);
-			//if ($fieldSettings[2]) $primary= $column;
+		$columnsString = $this->getSettingsString($columnSettings);
 
-			$fieldOutput .= ($i? ',' : '')."\nCHANGE `$column` `$column` $settings";
-			$i++;
-		}
-		//if ($primary) $primary = ",\nPRIMARY KEY (`$primary`)";
+		$result = $this->mysqli->query($q = "ALTER TABLE `$table` $columnsString");
+		if (!$result) return $this->setError(__FUNCTION__, $q);
 
-		$result = $this->mysqli->query($q = "ALTER TABLE `$table` $fieldOutput");
-		if (!$result) $this->setError(__FUNCTION__, $q);
+		return true;
 	}
 
 	/**
-	 * Get the settings description]
-	 * @param array $fieldSettings:
-	 * @return array
+	 * Get the settings.
+	 *
+	 * @see create(), alter().
+	 * @param array $columns: indexed array of columns (columns) to add in table or alter
+	 *                       (pairs of column_name => column_attributes).
+	 * @param boolean $alter: Add the keyword 'CHANGE' if the string is for an alter statement.
+	 * @return string: the generated string for the create or alter table statement.
 	 */
-	private function getSettingsString($fieldSettings)
+	private function getSettingsString($columns, $alter = false)
 	{
+		$fieldOutput = '';
+		$primary = '';
+		$i = 0;
+		foreach ($columns as $column => $columnSettings)
+		{
+			if ($columnSettings[2])
+			{
+				// Make sure there is only one Primary key.
+				if ($primary)
+				{
+					Error::getInstance()->add(ucfirst(__FUNCTION__)." function: You cannot create a table with multiple primary keys (\"$primary\", \"{$columnSettings[2]}\").", 'MYSQLI');
+					return;
+				}
+				$primary = $column;
+			}
+
 			// `id` int(11) NOT NULL AUTO_INCREMENT
 			// 				(type,  maxlength= 0, primary= false, auto-increment= false, not-null= false, default= null, desc= '')
 			// 'id' => array('int', 11,           true,           true,                  true)
-			$settings= $fieldSettings[0]
-					  .($fieldSettings[1] ? "($fieldSettings[1])" : ($fieldSettings[0]== 'varchar' ? '(255)' : ''))
-					  .($fieldSettings[3] ? ' AUTO_INCREMENT' : '')
-					  .($fieldSettings[4] ? ' NOT NULL' : '')
-					  .($fieldSettings[5] ? " DEFAULT \"$fieldSettings[5]\"" : '')
-					  .($fieldSettings[6] ? " COMMENT \"$fieldSettings[6]\"" : '');
-			//if ($fieldSettings[2]) $primary= $column;
+			$settings = $columnSettings[0]
+						.($columnSettings[1] ? "($columnSettings[1])" : ($columnSettings[0]== 'varchar' ? '(255)' : ''))
+						.($columnSettings[3] ? ' AUTO_INCREMENT' : '')
+						.($columnSettings[4] ? ' NOT NULL' : '')
+						.($columnSettings[2] ? ' PRIMARY KEY' : '')
+						.($columnSettings[5] ? " DEFAULT \"$columnSettings[5]\"" : '')
+						.($columnSettings[6] ? " COMMENT \"$columnSettings[6]\"" : '');
 
-		return $settings;
+			$columnOutput .= ($i ? ',' : '')."\n".($alter ? 'CHANGE ' : '')."`$column` $settings";
+			$i++;
+		}
+
+		return $columnOutput;
 	}
 
 	/**
@@ -223,11 +232,13 @@ DROP DATABASE  `my_site` ;*/
 	 *
 	 * @param string $function: the name of the function that triggered the error
 	 * @param string $query: the original query
-	 * @return void
+	 * @return false
 	 */
 	public function setError($function, $query)
 	{
 		Error::getInstance()->add(ucfirst($function)." function: {$this->mysqli->error}\n  SQL = \"$query\".", 'MYSQLI');
+
+		return false;
 	}
 
 	/**

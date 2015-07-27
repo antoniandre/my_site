@@ -5,7 +5,7 @@
  */
 Class Page
 {
-	private static $instance= null;
+	private static $instance = null;
 	public $id;
 	public $page;
 	public $url;
@@ -26,20 +26,20 @@ Class Page
 	 */
 	private function __construct()
 	{
-		$this->id= null;
-		$this->page= null;
-		$this->url= new StdClass();
-		$this->path= null;
-		$this->title= new StdClass();
-		$this->icon= null;
-		$this->metaDescription= new StdClass();
-		$this->metaKeywords= new StdClass();
-		$this->parent= null;
-		$this->article= null;
-		$this->breadcrumbs= array();
-		$this->showBreadcrumbs= true;
-		$this->language= null;
-		$this->rewriteEngine= true;
+		$this->id = null;
+		$this->page = null;
+		$this->url = new StdClass();
+		$this->path = null;
+		$this->title = new StdClass();
+		$this->icon = null;
+		$this->metaDescription = new StdClass();
+		$this->metaKeywords = new StdClass();
+		$this->parent = null;
+		$this->article = null;
+		$this->breadcrumbs = array();
+		$this->showBreadcrumbs = true;
+		$this->language = null;
+		$this->rewriteEngine = true;
 	}
 
 	/**
@@ -60,7 +60,7 @@ Class Page
 	 */
 	public function setLanguage($language)
 	{
-		$this->language= $language;
+		$this->language = $language;
 		$this->detectCurrentPage();
 	}
 
@@ -82,8 +82,8 @@ Class Page
 	private function detectCurrentPage()
 	{
 		global $settings, $gets, $aliases;
-		$allowedLanguages= array_keys(Language::allowedLanguages);
-		$page= null;
+		$allowedLanguages = array_keys(Language::allowedLanguages);
+		$page = null;
 
 		// REQUEST_URI has the whole path including the query string
 		// REDIRECT_URL has the whole path except the query string but is not accessible without rewrite engine on.
@@ -93,45 +93,45 @@ Class Page
 		{
 			// First get the path without query string
 			// $_SERVER['REDIRECT_URL'] Not set when rewrite engine is off.
-			$path= str_replace($settings->root, '', $_SERVER['REDIRECT_URL']);
+			$path = str_replace($settings->root, '', $_SERVER['REDIRECT_URL']);
 
-			if (!$path) $page= getPageByProperty('id', 'home', $this->language);
+			if (!$path) $page = getPageByProperty('id', 'home', $this->language);
 			elseif (preg_match('~^('.implode('|', $allowedLanguages).')/?~', $path, $match))
 			{
-				$this->language= $match[1];
-				$remainingUrl= str_replace(array("$this->language/", '.html'), '', $path);
+				$this->language = $match[1];
+				$remainingUrl = str_replace(array("$this->language/", '.html'), '', $path);
 				// Detect if nothing is after the language in the path
-				if ($path== "$this->language/" || $path== $this->language) $page= getPageByProperty('id', 'home', $this->language);
-				elseif (strrpos($path, '.html')!== false) $page= getPageByProperty('url', $remainingUrl, $this->language);
-				elseif (array_key_exists($remainingUrl, $aliases)) $page= getPageByProperty('id', $aliases[$remainingUrl], $this->language);
+				if ($path == "$this->language/" || $path == $this->language) $page= getPageByProperty('id', 'home', $this->language);
+				elseif (strrpos($path, '.html') !== false) $page = getPageByProperty('url', $remainingUrl, $this->language);
+				elseif (array_key_exists($remainingUrl, $aliases)) $page = getPageByProperty('id', $aliases[$remainingUrl], $this->language);
 			}
 		}
 		else
 		{
-			$urlParts= parse_url($_SERVER['REQUEST_URI']);
-			$path= str_replace('/'.dirname(SELF).'/', '', $urlParts['path']);
+			$urlParts = parse_url($_SERVER['REQUEST_URI']);
+			$path = str_replace('/'.dirname(SELF).'/', '', $urlParts['path']);
 
 			// Get the page from $gets if any
-			if (isset($gets->page)) $page= getPageByProperty('page', $gets->page, $this->language);
-			elseif (!$path || $path== 'index.php') $page= getPageByProperty('id', 'home', $this->language);
+			if (isset($gets->page)) $page = getPageByProperty('page', $gets->page, $this->language);
+			elseif (!$path || $path == 'index.php') $page = getPageByProperty('id', 'home', $this->language);
 		}
-		if (!$page) $page= getPageByProperty('id', 'notFound', $this->language);
-		$this->page= $page->page;
-		$this->url= $page->url;
-		$this->path= $page->path;
-		$this->title= $page->title;
-		$this->icon= $page->icon;
-		$this->id= $page->id;
-		$this->parent= $page->parent;
-		$this->article= $page->article;
+		if (!$page) $page = getPageByProperty('id', 'notFound', $this->language);
+		$this->page = $page->page;
+		$this->url = $page->url;
+		$this->path = $page->path;
+		$this->title = $page->title;
+		$this->icon = $page->icon;
+		$this->id = $page->id;
+		$this->parent = $page->parent;
+		$this->article = $page->article;
 
-		$this->breadcrumbs[0]= new StdClass();
-		$this->breadcrumbs[0]->name= $this->page;
-		$this->breadcrumbs[0]->url= $this->url;
-		$this->breadcrumbs[0]->path= $this->path;
-		$this->breadcrumbs[0]->title= $this->title;
-		$this->breadcrumbs[0]->id= $this->id;
-		$this->breadcrumbs[0]->parent= $this->parent;
+		$this->breadcrumbs[0] = new StdClass();
+		$this->breadcrumbs[0]->name = $this->page;
+		$this->breadcrumbs[0]->url = $this->url;
+		$this->breadcrumbs[0]->path = $this->path;
+		$this->breadcrumbs[0]->title = $this->title;
+		$this->breadcrumbs[0]->id = $this->id;
+		$this->breadcrumbs[0]->parent = $this->parent;
 
 		// TODO: finish.
 		/*//------------------------------ REDIRECTIONS -------------------------------//

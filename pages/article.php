@@ -11,8 +11,13 @@
 //============================================= MAIN ===================================================//
 $db = database::getInstance();
 $q = $db->query();
-$q->select('articles', [$q->col("content_$language"), $q->col('created'), $q->col('author'), $q->col('published')])
-  ->where()->col('id')->eq($page->article);
+$q->select('articles',
+		   [$q->col("content_$language"),
+		    $q->col('created'),
+		    $q->concat($q->colIn('firstName', 'users'), ' ', $q->colIn('lastName', 'users'))->as('author'),
+		    $q->col('published')])
+  ->relate('articles.author', 'users.id')
+  ->where()->colIn('id', 'articles')->eq($page->article);
 $article = $q->run()
             ->loadObject();
 $tpl = new Template('.');
@@ -28,7 +33,7 @@ if ($article && $article->published)
 				   						[
 				   							'sprintf' =>
 				   							[
-		   										'author',
+		   										$article->author,
 											  	$created->format('Y-m-d'),
 											 	$created->format($language == 'fr' ? 'H\hi' : 'H:i')
 											]

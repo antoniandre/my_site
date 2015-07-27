@@ -97,13 +97,6 @@ class Userdata
 	    return str_replace(array('&quot;', '&#039;', '&#x2F;'), array('"', '\'', '/'), $string);
 	}
 
-
-	public static function validate()
-	{
-
-	}
-
-
 	/**/
 	public static function checkFields($dataNameList, $dataSource = 'post')
 	{

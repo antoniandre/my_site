@@ -7,12 +7,13 @@ include __DIR__.'/database.query.where.php';
 
 Class Query extends DatabaseEntity
 {
-	private static $instance= null;
+	private static $instance = null;
 	private $mysqli;
 	private $secureInternalData;
 	private $currentQuery;
 	private $currentQueryType;
 	private $table;
+	private $join;
 	private $where;// Where object handling the current query WHERE clause.
 	private $orderBy;
 	private $limit;
@@ -27,18 +28,19 @@ Class Query extends DatabaseEntity
 	protected function __construct($mysqli)
 	{
 		parent::__construct();
-		$this->mysqli= $mysqli;
-		$this->secureInternalData= false;
-		$this->currentQuery= null;
-		$this->currentQueryType= null;
-		$this->table= null;
-		$this->where= null;
-		$this->orderBy= '';
-		$this->limit= '';
-		$this->info= null;
-		$this->lastQuery= null;
-		$this->lastQueryType= null;
-		$this->error= false;
+		$this->mysqli = $mysqli;
+		$this->secureInternalData = false;
+		$this->currentQuery = null;
+		$this->currentQueryType = null;
+		$this->table = null;
+		$this->join = [];
+		$this->where = null;
+		$this->orderBy = '';
+		$this->limit = '';
+		$this->info = null;
+		$this->lastQuery = null;
+		$this->lastQueryType = null;
+		$this->error = false;
 	}
 
 	/**
@@ -46,7 +48,7 @@ Class Query extends DatabaseEntity
 	 *
 	 * @return the only instance of this class
 	 */
-	public static function getInstance($mysqli= null)
+	public static function getInstance($mysqli = null)
 	{
 		if (!isset(self::$instance)) self::$instance = new self($mysqli);
 		return self::$instance;
@@ -108,7 +110,7 @@ Class Query extends DatabaseEntity
 	 * Insert a new row in database table. Set an error in case of failure.
 	 * If a duplicate entry (same primary key) is found, make an update of this entry with 'REPLACE INTO'
 	 *
-	 * @param string $tableName: the table name to insert in
+	 * @param string $table: the table name to insert in
 	 * @param array $pairs: array of pairs of 'col_name' => 'New value'.
 	 * @param boolean $replaceIfExists: use the 'REPLACE' keyword if set to true, so the row is overwritten if it exists.
 	 * @param boolean $secureInternalData: use to also secure data coming from the PHP. Since all user vars are already secured ($posts, $gets, etc.)
@@ -123,10 +125,10 @@ Class Query extends DatabaseEntity
 	 *            true)//true since we have a simple quote. In PHP side made code this should never happen...
 	 *   ->run()
 	 */
-	public function insert($tableName, $pairs, $replaceIfExists= false, $secureInternalData= false)
+	public function insert($table, $pairs, $replaceIfExists= false, $secureInternalData= false)
 	{
 		$this->currentQueryType= $replaceIfExists? 'replace' : 'insert';
-		$this->setTable($tableName);
+		$this->setTable($table);
 		$this->checkPairs($pairs, $secureInternalData);
 		return $this;
 	}
@@ -134,7 +136,7 @@ Class Query extends DatabaseEntity
 	/**
 	 * Update the given fields in database, set an error in case of failure.
 	 *
-	 * @param string $tableName: the table name to update in
+	 * @param string $table: the table name to update in
 	 * @param array $pairs: array of pairs of 'col_name' => 'New value'.
 	 *		  If the value must be complex like column name or concat, etc. make an array around it. E.g.
 	 *		  $db->update('table_name',
@@ -152,7 +154,7 @@ Class Query extends DatabaseEntity
 	 *   ->where('`key`="test2"')
 	 *   ->run();
 	 */
-	public function update($tableName, $pairs, $secureInternalData= false)
+	public function update($table, $pairs, $secureInternalData = false)
 	{
 		$this->currentQueryType= __FUNCTION__;
 		$this->setTable($table);
@@ -163,7 +165,7 @@ Class Query extends DatabaseEntity
 	/**
 	 * Delete a row of data from database table
 	 *
-	 * @param string $tableName: the table name to delete from
+	 * @param string $table: the table name to delete from
 	 * @return The current Query instance.
 	 *
 	 * Example of use:
@@ -182,7 +184,7 @@ Class Query extends DatabaseEntity
 	/**
 	 * Create a select query.
 	 *
-	 * @param string $tableName: the table name to delete from.
+	 * @param string $table: the table name to delete from.
 	 * @return string secured field string
 	 *
 	 * Example of use:
@@ -190,13 +192,13 @@ Class Query extends DatabaseEntity
 	 *   ->where('`id`=3')
 	 *   ->run();
 	 */
-	public function select($table, $fields, $secureInternalData= false)
+	public function select($table, $fields, $secureInternalData = false)
 	{
-		$this->currentQueryType= __FUNCTION__;
+		$this->currentQueryType = __FUNCTION__;
 		$this->setTable($table);
 
-		if ($fields === '*') $this->tempPieces= array('*');
-		else $this->tempPieces[]= implode(', ', $this->gatherArgs($fields));
+		if ($fields === '*') $this->tempPieces = array('*');
+		else $this->tempPieces[] = implode(', ', $this->gatherArgs($fields));
 
 		return $this;
 	}
@@ -275,26 +277,27 @@ Class Query extends DatabaseEntity
 		}
 		else
 		{
-			$queryType= strtoupper($this->currentQueryType);
+			$queryType = strtoupper($this->currentQueryType);
 			switch ($queryType)
 			{
 				case 'INSERT':
 				case 'REPLACE':
-					$keys= '`'.implode('`, `', array_keys($this->tempPieces)).'`';
-					$values= implode(', ', $this->tempPieces);
-					$this->currentQuery= "$queryType INTO `$this->table` ($keys) VALUES ($values)";
+					$keys = '`'.implode('`, `', array_keys($this->tempPieces)).'`';
+					$values = implode(', ', $this->tempPieces);
+					$this->currentQuery = "$queryType INTO `$this->table` ($keys) VALUES ($values)";
 					break;
 				case 'UPDATE':
-					foreach ($this->tempPieces as $key => $value) $pairs[]= "`$key`= $value";
-					$pairs= implode(', ', $pairs);
-					$this->currentQuery= "$queryType `$this->table` SET $pairs";
+					foreach ($this->tempPieces as $key => $value) $pairs[] = "`$key`= $value";
+					$pairs = implode(', ', $pairs);
+					$this->currentQuery = "$queryType `$this->table` SET $pairs";
 					break;
 				case 'DELETE':
-					$this->currentQuery= "$queryType FROM `$this->table`";
+					$this->currentQuery = "$queryType FROM `$this->table`";
 					break;
 				case 'SELECT':
-					$fields= implode(', ', $this->tempPieces);
-					$this->currentQuery= "$queryType $fields FROM `$this->table`";
+					$fields = implode(', ', $this->tempPieces);
+					$this->currentQuery = "$queryType $fields FROM `$this->table`";
+					if (count($this->join)) $this->currentQuery .= ' '.implode(' ', $this->join);
 					break;
 				default:
 					return $this->abort(ucfirst(__FUNCTION__).'(): This case is not developed!');
@@ -302,14 +305,14 @@ Class Query extends DatabaseEntity
 			}
 
 			// Add the WHERE clause to the query if any and reset class attributes to null.
-			if ($this->where!== null) $this->currentQuery.= " WHERE ({$this->where->get()})";
-			$this->currentQuery.= $this->orderBy.$this->limit;
-			$this->table= null;
-			$this->tempPieces= null;
+			if ($this->where !== null) $this->currentQuery .= " WHERE ({$this->where->get()})";
+			$this->currentQuery .= $this->orderBy.$this->limit;
+			$this->table = null;
+			$this->tempPieces = null;
 			if ($this->where instanceof Where)
 			{
 				$this->where->kill();
-				$this->where= null;
+				$this->where = null;
 			}
 		}
 		return $this;
@@ -324,43 +327,43 @@ Class Query extends DatabaseEntity
 	 */
 	public function run()
 	{
-		$info= new StdClass();
-		$info->error= true;
-		$info->errorMessage= '';
-		$info->insertId= null;
-		$info->affectedRows= 0;
-		$info->numRows= null;
-		$info->mysqliResult= null;
+		$info = new StdClass();
+		$info->error = true;
+		$info->errorMessage = '';
+		$info->insertId = null;
+		$info->affectedRows = 0;
+		$info->numRows = null;
+		$info->mysqliResult = null;
 
 		if ($this->assemble())
 		{
-			$result= $this->mysqli->query($this->currentQuery);
-			if (!$result) $info->errorMessage= $this->setError();
+			$result = $this->mysqli->query($this->currentQuery);
+			if (!$result) $info->errorMessage = $this->setError();
 			else
 			{
 				switch ($this->currentQueryType)
 				{
 				 	case 'insert':
 				 	case 'replace':
-				 		$info->insertId= $this->mysqli->insert_id;
+				 		$info->insertId = $this->mysqli->insert_id;
 				 		break;
 				 	case 'select':
-				 		$info->numRows= $result->num_rows;
+				 		$info->numRows = $result->num_rows;
 				 		break;
 				 	default:
 						Debug::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): This case is not developed!');
 				 		break;
 				}
-				$info->mysqliResult= $result;
-				$info->error= false;
-				$info->affectedRows= $this->mysqli->affected_rows;
+				$info->mysqliResult = $result;
+				$info->error = false;
+				$info->affectedRows = $this->mysqli->affected_rows;
 			}
 		}
 
 		// The query is now finished: set it as last query, clear current query and class attributes.
-		$this->lastQuery= $this->currentQuery;
-		$this->lastQueryType= $this->currentQueryType;
-		$this->info= $info;
+		$this->lastQuery = $this->currentQuery;
+		$this->lastQueryType = $this->currentQueryType;
+		$this->info = $info;
 		$this->end();
 
 		return $this;
@@ -384,7 +387,7 @@ Class Query extends DatabaseEntity
 	 */
 	private function begin()
 	{
-		$this->info= null;
+		$this->info = null;
 	}
 
 	/**
@@ -394,15 +397,16 @@ Class Query extends DatabaseEntity
 	 */
 	private function end()
 	{
-		$this->secureInternalData= false;
-		$this->currentQuery= null;
-		$this->currentQueryType= null;
-		$this->table= null;
-		$this->tempPieces= array();
-		$this->orderBy= '';
-		$this->limit= '';
+		$this->secureInternalData = false;
+		$this->currentQuery = null;
+		$this->currentQueryType = null;
+		$this->table = null;
+		$this->join = [];
+		$this->tempPieces = [];
+		$this->orderBy = '';
+		$this->limit = '';
 		// Comment because we need the mysqli result after run() when loadObjects() and other after-run functions.
-		// $this->info->mysqliResult= null;
+		// $this->info->mysqliResult = null;
 		return $this;
 	}
 
@@ -435,9 +439,9 @@ Class Query extends DatabaseEntity
 	 */
 	public function _as($alias)
 	{
-		$alias= $this->checkField($alias);
+		$alias = $this->checkField($alias);
 
-		$currIndex= count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces)-1;
 		if ($currIndex<0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to add an alias to nothing, no field is provided.');
 		else $this->tempPieces[$currIndex].= " AS $alias";
 		return $this;
@@ -479,6 +483,22 @@ Class Query extends DatabaseEntity
 		return parent::{__FUNCTION__}(func_get_arg(0));
 	}
 
+	/**
+	 * Tells the query this word is not a string but a column name prefixed by a table name.
+	 * E.g. 'articles.id'
+	 *
+	 * @param string $column: the column name.
+	 * @param string $table: the table name.
+	 * @return The current Query instance.
+	 */
+	public function colIn($column, $table)
+	{
+		// PHP5.6+
+		// parent::{__FUNCTION__}(...func_get_args());
+		// PHP5.5-
+		return call_user_func_array(['parent', __FUNCTION__], func_get_args());
+	}
+
 	/**/
 	protected function lower($string)
 	{
@@ -502,9 +522,29 @@ Class Query extends DatabaseEntity
 	/**/
 	public function limit()
 	{
-		if (func_num_args()== 2) list($from, $num)= func_get_args();
-		elseif (func_num_args()== 1) list($from, $num)= [0, func_get_arg(0)];
-		$this->limit= " LIMIT $from, $num";
+		if (func_num_args() == 2) list($from, $num) = func_get_args();
+		elseif (func_num_args() == 1) list($from, $num) = [0, func_get_arg(0)];
+		$this->limit = " LIMIT $from, $num";
+		return $this;
+	}
+
+	/**/
+	/*public function join($table, $alias, $on, $type = '')
+	{
+		$type = in_array($type, ['left', 'inner']) ? " $type" : '';
+		$on = implode(' AND ', $this->gatherArgs($on));
+		$this->join[] = "$type JOIN $table AS $alias ON ($on)";
+		return $this;
+	}*/
+
+	/**/
+	public function relate($tableField1, $tableField2)
+	{
+		list($table1, $field1) = explode('.', $tableField1, 2);
+		list($table2, $field2) = explode('.', $tableField2, 2);
+		
+		$joinedTable = $this->table == $table1 ? $table2 : $table1;
+		$this->join[] = "JOIN $joinedTable ON (`$table1`.`$field1`=`$table2`.`$field2`)";
 		return $this;
 	}
 
@@ -665,7 +705,7 @@ Class Query extends DatabaseEntity
 	 * @param string $compareString: a concatenation of all the fields.
 	 * @return boolean true if OK, false if insert has previously been done.
 	 */
-	public function checkLastInsert($table, $fields= [], $compareString)
+	public function checkLastInsert($table, $fields = [], $compareString)
 	{
 		// PHP 5.5- -- OLD WAY.
 		$concat = call_user_func_array([$this, 'concat'], $fields);
@@ -686,9 +726,9 @@ Class Query extends DatabaseEntity
 	 */
 	public function numRows()
 	{
-		$return= null;
-		if (!$result= $this->mysqli->query($query)) return $this->setError('numRows', $query);
-		if ($numRows= $result->num_rows) $return= $numRows;
+		$return = null;
+		if (!$result = $this->mysqli->query($query)) return $this->setError('numRows', $query);
+		if ($numRows = $result->num_rows) $return= $numRows;
 		$result->free();
 		return $return;
 	}
@@ -698,7 +738,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function missingId($table)
 	{
-		/*$row= loadObject("SHOW KEYS FROM $table");
+		/*$row = loadObject("SHOW KEYS FROM $table");
 		return loadResult("SELECT l.$row->Column_name+1 AS start FROM $table AS l
 						   LEFT OUTER JOIN $table AS r ON l.$row->Column_name+1=r.$row->Column_name
 						   WHERE r.$row->Column_name IS null;");*/
@@ -711,17 +751,17 @@ Class Query extends DatabaseEntity
 	*/
 	public function loadResult()
 	{
-		$return= null;
+		$return = null;
 
 		if (!$this->info) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
-			$result= $this->info->mysqliResult;
-			if ($result->num_rows && $row= $this->info->mysqliResult->fetch_array()) $return= $row[0];
+			$result = $this->info->mysqliResult;
+			if ($result->num_rows && $row = $this->info->mysqliResult->fetch_array()) $return = $row[0];
 			$result->free();
 		}
 
-		$this->info= null;
+		$this->info = null;
 		return $return;
 	}
 
@@ -731,17 +771,17 @@ Class Query extends DatabaseEntity
 	*/
 	public function loadObject()
 	{
-		$return= null;
+		$return = null;
 
 		if (!$this->info) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
-			$result= $this->info->mysqliResult;
-			if ($result->num_rows && $row= $this->info->mysqliResult->fetch_object()) $return= $row;
+			$result = $this->info->mysqliResult;
+			if ($result->num_rows && $row= $this->info->mysqliResult->fetch_object()) $return = $row;
 			$result->free();
 		}
 
-		$this->info= null;
+		$this->info = null;
 		return $return;
 	}
 
@@ -753,32 +793,32 @@ Class Query extends DatabaseEntity
 	 *                or null if the query fails (with an error message).
 	 *
 	 * Example of use:
-	 * $q= $db->query();
-     * $pagesFromDB= $q->select('pages', '*')->run()->loadObjects('page');
+	 * $q = $db->query();
+     * $pagesFromDB = $q->select('pages', '*')->run()->loadObjects('page');
 	 */
-	public function loadObjects($key= '')
+	public function loadObjects($key = '')
 	{
-		$return= null;
+		$return = null;
 
 		if (!$this->info) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
-			$result= $this->info->mysqliResult;
+			$result = $this->info->mysqliResult;
 			if ($result->num_rows)
 			{
-				$array= array();
-				while ($row= $result->fetch_object())
+				$array = array();
+				while ($row = $result->fetch_object())
 				{
-				   if ($key) $array[$row->$key]= $row;
-				   else $array[]= $row;
+				   if ($key) $array[$row->$key] = $row;
+				   else $array[] = $row;
 				}
-				$return= $array;
+				$return = $array;
 			}
 			$result->free();
 			unset($this->info->mysqliResult);
 		}
 
-		$this->info= null;
+		$this->info = null;
 		return $return;
 	}
 
@@ -790,17 +830,17 @@ Class Query extends DatabaseEntity
 	*/
 	public function loadArray($key= '')
 	{
-		/*$return= null;
-		if (!$result= $this->mysqli->query($query)) return $this->setError('Select', $query);
+		/*$return = null;
+		if (!$result = $this->mysqli->query($query)) return $this->setError('Select', $query);
 		if ($result->num_rows)
 		{
-			$array= array();
-			while ($row= $result->fetch_assoc())
+			$array = array();
+			while ($row = $result->fetch_assoc())
 			{
-				if ($key) $array[$row[$key]]= $row;
-				else $array[]= $row;
+				if ($key) $array[$row[$key]] = $row;
+				else $array[] = $row;
 			}
-			$return= $array;
+			$return = $array;
 			$result->free();
 		}
 		return $return;*/

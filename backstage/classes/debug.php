@@ -124,7 +124,7 @@ Class Debug
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach ($this->stack as $i => $message)
 		{
-			$parentCaller= $this->showLevel2caller ? " (Called by <em>$message->file2</em> at line $message->line2)" : '';
+			$parentCaller = $this->showLevel2caller ? " (Called by <em>$message->file2</em> at line $message->line2)" : '';
 			$output .= "- Called by $message->file at line $message->line$parentCaller:\n  $message->text\n\n";
 		}
 		$output .= "\n";

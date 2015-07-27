@@ -115,7 +115,11 @@ function fetchSettings()
     return $settings;
 }
 
-
+/**
+ * getPagesFromDB retrieve all the pages tables from the database.
+ *
+ * @return array: the pages onject as they are stored in DB.
+ */
 function getPagesFromDB()
 {
     $db = database::getInstance();

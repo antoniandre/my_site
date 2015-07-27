@@ -90,21 +90,20 @@ function handlePostedData()
 			if ($posts->page->type === 'php') createPhpFile($posts->page->name, $posts->page->path);
 			elseif ($posts->page->type === 'article')
 			{
-				dbgd($_POST['article']['published']);
 				$q = $db->query();
-				$q->insert('articles', ['content_en' => secureVars($_POST['article']['content']['en'], true, true),
-		                                'content_fr' => secureVars($_POST['article']['content']['fr'], true, true),
+				$q->insert('articles', ['content_en' => Userdata::secureVars($_POST['article']['content']['en'], true, true),
+		                                'content_fr' => Userdata::secureVars($_POST['article']['content']['fr'], true, true),
 		                                'author' => 1/*TODO: $user->id*/,
-		                                'published' => $posts->article->published]);
+		                                'published' => (bool)$posts->article->published]);
 				$q->run();
-				$articleId = $q->info()->insertedId;
+				$articleId = $q->info()->insertId;
 			}
 
 			$q = $db->query();
-			$q->insert('pages', ['page' => $posts->page->name,
-		                         'path' => $posts->page->path,
-		                         'url_en' => $posts->page->url->en,
-		                         'url_fr' => $posts->page->url->fr,
+			$q->insert('pages', ['page' => text($posts->page->name, ['formats' => ['sef']]),
+		                         'path' => $posts->page->path ? text($posts->page->path, ['formats' => ['sef']]) : '',
+		                         'url_en' => text($posts->page->url->en, ['formats' => ['sef']]),
+		                         'url_fr' => text($posts->page->url->fr, ['formats' => ['sef']]),
 		                         'title_en' => $posts->page->title->en,
 		                         'title_fr' => $posts->page->title->fr,
 		                         'metaDesc_en' => $posts->page->metaDesc->en,
