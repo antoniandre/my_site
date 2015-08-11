@@ -25,7 +25,11 @@ $tpl->set_file("$page->page-page", "backstage/templates/article.html");
 if ($article && $article->published)
 {
 	$created = new DateTime($article->created);
-	$tpl->set_var(['content'=> str_replace('src="images/', 'src="'.$settings->root.'images/?i=', $article->{"content_$language"}),
+	$content = $article->{"content_$language"};
+	// Set correct src paths for img tags.
+	$content = preg_replace('~src="uploads/~', 'src="'.$settings->root.'images/?u=', $content);
+	$content = preg_replace('~src="images/~', 'src="'.$settings->root.'images/?i=', $content);
+	$tpl->set_var(['content'=> $content,
 				   'created'=> text(21,
 				   					[
 				   					    'contexts' => 'article',
