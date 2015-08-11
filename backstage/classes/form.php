@@ -6,7 +6,7 @@
  */
 Class Form
 {
-	const existingElements = ['select', 'text', 'checkbox', 'radio', 'textarea', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph'];
+	const existingElements = ['select', 'text', 'checkbox', 'radio', 'textarea', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
 	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
 								 'alpha' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
 								 'alpha+' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
@@ -23,6 +23,7 @@ Class Form
 	public $action;// Custom action.
 	public $class;// Custom class.
 	public $captcha;// Captcha presence.
+	private $enctype;// Add enctype="multipart/form-data" to the form tag if an upload element is found.
 	private $elements = [];
 	private $buttons = [];
 	private $validElements = [];
@@ -42,6 +43,7 @@ Class Form
 		$this->method = isset($option['method']) ? $option['method'] : 'POST';
 		$this->action = isset($option['action']) ? $option['action'] : url('SELF');
 		$this->class = isset($option['class']) ? $option['class'] : null;
+		$this->enctype = false;
 	}
 
 	/**
@@ -102,42 +104,66 @@ Class Form
      **/
 	public function addElement($type, $attributes = [], $options = [])
 	{
-		if (!is_string($type)) Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
-		elseif (!in_array($type, self::existingElements)) Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
-		elseif (in_array($type, ['wrapper', 'header', 'paragraph']))
+		$options = (object)$options;// Just for conveniance.
+
+		// Error if no element type provided.
+		if (!is_string($type))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
+
+		// Error if provided element type does not exist.
+		elseif (!in_array($type, self::existingElements))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
+
+		// Error if no attribute is found. Except for elements: wrapper, header, paragraph.
+		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
+				&& (!is_array($attributes) || !count($attributes)))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
+
+		// Error if no name attribute is found. Except for elements: wrapper, header, paragraph.
+		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
+				&& !isset($attributes['name']))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
+
+		// Error if no name numberElements is found for wrapper element.
+		elseif ($type === 'wrapper' && !isset($options->numberElements))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
+
+		// Error if no name numberElements is found for wrapper element.
+		elseif (($type === 'header' || $type === 'paragraph') && !isset($options->text))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
+
+		// Error if no name numberElements is found for wrapper element.
+		elseif (($type === 'header') && !isset($options->level))
+			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
+
+		// Elements for which attributes are not required:
+		else
 		{
+			$el = (object)['type' => $type, 'attributes' => (object)$attributes, 'options' => $options];
+
 			switch ($type)
 			{
 				case 'wrapper':
-					$this->elements[] = (object)['type' => $type, 'numberElements' => $attributes, 'class' => $options];
+					// Expects the specific 'numberElements' param.
+					$el->numberElements = $options->numberElements;
 					break;
 				case 'header':
-					$this->elements[] = (object)['type' => $type, 'level' => $attributes, 'text' => $options];
+					// Expects the specific 'level' and 'text' param.
+					$el->level = $options->level;
+					$el->text = $options->text;
 					break;
 				case 'paragraph':
-					$this->elements[] = (object)['type' => $type, 'text' => $attributes];
+					// Expects the specific 'text' param.
+					$el->text = $options->text;
 					break;
-				default:
-					break;
-			}
-		}
-		elseif (!is_array($attributes) || !count($attributes)) Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide an array of attributes containing element name and other html attributes.', 'MISSING DATA', true);
-		elseif (!isset($attributes['name'])) Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): You must provide a name for the $type form element.", 'MISSING DATA');
-		else
-		{
-			switch ($type)
-			{
+				case 'upload':
+					$this->enctype = true;
 				case 'text':
-					break;
 				default:
 					break;
 			}
-			 // 'name' => $name,
-			 // 'label' => $label,
-			 // 'value' => $value,
-			 // 'validation' => $validation,
-			 // 'attr' => $attr];
-			$this->elements[] = (object)['type' => $type, 'attributes' => (object)$attributes, 'options' => (object)$options];
+
+			$this->elements[] = $el;
 		}
 	}
 
@@ -174,7 +200,7 @@ Class Form
 	 *
 	 * @return (string) generated form HTML.
 	 */
-	public function render()
+	/*public function render_old()
 	{
 		$tpl = new Template(__DIR__.'/../templates/');
 		$tpl->set_file(['form-tpl' => 'form.html',
@@ -191,7 +217,8 @@ Class Form
 		$tpl->set_var(['formId' => "form$this->id",
 					   'method' => $this->method,
 					   'action' => $this->action,
-					   'class' => $this->class ? " class=\"$this->class\"" : '']);
+					   'class' => $this->class ? " class=\"$this->class\"" : '',
+					   'enctype' => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
 
 		$wrapFollowingElmts = 0;
 		$wrapperClass = '';
@@ -229,6 +256,112 @@ Class Form
 			$rowSpan = isset($element->options->rowSpan) && $element->options->rowSpan > 1 ? $element->options->rowSpan : $rowSpan;
 			if ($rowSpan) $rowSpan--;
 			if (!$rowSpan) $tpl->parse('theRowBlock', 'rowBlock', !($rowSpan));
+		}
+		//======================================================================//
+
+		//========================== BUTTONS RENDERING =========================//
+		foreach ($this->buttons as $k => $button)
+		{
+			$tpl->set_var(['btnText' => $button->label,
+						   'btnClass' => $button->class,
+						   'btnType' => $button->type,
+						   'btnName' => isset($button->name) && $button->name ? " name=\"form{$this->id}[$button->name]\"" : '',
+						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '']);
+			$tpl->parse('theButtonBlock', 'buttonBlock', true);
+		}
+		//======================================================================//
+
+		return $tpl->parse('display', 'form-tpl');
+	}*/
+
+	/**
+	 * render function.
+	 * Render the generated form and return the full HTML.
+	 *
+	 * @return (string) generated form HTML.
+	 */
+	public function render()
+	{
+		$tpl = new Template(__DIR__.'/../templates/');
+		$tpl->set_file(['form-tpl' => 'form.html',
+						'form-element-tpl' => 'form-elements.html']);
+		$tpl->set_block('form-tpl', 'wrapperBlock', 'theWrapperBlock');
+		$tpl->set_block('wrapperBlock', 'rowBlock', 'theRowBlock');
+		$tpl->set_block('rowBlock', 'elementBlock', 'theElementBlock');
+		foreach (self::existingElements as $existingElement) if ($existingElement !== 'wrapper')
+		{
+			$tpl->set_block('form-element-tpl', $existingElement.'Block', 'the'.ucfirst($existingElement).'Block');
+		}
+		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
+		$tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
+
+		$tpl->set_var(['formId' => "form$this->id",
+					   'method' => $this->method,
+					   'action' => $this->action,
+					   'class' => $this->class ? " class=\"$this->class\"" : '',
+					   'enctype' => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
+
+
+		foreach ($this->elements as $k => $element)
+		{
+			$k++;
+			if ($element->type === 'wrapper') $wrappers['wrapper'.$k] = ['wrap' => $element->numberElements, 'state' => 'unset'];
+		}
+
+		$rowSpan = 0;
+		//========================= ELEMENTS RENDERING =========================//
+		foreach ($this->elements as $k => $element)
+		{
+			$k++;
+			$tpl->set_var(['wrapperBegin' => '',
+						   'wrapperEnd' => '',
+						   'rowClass' => isset($element->options->rowClass) ? " {$element->options->rowClass}" : '']);
+
+			if ($element->type === 'wrapper') $tpl->set_var(['theRowBlock' => '']);
+
+			$closingWrappers = 0;
+			foreach ($wrappers as $wrapperId => $wrapper) if ($wrapper['state'] !== 'closed')
+			{
+				if ($wrapper['state'] === 'unset')
+				{
+					// create wrapper
+					if ($wrapperId == "wrapper$k") $wrappers[$wrapperId]['state'] = 'opened';
+				}
+				else
+				{
+					// Decrement the wrapper number of remaining element.
+					$wrappers[$wrapperId]['wrap']--;					
+				}
+				if (!$wrappers[$wrapperId]['wrap'])
+				{
+					$wrappers[$wrapperId]['state'] = 'closed';
+					$closingWrappers++;
+				}
+			}
+
+			// If element is a wrapper, skip the current lap setting the $wrapFollowingElmts var for next loop lap.
+			if ($element->type === 'wrapper')
+			{
+				$tpl->set_var(['wrapperBegin' => $element->attributes->class ? "<div class=\"{$element->attributes->class}\">" : '<div>']);
+			}
+
+			else
+			{
+				$this->renderElement($element, $tpl);
+				$this->renderLabel($element, $tpl);
+				$tpl->parse('theElementBlock', 'elementBlock', $rowSpan);
+
+				$rowSpan = isset($element->options->rowSpan) && $element->options->rowSpan > 1 ? $element->options->rowSpan : $rowSpan;
+				if ($rowSpan) $rowSpan--;
+				if (!$rowSpan) $tpl->parse('theRowBlock', 'rowBlock', $rowSpan);
+			}
+			$tpl->set_var(['wrapperEnd' => str_repeat('</div><!-- closing tag -->', $closingWrappers)]);
+			// if ($closingWrappers) dbg("closing $closingWrappers wrapper.");
+			// dbg($element->type,$wrappers, $closingWrappers);
+			$tpl->parse('theWrapperBlock', 'wrapperBlock',  true);
+
+			// $tpl->parse('theElementBlock', 'elementBlock', false);
+			// $tpl->parse('theRowBlock', 'rowBlock', true);
 		}
 		//======================================================================//
 
@@ -292,19 +425,38 @@ Class Form
 		switch ($element->type)
 		{
 		 	case 'paragraph':
-			 	$tpl->set_var(['text' => $element->text]);
+			 	$tpl->set_var(['text' => $element->options->text, 'class' => isset($element->attributes->class) ? " class=\"{$element->attributes->class}\"" : '']);
 		 		break;
 		 	case 'header':
-		 		$tpl->set_var(['level' => (int)$element->level, 'text' => $element->text]);
+		 		$tpl->set_var(['level' => (int)$element->options->level, 'text' => $element->options->text, 'class' => isset($element->attributes->class) ? " class=\"{$element->attributes->class}\"" : '']);
 		 		break;
 		 	case 'select':
 		 		$tpl->set_block('selectBlock', 'optionBlock', 'theOptionBlock');
+		 		$tpl->set_var('theOptionBlock', '');
+		 		$i = 0;
 		 		foreach ($element->options->options as $value => $label)
 		 		{
 					$tpl->set_var(['value' => $value,
 								   'label' => $label,
+								   'opt' => $i,
 								   'selected' => isset($element->userdata) && $element->userdata == $value ? 'selected="selected"' : '']);
 		 			$tpl->parse('theOptionBlock', 'optionBlock', true);
+		 			$i++;
+		 		}
+		 		break;
+		 	case 'radio':
+		 	case 'checkbox':
+		 		$tpl->set_block('radioBlock', 'optionBlock', 'theOptionBlock');
+		 		$tpl->set_var('theOptionBlock', '');
+		 		$i = 0;
+		 		foreach ($element->options->options as $value => $label)
+		 		{
+					$tpl->set_var(['value' => $value,
+								   'label' => $label,
+								   'opt' => $i,
+								   'checked' => isset($element->userdata) && $element->userdata == $value ? 'checked="checked"' : '']);
+		 			$tpl->parse('theOptionBlock', 'optionBlock', true);
+		 			$i++;
 		 		}
 		 		break;
 		 	default:
@@ -372,7 +524,7 @@ Class Form
 		$countFilledElements = 0;
 		$countInvalidElements = 0;
 
-		// Loop through all the element that have a set name (html attr)
+		// Loop through all the element that have a set name (html attr).
 		foreach ($this->elements as $k => $element)
 		{
 			if (isset($element->attributes->name))

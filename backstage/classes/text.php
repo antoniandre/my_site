@@ -273,6 +273,10 @@ Class Text
 							{
 								$toRemove = str_split('/|\\\'"()[]{}#$%@!?.,;:+=');
 								$str = str_replace($toRemove, '', $str);
+
+								//!\ remove preceding and trailing spaces after the previous cleanup to prevent replacing with '-'.
+								$str = rtrim(trim($str));
+
 								$str = str_replace([' & ', ' ', '&'], ['-and-', '-', '-and-'], $str);
 								if (strlen($str = strtolower($str)) !== strlen(htmlentities($str, ENT_NOQUOTES, 'UTF-8')))
 								{

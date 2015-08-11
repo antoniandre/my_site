@@ -6,7 +6,6 @@ define('SELF', $_SERVER['PHP_SELF']{0} == '/' ? substr($_SERVER['PHP_SELF'], 1) 
 $qs = $_SERVER['QUERY_STRING'];
 define('QUERY_STRING', @$qs{0} == '&' ? substr($qs, 1) : $qs/*preventing pb*/);
 define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
-define('REWRITE_ENGINE_ON', false);
 define('CONFIG_DIR', __DIR__.'/../config');
 define('CONFIG_FILE', 'config.ini');
 //=====================================================//
@@ -54,6 +53,7 @@ $page->setLanguage($language);
 if ($languageObject->target) $page->refresh();
 
 $db = database::getInstance();
+$user = User::getInstance();
 // TODO: remove following query trials:
 /*$where = $db->query()->where("column_name1 ='value1'");
 $where->and("column_name2='value2'")

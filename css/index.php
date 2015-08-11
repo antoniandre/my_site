@@ -23,6 +23,11 @@ if (isset($_GET['backstage']))
     $css[]= 'backstage';
 }
 
+if (isset($_GET['article']))
+{
+    $css[]= 'article';
+}
+
 if (1 == 1)// TODO: secure this:
 {
     $css[]= (isset($_GET['backstage']) ? 'backstage.' : '').$_GET['p'];

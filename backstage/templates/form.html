@@ -1,11 +1,15 @@
-<form id="{formId}" action="{action}" method="{method}"{class} role="form">
+<form id="{formId}" action="{action}" method="{method}"{class}{enctype} role="form">
+	<!-- BEGIN wrapperBlock -->
+	{wrapperBegin}
 	<!-- BEGIN rowBlock -->
-	{wrapperBegin}<div class="row{rowClass}">
+	<div class="row{rowClass}">
 		<!-- BEGIN elementBlock -->
-		{labelBefore}{element}{labelAfter}
+		{labelBefore}{element}{labelAfter}{errorMessage}
 		<!-- END elementBlock -->
-	</div>{wrapperEnd}
+	</div>
 	<!-- END rowBlock -->
+	{wrapperEnd}
+	<!-- END wrapperBlock -->
 	<br class="clear" />
 	<div class="buttons">
 		<!-- BEGIN buttonBlock -->

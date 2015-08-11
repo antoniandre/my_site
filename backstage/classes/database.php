@@ -50,16 +50,22 @@ Class Database
 		}
 		else
 		{
-			$this->mysqli->select_db(IS_LOCAL ? $settings->localDBname : $settings->DBname);
+			$dbName = IS_LOCAL ? $settings->localDBname : $settings->DBname;
+			$this->mysqli->select_db($dbName);
 
 			// Unknown database.
-			if ($this->mysqli->errno === 1049) $this->createDB(IS_LOCAL ? $settings->localDBname : $settings->DBname);
+			if ($this->mysqli->errno === 1049) $this->createDB($dbName);
+
+			// Database is empty.
+			elseif (!$this->mysqli->query("SHOW TABLES IN `$dbName`")->num_rows) $this->populateDB($dbName);
+
+			// In all cases set encoding.
 			$this->mysqli->set_charset('utf8');
 		}
 	}
 
 	/**
-	 * Create the minimum required database from a backup file if DB not found.
+	 * Create the database then call the private method populateDB() to fill it up.
 	 *
 	 * @param  string $dbName: the database name.
 	 * @return void
@@ -70,19 +76,30 @@ Class Database
 		{
 			$result = $this->mysqli->query($q = "CREATE DATABASE `$dbName`");
 			if (!$result) $this->setError(__FUNCTION__, $q);
+			else $this->populateDB($dbName);
+		}
+	}
+
+	/**
+	 * Create the minimum required database data from a backup file if DB is empty.
+	 *
+	 * @param string $dbName: the database name.
+	 * @return void
+	 */
+	private function populateDB($dbName)
+	{
+		if (is_file(__DIR__.'/../../'.self::minimumDbSqlFile))
+		{
+			$this->mysqli->select_db($dbName);
+			// First set the DB charset to utf8 before importing utf8-encoded file into DB (for accents and special chars).
+			$this->mysqli->set_charset('utf8');
+			$result = $this->mysqli->multi_query($q = file_get_contents(__DIR__.'/../../'.self::minimumDbSqlFile));
+			if (!$result) $this->setError(__FUNCTION__, $q);
 			else
 			{
-				$this->mysqli->select_db($dbName);
-				// First set the DB charset to utf8 before importing utf8-encoded file into DB (for accents and special chars).
-				$this->mysqli->set_charset('utf8');
-				$result = $this->mysqli->multi_query($q = file_get_contents(__DIR__.'/../../'.self::minimumDbSqlFile));
-				if (!$result) $this->setError(__FUNCTION__, $q);
-				else
-				{
-					// Wait 1s for the sql query to be finished.
-					header('Refresh:1');
-					exit;
-				}
+				// Wait 1s for the sql query to be finished.
+				header('Refresh:1');
+				exit;
 			}
 		}
 	}

@@ -25,7 +25,7 @@ $tpl->set_file("$page->page-page", "backstage/templates/article.html");
 if ($article && $article->published)
 {
 	$created = new DateTime($article->created);
-	$tpl->set_var(['content'=> $article->{"content_$language"},
+	$tpl->set_var(['content'=> str_replace('src="images/', 'src="'.$settings->root.'images/?i=', $article->{"content_$language"}),
 				   'created'=> text(21,
 				   					[
 				   					    'contexts' => 'article',
@@ -34,7 +34,7 @@ if ($article && $article->published)
 				   							'sprintf' =>
 				   							[
 		   										$article->author,
-											  	$created->format('Y-m-d'),
+											  	$created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
 											 	$created->format($language == 'fr' ? 'H\hi' : 'H:i')
 											]
 										]

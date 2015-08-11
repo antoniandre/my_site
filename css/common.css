@@ -158,7 +158,14 @@ transition:color .3s;}
 .invalid:after {content:"h";line-height:1.8em;font-size:1.4em;right:.4em;color:#c33;}
 .required input, .valid input, .invalid input {padding-right:1.8em;}
 
-#frame {margin:75px auto;width:80%;min-width:1050px;max-width:1500px;}
+.logo
+{position: fixed;
+top: 10px;
+left: 15px;
+width: 377px;
+height: 125px;
+z-index: 0;}
+#frame {margin:110px auto 35px;width:90%;position: relative;}
 #frame > .inner
 {padding:50px 50px;
 position:relative;
@@ -805,6 +812,22 @@ margin-right:.4em;
 vertical-align:bottom;
 background:none;
 line-height:1.5em;}
+
+.quote
+{border: 2px solid #F6E955;
+background: rgba(255,255,230,.6);
+margin-bottom: 30px;
+min-height: 100px;
+border-radius: 5px;
+font-size: 120%;
+position: relative;
+padding: 20px 45px;
+border-radius: 4px;
+margin-top: 25px;}
+.quote .i-quote-l:before, .quote .i-quote-r:before {display: block;position: absolute;color: #F6E955;}
+.quote .i-quote-l:before {top: 10px;left: 10px;}
+.quote .i-quote-r:before {bottom: 40px;right: 10px;}
+.quote .author {bottom: 10px;right: 10px;position: absolute;font-style: italic;}
 /*============================ end of MESSAGES =============================*/
 
 

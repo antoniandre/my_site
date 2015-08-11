@@ -5,6 +5,17 @@
 			<div class="inner">
 				<p class="intro">{newPageIntro}</p>
 				<div>
+					<label for="pageTypePHP">{pageTypeLabel}</label> &nbsp;
+					<input id="pageTypePHP" type="radio" name="page[type]" value="php" />
+					<label for="pageTypePHP">{pageTypePHPLabel}</label> &nbsp;
+					<input id="pageTypeArticle" type="radio" name="page[type]" value="article" />
+					<label for="pageTypeArticle">{pageTypeArticleLabel}</label>
+				</div>
+				<div>
+					<label for="pageName">{pageNameLabel}</label>
+					<input type="text" id="pageName" class="text" name="page[name]" value="{pageNameValue}" placeholder="{pageNamePlaceholder}"/>
+				</div>
+				<div>
 					<!-- BEGIN languageBlock -->
 					<div class="languageBlock">
 						<h3 class="language">{Language}</h3>
@@ -28,23 +39,12 @@
 					<!-- END languageBlock -->
 					<br class="clear"/>
 					<div>
-						<label for="pageName">{pageNameLabel}</label>
-						<input type="text" id="pageName" class="text" name="page[name]" value="{pageNameValue}" placeholder="{pageNamePlaceholder}"/>
-					</div>
-					<div>
 						<label for="pagePath">{pagePathLabel}</label>
 						<input type="text" id="pagePath" class="text" name="page[path]" value="{pagePathValue}" placeholder="{pagePathPlaceholder}"/>
 					</div>
 					<div>
 						<label for="pageParent">{pageParentLabel}</label>
 						<select id="pageParent" name="page[parent]" cols="30" rows="10">{pageParentValue}</select>
-					</div>
-					<div>
-						<label for="pageTypePHP">{pageTypeLabel}</label> &nbsp;
-						<input id="pageTypePHP" type="radio" name="page[type]" value="php" />
-						<label for="pageTypePHP">{pageTypePHPLabel}</label> &nbsp;
-						<input id="pageTypeArticle" type="radio" name="page[type]" value="article" />
-						<label for="pageTypeArticle">{pageTypeArticleLabel}</label>
 					</div>
 					<div class="buttons">
 						<button class="cancel" type="reset">{cancelText}</button>

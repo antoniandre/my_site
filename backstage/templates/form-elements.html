@@ -2,6 +2,14 @@
 <label for="{formId}{id}">{label}</label>
 <!-- END labelBlock -->
 
+<!-- BEGIN uploadBlock -->
+<div id="{formId}{id}" class="Dropzone">
+	<div id="{formId}{id}" class="fallback">
+		<input name="{formId}{name}" type="file" multiple />
+	</div>
+</div>
+<!-- END uploadBlock -->
+
 <!-- BEGIN textBlock -->
 <span class="{validation}{state}">
 	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
@@ -34,7 +42,7 @@
 
 <!-- BEGIN selectBlock -->
 <span class="{validation}{state}">
-	<select name="{formId}{name}" id="{formId}{id}" class="text {class}">
+	<select name="{formId}{name}" id="{formId}{id}opt{opt}" class="text {class}">
 		<option value=""> - </option>
 		<!-- BEGIN optionBlock -->
 		<option value="{value}"{selected}>{label}</option>
@@ -45,20 +53,24 @@
 
 <!-- BEGIN checkboxBlock -->
 <span class="{validation}{state}">
-	<input type="checkbox" name="{formId}{name}[]" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+	<!-- BEGIN optionBlock -->
+	<input type="checkbox" name="{formId}{name}[]" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{attr} /> {label}
+	<!-- END optionBlock -->	
 </span>
 <!-- END checkboxBlock -->
 
 <!-- BEGIN radioBlock -->
 <span class="{validation}{state}">
-	<input type="radio" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+	<!-- BEGIN optionBlock -->
+	<input type="radio" name="{formId}{name}" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{attr} /> {label}
+	<!-- END optionBlock -->	
 </span>
 <!-- END radioBlock -->
 
 <!-- BEGIN headerBlock -->
-<h{level}{attr}>{text}</h{level}>
+<h{level}{attr}{class}>{text}</h{level}>
 <!-- END headerBlock -->
 
 <!-- BEGIN paragraphBlock -->
-<p{attr}>{text}</p>
+<p{attr}{class}>{text}</p>
 <!-- END paragraphBlock -->

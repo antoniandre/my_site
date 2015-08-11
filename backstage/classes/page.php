@@ -11,6 +11,7 @@ Class Page
 	public $url;
 	public $path;
 	public $title;
+	public $h1;
 	public $icon;
 	public $metaDescription;
 	public $metaKeywords;
@@ -31,6 +32,7 @@ Class Page
 		$this->url = new StdClass();
 		$this->path = null;
 		$this->title = new StdClass();
+		$this->h1 = '';//!\ Empty string is distinct from null in later var use. 
 		$this->icon = null;
 		$this->metaDescription = new StdClass();
 		$this->metaKeywords = new StdClass();
@@ -65,6 +67,16 @@ Class Page
 	}
 
 	/**
+	 * Set the h1 title of the page.
+	 *
+	 * @param String $h1: the h1 texts to display on the page. Empty string to force no H1.
+	 */
+	public function setH1($h1)
+	{
+		$this->h1 = $h1 ? $h1 : null;
+	}
+
+	/**
 	 * get the title of the current page.
 	 *
 	 * @return String: the title of the page.
@@ -91,17 +103,21 @@ Class Page
 
 		if ($settings->rewriteEngine)
 		{
-			// First get the path without query string
+			// First get the path without query string.
 			// $_SERVER['REDIRECT_URL'] Not set when rewrite engine is off.
 			$path = str_replace($settings->root, '', $_SERVER['REDIRECT_URL']);
-
+			
+			// Remove the potential uneeded preceding slash.
+			if ($path{0} === '/') $path = substr($path, 1);
+			
 			if (!$path) $page = getPageByProperty('id', 'home', $this->language);
 			elseif (preg_match('~^('.implode('|', $allowedLanguages).')/?~', $path, $match))
 			{
 				$this->language = $match[1];
 				$remainingUrl = str_replace(array("$this->language/", '.html'), '', $path);
+
 				// Detect if nothing is after the language in the path
-				if ($path == "$this->language/" || $path == $this->language) $page= getPageByProperty('id', 'home', $this->language);
+				if ($path === "$this->language/" || $path === $this->language) $page = getPageByProperty('id', 'home', $this->language);
 				elseif (strrpos($path, '.html') !== false) $page = getPageByProperty('url', $remainingUrl, $this->language);
 				elseif (array_key_exists($remainingUrl, $aliases)) $page = getPageByProperty('id', $aliases[$remainingUrl], $this->language);
 			}
@@ -193,6 +209,8 @@ Class Page
 		//-------------------- SEO metas --------------------//
 		$tpl->set_block('page-tpl', 'seoMetas', 'theSeoMetas');
 		$tpl->set_block('page-tpl', 'googleAnalytics', 'theGoogleAnalytics');
+		$tpl->set_block('page-tpl', 'h1Block', 'theH1Block');
+
 		// Search engines must not crawl the backstage:
 		$tpl->set_var(['metaDesc' => 'metadesc',
 						'metaKey' => 'metakey',
@@ -213,24 +231,33 @@ Class Page
 		//---------------------------------------------------//
 
 		if ($this->showBreadcrumbs) $this->calculateBreadcrumbs($this);
+
+		// Detect if should show error according to the config choice and the current user type.
+		// @see: config.ini [advanced].
+		$showErrors = ($settings->debugMode == 1 && $user->isAdmin()) || $settings->debugMode == 2;
+
 		$tpl->set_var(['content' => $content,
 					   'ROOT' => $settings->root,
 					   'SELF' => url('SELF'),
 					   'language' => $language,
 					   'pageId' => $page->id,
 					   'page' => $page->page,
+					   'article' => $page->article ? '&amp;article=1' : '',
 					   // Used for js and css.
 					   'backstage' => strpos($page->path, 'backstage/') !== false ? '&amp;backstage=1' : '',
-					   'h1' => $page->title->$language,
+
+					   'h1' => $this->h1 ? $this->h1 : $page->title->$language,
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
+					   'logoSrc' => url('images/logo.jpg'),
 					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
+					   'backToHomeText' => text(45),
 					   'homeText' => getPageByProperty('id', 'home', $language)->title->$language,
 					   'contactUrl' => url(getPageByProperty('id', 'contact', $language)->page.'.php'),
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,
 					   'classEn' => $language == 'en' ? ' active' : '',
 					   'classFr' => $language == 'fr' ? ' active' : '',
-					   'error' => Error::getInstance()->getCount() ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Error::getInstance()->show()."</div>" : '',
-					   'debug' => Debug::getInstance()->getCount() ? "<div id=\"debug\"><p><span class=\"i-bug\"></span> DEBUG </p>".Debug::getInstance()->show()."</div>" : '',
+					   'error' => Error::getInstance()->getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Error::getInstance()->show()."</div>" : '',
+					   'debug' => Debug::getInstance()->getCount() && $showErrors ? "<div id=\"debug\"><p><span class=\"i-bug\"></span> DEBUG </p>".Debug::getInstance()->show()."</div>" : '',
 					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"headerMessage\">$headerMessage</div>" : '',
 					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"contentMessage\">$contentMessage</div>" : '',
 					   'copyright' => textf(19, $settings->siteName, date('Y')),
@@ -240,6 +267,10 @@ Class Page
 					   'legalTermsText' => getPageByProperty('id', 'legalTerms', $language)->title->$language,
 					   'breadcrumbs' => $this->showBreadcrumbs? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div><br class=\"clear\"/>" : ''
 					  ]);
+
+		// Remove h1 tag if it is explicitly set to null.
+		if ($this->h1 === null) $tpl->set_var('theH1Block', '');
+		else $tpl->parse('theH1Block', 'h1Block', true);
 
 		$tpl->set_block('page-tpl', 'cookieNotice', 'theCookieNotice');
 		if (!isset($cookies->cookie_consent))

@@ -5,6 +5,16 @@ Options -Indexes
 RewriteEngine On
 #==============================================#
 
+#=================== DEV ======================#
+#ErrorDocument 404 /my_site/site/pages/not-found.php
+#ErrorDocument 403 /my_site/site/pages/forbidden.php
+#==============================================#
+
+#==================== PRD =====================#
+#ErrorDocument 404 /pages/not-found.php
+#ErrorDocument 403 /pages/forbidden.php
+#==============================================#
+
 #================= robots.txt =================#
 # NEED APACHE HEADERS_MODULE
 #Do not index robots.txt in search engines

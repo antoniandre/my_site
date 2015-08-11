@@ -1,10 +1,11 @@
 <?php
 /**
- *
+ * @TODO: develop this whole class.
  */
 class User
 {
-	public $id;
+	private static $instance = null;
+	private $id;
 	public $type;
 	public $login;
 	private $settings;
@@ -19,6 +20,17 @@ class User
 	 */
 	function __construct()
 	{
+		if (IS_LOCAL)
+		{
+			$this->id = 1;
+			$this->type = 'member';
+		}
+		else
+		{
+			$this->id = 2;
+			$this->type = 'guest';
+		}
+		/*
 		global $language;
 		
 		$posts = Userdata::$posts;
@@ -45,7 +57,18 @@ class User
 			&& $language!= @$this->getSettings()->language)//!\ only if pref language is different
 		{
 			changeLanguage($language, $this->getSettings()->language);
-		}	
+		}	*/
+	}
+
+	/**
+	 * Get the only instance of this class.
+	 *
+	 * @return User object: the only instance of this class.
+	 */
+	public static function getInstance()
+	{
+		if (!isset(self::$instance)) self::$instance = new self;
+		return self::$instance;
 	}
 
 	/**
@@ -159,8 +182,9 @@ class User
 	*/
 	public function isAdmin()
 	{
-		global $settings;
-		return $this->login.$this->id== $settings->webMasterLogin.'1'?1:0;
+		return $this->id == 1;
+		/*global $settings;
+		return $this->login.$this->id== $settings->webMasterLogin.'1'?1:0;*/
 	}
 	
 	/*
@@ -203,6 +227,16 @@ class User
 	{
 		foreach((array)$keys as $k) unset($this->settings->$k);
 		insert('user_settings',array($this->id,serialize($this->settings)));
+	}
+	
+	/**
+	 * getId. Get the private attr ID of the current user.
+	 *
+	 * @return int: the id of the current user.
+	 */
+	public function getId()
+	{
+		return $this->id;
 	}
 	
 	/*
