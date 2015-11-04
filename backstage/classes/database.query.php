@@ -288,8 +288,8 @@ Class Query extends DatabaseEntity
 	/**
 	 * Check the fields we want to select.
 	 *
-	 * @param  string $field
-	 * @return string secured field string
+	 * @param string $field.
+	 * @return string secured field string.
 	 */
 	protected function checkField($field)
 	{
@@ -360,7 +360,7 @@ Class Query extends DatabaseEntity
 	 * Run the query and update the $this->info object to store multiple after-query information like:
 	 * Number of affected rows, number of returned rows, inserted id, error.
 	 *
-	 * @todo ?? $this->mysqli->multi_query($query)
+	 * @todo ?? $this->mysqli->multi_query($query).
 	 * @return The current Query instance.
 	 */
 	public function run()
@@ -552,7 +552,7 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * orderBy
+	 * orderBy.
 	 *
 	 * @param string $column:
 	 * @param string $direction:
@@ -569,7 +569,7 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * limit
+	 * limit.
 	 *
 	 * @return The current Query instance.
 	 */
@@ -657,7 +657,7 @@ Class Query extends DatabaseEntity
 	/**
 	 * Run postponed queries.
 	 *
-	 * @todo Retrieve each postponed query from the database table `postponed_queries`
+	 * @todo Retrieve each postponed query from the database table `postponed_queries`;
 	 */
 	public function runPostponed()
 	{
@@ -677,9 +677,9 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * Create the WHERE clause instance
+	 * Create the WHERE clause instance.
 	 *
-	 * @param string $condition: the first WHERE clause condition
+	 * @param string $condition: the first WHERE clause condition.
 	 */
 	public function where()
 	{
@@ -688,10 +688,10 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * Proceed to real_escape_string()
+	 * Proceed to real_escape_string().
 	 *
-	 * @param the string to escape
-	 * @return the escaped string
+	 * @param the string to escape.
+	 * @return the escaped string.
 	 */
 	public function escape($string)
 	{
@@ -704,10 +704,10 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * Check complex value given in an array form
+	 * Check complex value given in an array form.
 	 *
-	 * @param string $key
-	 * @param array $value
+	 * @param string $key: .
+	 * @param array $value: .
 	 * @return a {error:int, value:'secured_value'} object containing the secured string value
 	 */
 	private function checkComplexValue($key, $value)
@@ -806,7 +806,7 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
-	 * Returns the first unused id of the sequence of auto-incremented ids
+	 * Returns the first unused id of the sequence of auto-incremented ids.
 	 */
 	public function missingId($table)
 	{
@@ -838,7 +838,7 @@ Class Query extends DatabaseEntity
 	}
 
 	/*
-		Load one object from DB
+		Load one object from DB.
 		Returns the error (string) if the query fails, or an object of the returned record.
 	*/
 	public function loadObject()
@@ -897,8 +897,8 @@ Class Query extends DatabaseEntity
 	/**
 	 * Set an error if the query failed.
 	 *
-	 * @param string $function: the name of the function that triggered the error
-	 * @param string $query: the original query
+	 * @param string $function: the name of the function that triggered the error.
+	 * @param string $query: the original query.
 	 */
 	public function setError()
 	{
@@ -911,7 +911,7 @@ Class Query extends DatabaseEntity
 	 * Private clone method to prevent cloning of the instance of the
 	 * *Singleton* instance.
 	 *
-	 * @return void
+	 * @return void.
 	 */
 	private function __clone()
 	{
