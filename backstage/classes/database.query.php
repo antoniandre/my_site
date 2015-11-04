@@ -1,6 +1,7 @@
 <?php
 /**
- * Design pattern: singleton
+ * Database Query Model.
+ * Design pattern: singleton.
  */
 include __DIR__.'/database.entity.php';
 include __DIR__.'/database.query.where.php';
