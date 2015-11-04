@@ -9,9 +9,15 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$tpl = new Template('.');
-$tpl->set_file("$page->page-page", "backstage/templates/$page->page.html");
+$tpl = new Template();
+$tpl->set_file("$page->page-page", "templates/$page->page.html");
 $tpl->set_var('content', "The page content goes here for page \"$page->page\".");
+
+foreach (getPagesFromDB() as $id => $thePage)
+{
+	dbg($thePage);
+}
+
 $content = $tpl->parse('display', "$page->page-page");
 //============================================ end of MAIN =============================================//
 //======================================================================================================//

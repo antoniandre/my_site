@@ -2,63 +2,81 @@
 <label for="{formId}{id}">{label}</label>
 <!-- END labelBlock -->
 
+<!-- BEGIN uploadBlock -->
+<div id="{formId}{id}" class="Dropzone" data-name="{formId}{name}">
+	<div id="{formId}{id}" class="fallback">
+		<input name="{formId}{name}" type="file" multiple />
+	</div>{errorMessage}
+</div>
+<!-- END uploadBlock -->
+
 <!-- BEGIN textBlock -->
 <span class="{validation}{state}">
-	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />{errorMessage}
 </span>
 <!-- END textBlock -->
 
 <!-- BEGIN emailBlock -->
 <span class="{validation}{state}">
-	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text email{class}" value="{value}"{attr} />
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text email{class}" value="{value}"{attr} />{errorMessage}
 </span>
 <!-- END emailBlock -->
 
 <!-- BEGIN phoneBlock -->
 <span class="{validation}{state}">
-	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text phone{class}" value="{value}"{attr} />
+	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text phone{class}" value="{value}"{attr} />{errorMessage}
 </span>
 <!-- END phoneBlock -->
 
 <!-- BEGIN hiddenBlock -->
 <span class="{validation}{state}">
-	<input type="hidden" name="{formId}{name}" id="{formId}{id}" value="{value}" />
+	<input type="hidden" name="{formId}{name}" id="{formId}{id}" value="{value}" />{errorMessage}
 </span>
 <!-- END hiddenBlock -->
 
 <!-- BEGIN textareaBlock -->
 <span class="{validation}{state}">
-	<textarea name="{formId}{name}" id="{formId}{id}" class="text {class}"{attr}>{value}</textarea>
+	<textarea name="{formId}{name}" id="{formId}{id}" class="text {class}"{attr}>{value}</textarea>{errorMessage}
 </span>
 <!-- END textareaBlock -->
 
+<!-- BEGIN wysiwygBlock -->
+<article class="{validation}{state}">
+	<textarea name="{formId}{name}" id="{formId}{id}" class="text wysiwyg {class}"{attr}>{value}</textarea>{errorMessage}
+</article>
+<!-- END wysiwygBlock -->
+
 <!-- BEGIN selectBlock -->
 <span class="{validation}{state}">
-	<select name="{formId}{name}" id="{formId}{id}" class="text {class}">
-		<option value="-"> - </option>
-		<!-- BEGIN optionBlock -->
-		<option value="{value}">{label}</option>
-		<!-- END optionBlock -->	
-	</select>
+	<select name="{formId}{name}" id="{formId}{id}opt{opt}" class="text {class}">
+		<option value=""> - </option>
+		<!-- BEGIN selectOptionBlock -->
+		<option value="{value}"{selected}>{label}</option>
+		<!-- END selectOptionBlock -->	
+	</select>{errorMessage}
 </span>
 <!-- END selectBlock -->
 
 <!-- BEGIN checkboxBlock -->
-<span class="{validation}{state}">
-	<input type="checkbox" name="{formId}{name}[]" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+<span class="{validation}{state}{inline}">
+	<!-- BEGIN checkboxOptionBlock -->
+	<input type="checkbox" name="{formId}{name}[]" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{checked}{attr} /> {label}{br}
+	<!-- END checkboxOptionBlock -->{errorMessage}
 </span>
 <!-- END checkboxBlock -->
 
 <!-- BEGIN radioBlock -->
-<span class="{validation}{state}">
-	<input type="radio" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />
+<span class="{validation}{state}{inline}">
+	<!-- BEGIN radioOptionBlock -->
+	<input type="radio" name="{formId}{name}" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{checked}{attr} /> {label}{br}
+	<!-- END radioOptionBlock -->{errorMessage}
 </span>
 <!-- END radioBlock -->
 
 <!-- BEGIN headerBlock -->
-<h{level}{attr}>{text}</h{level}>
+<h{level}{attr}{class}>{text}</h{level}>
 <!-- END headerBlock -->
 
 <!-- BEGIN paragraphBlock -->
-<p{attr}>{text}</p>
+<p{attr}{class}>{text}</p>
 <!-- END paragraphBlock -->

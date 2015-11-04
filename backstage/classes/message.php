@@ -36,8 +36,8 @@ Class Message
 		$this->class = '';
 		foreach (explode(' ', $class) as $c)
 		{
-			$this->class.= " $c";
-			if (array_key_exists($c, self::$classColors)) $this->class.= ' '.self::$classColors[$c];
+			$this->class .= " $c";
+			if (array_key_exists($c, self::$classColors)) $this->class .= ' '.self::$classColors[$c];
 		}
 		$this->position = $position;
 		$this->animation = $animation;

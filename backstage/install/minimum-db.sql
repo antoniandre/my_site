@@ -121,7 +121,7 @@ INSERT INTO `texts` (`id`, `text_en`, `text_fr`, `context`) VALUES
 (20, 'Article contents in %s', 'Contenu de l''article en %s', 'create-new-page'),
 (21, 'Created by %s the %s at %s.', 'Créé par %s le %s à %s.', 'article'),
 (22, 'The page "%s" already exists in the database. Please use another page name.', 'La page "%s" existe déjà dans la base de données. Veuillez utiliser un autre nom de page.', 'create-new-page'),
-(23, 'The page "%s" was created successfully.', 'La page "%s" a bien été créée.', 'create-new-page'),
+(23, 'The page "%s" was created successfully.\r\nYou can see it here: <a href="%s">%s</a>.', 'La page "%s" a bien été créée.\r\nVous pouvez la voir ici : <a href="%s">%s</a>.', 'create-new-page'),
 (24, 'Send', 'Envoyer', 'contact'),
 (25, 'Message', 'Message', 'contact'),
 (26, 'Last name', 'Nom', 'contact'),
@@ -136,12 +136,38 @@ INSERT INTO `texts` (`id`, `text_en`, `text_fr`, `context`) VALUES
 (35, 'An error occured, your message has not been sent.', 'Une erreur est survenue, votre message n''a pas pu être envoyé.', 'contact'),
 (36, 'You must enter 4 numbers and 2 letters.', 'Vous devez saisir 4 chiffres et 2 lettres.', 'general'),
 (37, 'This article is not published', 'Cet article n''est pas publié', 'article'),
-(38, '[b]We use cookies to enhance your user experience[/b]\nBy continuing to use our website, you agree to our use of cookies in order to offer you contents and services adapted to your needs.', '[b]Nous utilisons les cookies pour améliorer votre expérience utilisateur[/b]\nEn poursuivant votre navigation sur ce site, vous acceptez l''utilisation des cookies relatifs aux réseaux sociaux et à la mesure d''audience.', 'general'),
+(38, '[b]We use cookies to enhance your user experience[/b]\r\nBy continuing to use our website, you agree to our use of cookies in order to offer you contents and services adapted to your needs.', '[b]Nous utilisons les cookies pour améliorer votre expérience utilisateur[/b]\r\nEn poursuivant votre navigation sur ce site, vous acceptez l''utilisation des cookies relatifs aux réseaux sociaux et à la mesure d''audience.', 'general'),
 (39, 'Ok, I agree', 'J''accepte', 'general'),
 (40, 'Learn more', 'En savoir plus', 'general'),
 (41, 'You must fill all the mandatory fields.', 'Vous devez remplir tous les champs obligatoires.', 'general'),
 (42, 'The duplicate insertion in database was rejected.', 'L''insertion d''un doublon en base de données a été refusée.', 'general'),
-(43, 'Vous voilà dans les coulisses.', 'You\'re in the backstage.', 'backstage');
+(43, 'Database manager', 'Gestionnaire de base de données', 'backstage'),
+(44, 'Latest articles', 'Derniers articles', 'home'),
+(45, 'Vous voilà dans les coulisses.', 'You''re in the backstage.', 'backstage'),
+(46, 'd-m-Y', 'd/m/Y', 'date'),
+(47, 'd-m-Y at H:i', 'd/m/Y à Hhi', 'date'),
+(48, 'Monday', 'Lundi', 'date'),
+(49, 'Tuesday', 'Mardi', 'date'),
+(50, 'Wednesday', 'Mercredi', 'date'),
+(51, 'Thursday', 'Jeudi', 'date'),
+(52, 'Friday', 'Vendredi', 'date'),
+(53, 'Saturday', 'Samedi', 'date'),
+(54, 'Sunday', 'Dimanche', 'date'),
+(55, 'January', 'Janvier', 'date'),
+(56, 'February', 'Février', 'date'),
+(57, 'March', 'Mars', 'date'),
+(58, 'April', 'Avril', 'date'),
+(59, 'May', 'Mai', 'date'),
+(60, 'June', 'Juin', 'date'),
+(61, 'July', 'Juillet', 'date'),
+(62, 'August', 'Août', 'date'),
+(63, 'September', 'Septembre', 'date'),
+(64, 'October', 'Octobre', 'date'),
+(65, 'November', 'Novembre', 'date'),
+(66, 'December', 'Décembre', 'date'),
+(67, 'The page "%s" was updated successfully.\nYou can see it here: <a href="%s">%s</a>.', 'La page "%s" a bien été modifiée.\nVous pouvez la voir ici : <a href="%s">%s</a>.', 'edit-new-page'),
+(68, 'No row affected by the update request.', 'Aucune ligne n\'a été affectée par la requête de mise à jour.', 'edit-new-page'),
+(69, 'The page \'%s\' does not exist in database.', 'La page \'%s\' n\'existe pas dans la base de données.', 'edit-new-page');
 -- --------------------------------------------------------
 
 
@@ -155,7 +181,9 @@ CREATE TABLE `articles` (
   `content_fr` longtext NOT NULL COMMENT 'Article content in french',
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Article creation timestamp',
   `author` int(11) NOT NULL COMMENT 'Author user id',
-  `published` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Boolean published or not',
+  `category` int(11) NOT NULL COMMENT 'Article category id',
+  `image` varchar(255) NOT NULL COMMENT 'Article representative image for sharing and home page display',
+  `published` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Boolean published or not'
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 

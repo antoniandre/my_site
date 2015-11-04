@@ -3,7 +3,7 @@
  * The contactReady() function is called after commonReady() when DOM is ready.
  */
 
-var contactReady= function()
+var contactReady = function()
 {
 	$('#captcha').hide();
     $('#captchaSwitch').prepend('<input type="checkbox" id="switch"/><label class="switch" for="switch"/>');

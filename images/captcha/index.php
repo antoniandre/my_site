@@ -14,6 +14,8 @@ $x = 5;
 
 
 //====================== TOP MISC =====================//
+ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')? 'ob_gzhandler' : null);
+
 $img = imagecreatetruecolor($imgWidth, $imgHeight);//creates the image
 //=====================================================//
 
@@ -32,7 +34,7 @@ imagefill($img, 0, 0, $bgColor);
 $code = mt_rand(1000, 9999).chr(mt_rand(65, 90)).chr(mt_rand(65, 90));//mt_rand is faster than rand.
 //uppercase alphabetic letters are found between 65 & 90
 
-if (!headers_sent() && !isset($_SESSION)) {ob_start();session_start();}//to avoid errors...
+if (!isset($_SESSION)) session_start();//to avoid errors...
 $_SESSION['securityCode'] = md5(strtolower($code));
 //---------------------------------------------------------------------------------------------------//
 

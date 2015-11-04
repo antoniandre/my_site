@@ -1,6 +1,9 @@
 <?php
 /**
- * Design pattern: singleton
+ * Error model.
+ * Design pattern: singleton.
+ *
+ * @dependencies: Settings.
  */
 Class Error
 {
@@ -8,7 +11,7 @@ Class Error
 	private $stack;
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	private function __construct()
 	{
@@ -17,9 +20,9 @@ Class Error
 	}
 
 	/**
-	 * Get the only instance of this class
+	 * Get the only instance of this class.
 	 *
-	 * @return the only instance of this class
+	 * @return the only instance of this class.
 	 */
 	public static function getInstance()
 	{
@@ -28,9 +31,9 @@ Class Error
 	}
 
 	/**
-	 * Get the current number of errors
+	 * Get the current number of errors.
 	 *
-	 * @return integer: number of errors
+	 * @return integer: number of errors.
 	 */
 	public function getCount()
 	{
@@ -67,8 +70,8 @@ Class Error
 	/**
 	 * Set a custom user-triggered error.
 	 *
-	 * @param string $errorMessage: the message to display
-	 * @param string $errorType: the kind of error
+	 * @param string $errorMessage: the message to display.
+	 * @param string $errorType: the kind of error.
 	 */
 	public function add($errorMessage, $errorType = 'USER CUSTOM', $backtrace = false)
 	{
@@ -146,11 +149,11 @@ Class Error
 	 * Writes in the error log file any error that was detected during execution of the script.
 	 * The error is appended to the file with the current date and time.
 	 *
-	 * @return void
+	 * @return void.
 	 */
 	public function log()
 	{
-		global $settings;
+		$settings = Settings::get();
 
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach ($this->stack as $i => $error)
@@ -163,10 +166,9 @@ Class Error
 	}
 
 	/**
-	 * Private clone method to prevent cloning of the instance of the
-	 * *Singleton* instance.
+	 * Private clone method to prevent cloning the instance of the Singleton.
 	 *
-	 * @return void
+	 * @return void.
 	 */
 	private function __clone()
 	{

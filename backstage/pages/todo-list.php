@@ -12,7 +12,7 @@ $archiveJsonFile =  __DIR__.'/todo-list-archive.json';
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$tpl = new Template('.');
+$tpl = new Template();
 $tpl->set_file("$page->page-page", "templates/$page->page.html");
 $tpl->set_block("$page->page-page", 'tableHeader', 'theTableHeader');
 

@@ -1,1 +1,27 @@
-<h2>This is home page.</h2>
+<h2>This is the home page!</h2>
+
+<!-- BEGIN latestArticlesBlock -->
+<div class="latestArticles block">
+	<h3 class="title">{latestArticlesTitle}</h3>
+	<ul class="glyph">
+		<!-- BEGIN articleBlock -->
+		<li><a href="{articleLink}">{articleTitle}</a> <span class="details">{publishedByOn}</span></li>
+		<!-- END articleBlock -->
+	</ul>
+</div>
+<!-- END latestArticlesBlock -->
+<!-- BEGIN latestArticlesBlockImages -->
+<h3 class="title">{latestArticlesTitle}</h3>
+<div class="latestArticles block">
+<!-- BEGIN articleBlockImages -->
+	<div class="image {imgClass}">
+			<a href="{articleLink}" class="i-zoom">
+				<span class="title">{articleTitle}</span>
+				<span class="details">{publishedByOn}</span>
+				<span class="bg" style="background:url('{articleImgSrc}') center;background-size:cover"></span>
+			</a>
+	</div>
+<!-- END articleBlockImages -->
+</div>
+<!-- END latestArticlesBlockImages -->
+<br class="clear" />

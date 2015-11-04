@@ -70,7 +70,7 @@ class Template
   * @var       string
   * @access    public
   */
-  var $classname= "Template";
+  var $classname = "Template";
 
  /**
   * Determines how much debugging output Template will produce.
@@ -86,7 +86,7 @@ class Template
   * @var       int
   * @access    public
   */
-  var $debug= false;
+  var $debug = 0;
 
  /**
   * Determines whether Template outputs filename comments.
@@ -205,7 +205,7 @@ class Template
   * @access    public
   * @return    void
   */
-  function Template($root= '.', $unknowns= 'remove') {
+  function Template($root = '.', $unknowns = 'remove') {
     if ($this->debug & 4) {
       echo "<p><b>Template:</b> root= $root, unknowns= $unknowns</p>\n";
     }

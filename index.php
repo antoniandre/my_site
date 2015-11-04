@@ -10,16 +10,19 @@ include 'backstage/functions/core.php';
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-if ($page->article)
+if ($page->isArticle())
 {
 	$article = getPageByProperty('id', 'article', $language);
-	include(__DIR__."/$article->path$article->page.php");
+	$includePath = __DIR__."/$article->path$article->page.php";
 }
 else
 {
 	if (!is_file(__DIR__."/$page->path$page->page.php")) $page = getPageByProperty('id', 'notFound', $language);
-	include(__DIR__."/$page->path$page->page.php");
+	$includePath = __DIR__."/$page->path$page->page.php";
 }
+
+include($includePath);
+
 echo Page::getInstance()->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//

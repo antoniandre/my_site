@@ -1,19 +1,21 @@
-<form id="{formId}" action="{action}" method="{method}"{class} role="form">
-	<!-- BEGIN rowBlock -->
-	{wrapperBegin}<div class="row{rowClass}">
-		<!-- BEGIN elementBlock -->
-		{labelBefore}{element}{labelAfter}
-		<!-- END elementBlock -->
-	</div>{wrapperEnd}
-	<!-- END rowBlock -->
-	<br class="clear" />
-	<div class="buttons">
-		<!-- BEGIN btnCancelBlock -->
-		<button class="cancel" type="reset">{cancelText}</button>
-		<!-- END btnCancelBlock -->
-		<!-- BEGIN btnValidateBlock -->
-		<button class="validate" type="submit" name="submit">{validateText}</button>
-		<!-- END btnValidateBlock -->
-	</div>
-	<br class="clear" />
-</form>
+<div id="{formId}Wrapper"{formWrapperClass}>
+	<form id="{formId}" action="{action}#{formId}" method="{method}"{formClass}{enctype} role="form">
+		<!-- BEGIN wrapperBlock -->
+		{wrapperBegin}
+		<!-- BEGIN rowBlock -->
+		<div class="row {elementType}{rowClass}"{toggle}>
+			<!-- BEGIN elementBlock -->
+			{labelBefore}{element}{labelAfter}
+			<!-- END elementBlock -->
+		</div>
+		<!-- END rowBlock -->
+		{wrapperEnd}
+		<!-- END wrapperBlock -->
+		<div class="buttons clear"{toggle}>
+			<!-- BEGIN buttonBlock -->
+			<button class="{btnClass}" type="{btnType}"{btnName}>{btnText}</button>
+			<!-- END buttonBlock -->
+		</div>
+		<br class="clear" />
+	</form>
+</div>

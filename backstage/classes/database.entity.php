@@ -64,6 +64,21 @@ abstract Class DatabaseEntity
 	}
 
 	/**
+	 * Secure a mysqli column name given in param.
+	 * Tells the query this word is not a string but a column name prefixed by a table name.
+	 * E.g. 'articles.id'
+	 *
+	 * @param string $column: the column name.
+	 * @param string $table: the table name.
+	 * @return The current Query instance.
+	 */
+	public function colIn($column, $table)
+	{
+		$this->tempPieces[] = "`$table`.`$column`";
+		return $this;
+	}
+
+	/**
 	 * Secure the mysqli LOWER command with the given arguments.
 	 *
 	 * @param mixed $string: the argument to apply lowercase on.
@@ -92,7 +107,7 @@ abstract Class DatabaseEntity
 	/**
 	 * Check the fields we want to select.
 	 *
-	 * @param  string $field: the field to check.
+	 * @param string $field: the field to check.
 	 * @return string: secured field string.
 	 */
 	protected function checkField($field)

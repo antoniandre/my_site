@@ -5,6 +5,16 @@ Options -Indexes
 RewriteEngine On
 #==============================================#
 
+#=================== DEV ======================#
+#ErrorDocument 404 /my_site/site/pages/not-found.php
+#ErrorDocument 403 /my_site/site/pages/forbidden.php
+#==============================================#
+
+#==================== PRD =====================#
+ErrorDocument 404 /pages/not-found.php
+ErrorDocument 403 /pages/forbidden.php
+#==============================================#
+
 #================= robots.txt =================#
 # NEED APACHE HEADERS_MODULE
 #Do not index robots.txt in search engines
@@ -110,7 +120,7 @@ RewriteRule . abuse.txt [L]
 
 #================= SEO rules ==================#
 #Let go through the images,css and js and send everything else to index.php
-RewriteRule ^(js|css|images)/.*$ - [NC,QSA,L]
+RewriteRule ^(js|css|images|uploads)/.*$ - [NC,QSA,L]
 RewriteRule ^backstage/tmp/.*$ - [NC,QSA,L]
 RewriteRule ^(en|fr)/backstage/.*$ backstage/index.php?lang=$1 [NC,QSA,L]
 RewriteRule ^(en|fr)/.*$ index.php?lang=$1 [NC,QSA,L]

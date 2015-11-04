@@ -1,6 +1,6 @@
 <?php
 /**
- * Design pattern: singleton
+ * Design pattern: singleton.
  */
 Class Debug
 {
@@ -10,7 +10,7 @@ Class Debug
 	public $showLevel3caller;
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	private function __construct()
 	{
@@ -20,9 +20,9 @@ Class Debug
 	}
 
 	/**
-	 * Get the only instance of this class
+	 * Get the only instance of this class.
 	 *
-	 * @return the only instance of this class
+	 * @return the only instance of this class.
 	 */
 	public static function getInstance()
 	{
@@ -31,9 +31,9 @@ Class Debug
 	}
 
 	/**
-	 * Get the current number of Debug messages
+	 * Get the current number of Debug messages.
 	 *
-	 * @return integer: number of debug messages
+	 * @return integer: number of debug messages.
 	 */
 	public function getCount()
 	{
@@ -41,7 +41,9 @@ Class Debug
 	}
 
 	/**
-	 *
+	 * add a debug message to the stack.
+	 * 
+	 * @return the only instance of this class.
 	 */
 	public function add()
 	{
@@ -66,7 +68,10 @@ Class Debug
 	}
 
 	/**
+	 * show the debug message.
 	 *
+	 * @param  boolean $hidden: hide the debug message in an html comment or not.
+	 * @return String: the output debug string.
 	 */
 	public function show($hidden = false)
 	{
@@ -83,7 +88,10 @@ Class Debug
 	}
 
 	/**
-	 * For debug function only
+	 * For debug function only.
+	 * 
+	 * @param  boolean $hidden: hide the debug message in an html comment or not.
+	 * @return void.
 	 */
 	public function showLevel3caller($hidden = false)
 	{
@@ -97,7 +105,9 @@ Class Debug
 	}
 
 	/**
+	 * Wether to show the 2nd level in the backtrace or not.
 	 *
+	 * @param boolean $bool: activate or deactivate level 2.
 	 */
 	public function setLevel2Caller($bool = true)
 	{
@@ -106,7 +116,9 @@ Class Debug
 	}
 
 	/**
+	 * Wether to show the 3rd level in the backtrace or not.
 	 *
+	 * @param boolean $bool: activate or deactivate level 3.
 	 */
 	public function setLevel3caller($bool = true)
 	{
@@ -115,16 +127,18 @@ Class Debug
 	}
 
 	/**
+	 * Log any debug message in the debug.log file.
 	 *
+	 * @return void.
 	 */
 	public function log()
 	{
-		global $settings;
+		$settings = Settings::get();
 
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach ($this->stack as $i => $message)
 		{
-			$parentCaller= $this->showLevel2caller ? " (Called by <em>$message->file2</em> at line $message->line2)" : '';
+			$parentCaller = $this->showLevel2caller ? " (Called by <em>$message->file2</em> at line $message->line2)" : '';
 			$output .= "- Called by $message->file at line $message->line$parentCaller:\n  $message->text\n\n";
 		}
 		$output .= "\n";
@@ -136,7 +150,7 @@ Class Debug
 	 * Private clone method to prevent cloning of the instance of the
 	 * *Singleton* instance.
 	 *
-	 * @return void
+	 * @return void.
 	 */
 	private function __clone()
 	{

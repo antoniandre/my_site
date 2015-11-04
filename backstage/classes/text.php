@@ -14,26 +14,31 @@ Class Text
 	private static $textContexts = null;
 
 	// Store the formatted strings until they are outputed with ->get();
-	private $tempStrings = null;
+	private $tempStrings = [];
 
 	/**
 	 * Class constructor.
-	 * Construct the object with a list of text IDs to retrieve or strings to work on.
+	 * Construct the object with a list of text IDs to retrieve or direct strings to work on.
 	 * Retrieve the texts of the current page and the 'general' context from the database.
 	 *
 	 * @param  array $parameters: an array of options to perform extra tasks on string if any:
 	 *         [
-	 *         	   'id' => [],        Array: list of text IDs to retrieve from DB.
-	 *         	   'context' => [],   Array: The multiple contexts to look into.
+	 *         	   'id' => [],       Array: list of text IDs to retrieve from DB.
+	 *         	   'context' => [],  Array: The multiple contexts to look into.
 	 *             'language' => [], Array: the array of languages codes you want to retrieve the text in.
-	 *                                Allowed languages are set in Language class.
-	 *                                Defaults to the current language only if none is provided.
+	 *                               Allowed languages are set in Language class.
+	 *                               Defaults to the current language only if none is provided.
 	 *         ]
 	 */
 	public function __construct($mixed)
 	{
+		// If only using new Text($string).
 		if ($mixed && is_string($mixed)) $this->tempStrings[] = (object)[Language::getInstance()->getCurrent() => $mixed];
+		
+		// If only using new Text($text_id).
 		elseif ($mixed && is_numeric($mixed)) $this->getTextFromId($mixed);
+		
+		// If using new Text((array)$parameters).
 		elseif ($mixed && is_array($mixed) && (isset($mixed['id']) || isset($mixed['contexts'])))
 		{
 			$language = isset($mixed['languages']) ? $mixed['languages'] : [];
@@ -157,12 +162,13 @@ Class Text
 	}
 
 	/**
-	 * Function get()
+	 * Function get(): returns the treated final text.
+	 *
 	 * @see classes/language.php for allowed languages.
-	 * @param int $id: the id of the text you want to retrieve.
-	 * @param array $languages: the array of languages codes you want to retrieve the text in.
-	 *                          Allowed languages are set in Language class.
-	 *                          Defaults to the current language only if none is provided.
+	 * @param int $id (optionnnal): the id of the text you want to retrieve.
+	 * @param array $languages (optionnnal): the array of languages codes you want to retrieve the text in.
+	 *                                       Allowed languages are set in Language class.
+	 *                                       Defaults to the current language only if none is provided.
 	 * @return StdClass Object/string: the object of strings or one string if only one language requested.
 	 */
 	public function get()// Expect at most 2 params: $id, $languages = [].
@@ -181,10 +187,10 @@ Class Text
 
 		if ($id !== null)
 		{
-			$context = Text::$textContexts[$id];
+			if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
 			$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
 
-			// Convert possible one-string to an array of string.
+			// Convert possible one-string to an array of strings.
 			$languages = (array)$languages;
 			// Set the requested language to currentLanguage if none.
 			$currentLanguage = Language::getInstance()->getCurrent();
@@ -235,7 +241,8 @@ Class Text
 
 		if ($id !== null && count($formats))
 		{
-			$context = Text::$textContexts[$id];
+			// If tempString is set then we are currently treating a direct string with no context.
+			if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
 
 			// Check requested formats and set htmlentities to true if no format is specified.
 			$formats = (array)$formats;
@@ -264,14 +271,28 @@ Class Text
 						case 'sef':
 							if ($formatArg)
 							{
-								$toRemove = str_split('/|\\\'"()[]{}#$%@!?.,;:+=');
-								$str = str_replace($toRemove, '', $str);
-								$str = str_replace([' & ', ' ', '&'], ['-and-', '-', '-and-'], $str);
-								if (strlen($str = strtolower($str)) !== strlen(htmlentities($str, ENT_NOQUOTES, 'UTF-8')))
+								/* NEW WAY: (does not work on OVH)
+								@todo: must investigate why and use it.
+								// exemple string:
+								// $str = 'お早うございます A æ      Übérmensch på høyeste nivå! И я люблю PHP! есть. ﬁ ¦ yé måß∂ƒà sœur & sœur&sœurîüýçñ∑´éèàûôêï`~ !µ³Ø Žluťoučký kůň !'
+								// 		.'¦∑´®†¥„´‰ˇØ∏”’˝»¸˛◊ı˜¯˘¿¡™£¢¤∞§¶•ªº`øπ“‘ß∂ƒ˙∆˚¬…«`Ω≈√∫˜µ≤≥÷⁄€‹›ﬁﬂ‡°·‚±~¼½¾×/|\\\'"()[]{}#$%@!?.,;:+=<>';
+								$str = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower(); [\u0080-\u7fff] remove', $str);*/
+
+								/* SAFER OLD WAY : */
+								if (mb_strlen($str) !== strlen($str))
 								{
-									$str = preg_replace('/&(\w)\w*;/', '$1', htmlentities($str, ENT_NOQUOTES, 'UTF-8'));
+									$pattern = '/&(\w{1,2})(?:grave|acute|circ|cedil|uml|ring|lig|tilde);/';
+									$str = preg_replace($pattern, '$1', htmlentities($str, ENT_NOQUOTES, 'UTF-8'));
 								}
-								$str = str_replace('---', '--', $str);
+
+								// Replace '&', remove special chars, reduce any space length to 2 max.
+								$str = preg_replace(['/ ?& ?/', '/[^A-Za-z0-9 -]/', '/[- ]{3,}/'], [' and ', '', '  '], $str);
+
+								// Remove preceding and trailing dashes after the previous cleanup.
+								$str = rtrim(trim($str));
+								
+								// Finally replace spaces with dashes and lower the case.
+								$str = strtolower(str_replace(' ', '-', $str));
 							}
 							break;
 						case 'sprintf':

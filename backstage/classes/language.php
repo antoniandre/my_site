@@ -5,7 +5,7 @@
  */
 Class Language
 {
-	const siteDefault = 'en';
+	const siteDefault = 'fr';
 	const allowedLanguages = ['en'=>'en_US', 'fr'=>'fr_FR'];
 	private static $instance = null;
 	public $browserDefault;
@@ -13,6 +13,7 @@ Class Language
 	// The target language is set if the current language has changed (post or
 	// not allowed) and page must refresh.
 	public $target = null;
+
 
 	/**
 	 * Class constructor.
@@ -22,6 +23,7 @@ Class Language
 		$this->browserDefault = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
 		$this->setLanguage();
 	}
+
 
 	/**
 	 * Get the only instance of this class.
@@ -34,6 +36,7 @@ Class Language
 		return self::$instance;
 	}
 
+
 	/**
 	 * Set language in this order of priority: $posts, $gets, $cookies, $browserDefault, $siteDefault.
 	 * set to default site language if no querystring or anything else above (home for the first time).
@@ -43,12 +46,15 @@ Class Language
 	 */
 	public function setLanguage($language = '')
 	{
-		global $posts, $gets, $cookies;
-		if (!$this->checkIfAllowed($language) && isset($posts->lang)) $language = $posts->lang;
-		if (!$this->checkIfAllowed($language) && isset($gets->lang)) $language = $gets->lang;
-		if (!$this->checkIfAllowed($language) && isset($cookies->lang)) $language = $cookies->lang;
-		if (!$this->checkIfAllowed($language)) $language = $this->browserDefault;
-		elseif (!$this->checkIfAllowed($language)) $language = self::siteDefault;
+		$gets = Userdata::get();
+		$posts = Userdata::get('post');
+		$cookies = Userdata::get('cookies');
+
+		if (!$this->isAllowed($language) && isset($posts->lang)) $language = $posts->lang;
+		if (!$this->isAllowed($language) && isset($gets->lang)) $language = $gets->lang;
+		if (!$this->isAllowed($language) && isset($cookies->lang)) $language = $cookies->lang;
+		if (!$this->isAllowed($language)) $language = $this->browserDefault;
+		elseif (!$this->isAllowed($language)) $language = self::siteDefault;
 		$this->current = $language;
 
 		// Set a cookie if the post language is allowed.
@@ -60,6 +66,7 @@ Class Language
 		return $this;
 	}
 
+
 	/**
 	 * getCurrent function.
 	 * Get the current language of the page. The current language is always
@@ -67,33 +74,47 @@ Class Language
 	 *
 	 * @return (string) the current language.
 	 */
-	public function getCurrent()
+	public static function getCurrent()
 	{
-		return $this->current;
+		return self::getInstance()->current;
 	}
+
 
 	/**
 	 * getCurrentFull function.
 	 * Get the current full language locale code.
 	 *
-	 * @return the full current language (E.g. en_US)
+	 * @return the full current language (E.g. en_US).
 	 */
-	public function getCurrentFull()
+	public static function getCurrentFull()
 	{
-		return self::allowedLanguages[$this->current];
+		return self::allowedLanguages[self::getInstance()->current];
 	}
 
+
 	/**
-	 * checkIfAllowed function.
-	 * Check if the provided language is allowed.
+	 * getTarget function.
+	 * Get the target language.
 	 *
-	 * @param string $language: the language of which to check validity.
-	 * @return (boolean)
+	 * @return the target language.
 	 */
-	public function checkIfAllowed($language)
+	public static function getTarget()
+	{
+		return self::getInstance()->target;
+	}
+
+
+	/**
+	 * Simply check if a given language is known from the system or not.
+	 *
+	 * @param (string) $language: a 2 char length string to test if known language.
+	 * @return boolean true if language is allowed false otherwise.
+	 */
+	public static function isAllowed($language)
 	{
 		return array_key_exists($language, self::allowedLanguages);
 	}
+
 
 	/**
 	 * Private clone method to prevent cloning of the instance of the

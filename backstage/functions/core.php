@@ -1,29 +1,21 @@
 <?php
 //===================== CONSTANTS =====================//
-define('IS_LOCAL', $_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '192.168.0.33');// desktop localhost or iphone access to localhost
-//ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')? 'ob_gzhandler' : null);
-define('SELF', $_SERVER['PHP_SELF']{0} == '/' ? substr($_SERVER['PHP_SELF'], 1) : $_SERVER['PHP_SELF']);
-$qs = $_SERVER['QUERY_STRING'];
-define('QUERY_STRING', @$qs{0} == '&' ? substr($qs, 1) : $qs/*preventing pb*/);
-define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
-define('REWRITE_ENGINE_ON', false);
-define('CONFIG_DIR', __DIR__.'/../config');
-define('CONFIG_FILE', 'config.ini');
+// Constants in minicore.php.
 //=====================================================//
 
 
 //======================= INCLUDES ====================//
-include __DIR__.'/../classes/error.php';
+require __DIR__.'/minicore.php';// Minimum required core. (the min for js/, css/, images/).
+
 include __DIR__.'/../classes/debug.php';
-include __DIR__.'/../classes/userdata.php';
 include __DIR__.'/../classes/utility.php';
 include __DIR__.'/../classes/message.php';
+include __DIR__.'/../classes/form.php';
 include __DIR__.'/../classes/page.php';
 include __DIR__.'/../classes/language.php';
 include __DIR__.'/../classes/database.php';
 include __DIR__.'/../classes/text.php';
 include __DIR__.'/../classes/encryption.php';
-include __DIR__.'/../classes/user.php';
 include __DIR__.'/../libraries/template.inc';
 //=====================================================//
 
@@ -34,38 +26,21 @@ include __DIR__.'/../libraries/template.inc';
 
 //======================================================================================================//
 //=============================================== MAIN =================================================//
-// First of all, set the error handler!
-//if ($user->isAdmin())
-error_reporting(E_ALL);//display errors only for admin (for remote site)
-$error = Error::getInstance()->errorHandler();
-
-// By default, the secured vars are converted to objects and they do not allow HTML.
-UserData::getInstance();
-$posts = UserData::$post;
-$gets = UserData::$get;
-$cookies = UserData::$cookie;
-$settings = fetchSettings();
-$languageObject = Language::getInstance();
-$language = $languageObject->getCurrent();
+$language = Language::getCurrent();
 $pages = getPagesFromDB();
 $aliases = getPagesAlias($pages);
 $page = Page::getInstance();
 $page->setLanguage($language);
-if ($languageObject->target) $page->refresh();
+if (Language::getTarget()) $page->refresh();
 
-$db = database::getInstance();
-// TODO: remove following query trials:
-/*$where = $db->query()->where("column_name1 ='value1'");
-$where->and("column_name2='value2'")
-      ->or("column_name3 LIKE 'value3'", $where->or("column_name4<=4"), $where->or("column_name5<=5"), $where->or("column_name6<=6"))
-      ->and("column_name7='value7'", $where->or("column_name8<=8", $where->and("column_name9='value9'", $where->and($where->in("column_name10", array(1,2,3,4,5))))))
-      ->and($where->concat("column_name1","column_name2"));
-dbg($where);*/
-/*$q = $db->query();
-$q->select('pages', '*')->where()->col('page')->in("sitemap", "home");
+// todo: write a Cache class.
+/*if ($settings->useCache && !Userdata::is_set('post'))
+{
+    include(__DIR__."/cache/$page->path$page->page.html");
+}*/
 
-$q->run();
-dbg($q->info(), $q->loadObjects());*/
+if (isset(UserData::get()->js)) include __DIR__.'/../../js/index.php';
+if (isset(UserData::get()->css)) include __DIR__.'/../../css/index.php';
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -74,48 +49,10 @@ dbg($q->info(), $q->loadObjects());*/
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
 /**
- * Fetch all the settings from the ini files in CONFIG_DIR and prepare some vars.
- * First get config from CONFIG_FILE and then overwrite with any other .ini file found in CONFIG_DIR.
- * Handles links (shortcuts) to .ini files elsewhere (for FAT32 partitions that don't handle symlinks), and MAC OSX symlinks.
- * Used to handle multiple dev environments with specific configs.
- * The practice is to put a lnk/symlink -- in CONFIG_DIR --  to a .ini file on the machine.
+ * getPagesFromDB retrieve all the pages tables from the database.
+ *
+ * @return array: the pages onject as they are stored in DB.
  */
-function fetchSettings()
-{
-    // First retrieve global settings.
-    $settings = parse_ini_file(CONFIG_DIR.'/'.CONFIG_FILE/*, process_sections= true*/);
-
-    // Then retrieve possible env-specific ini files -- in CONFIG_DIR -- to overwrite vars in global settings.
-    foreach(scandir(CONFIG_DIR) as $iniFile)
-    {
-        // only take care of .ini and .ini.lnk
-        if ((strpos($iniFile, '.ini') !== false || strpos($iniFile, '.ini.lnk') !== false) && $iniFile !== CONFIG_FILE)
-        {
-            $iniFile = CONFIG_DIR."/$iniFile";
-            if (strpos($iniFile, '.ini.lnk') !== false)
-            {
-                // Get the content of the .lnk to extract the real target. readlink() only work for symlinks.
-                $lnkData = file_get_contents($iniFile);
-                $target = preg_replace('@^.*\00([A-Z]:)(?:\\\\.*?\\\\\\\\.*?\00|[\00\\\\])(.*?)\00.*$@s', '$1\\\\$2', $lnkData);
-                if (!is_file($target)) continue;
-                $iniFile = $target;
-            }
-            // Overwrite the $settings array with specific configs if any.
-            $settings = array_merge($settings, parse_ini_file($iniFile/*, process_sections = true*/));
-        }
-    }
-
-    // Convert to object.
-    $settings = (object)$settings;
-
-    // This var has to be used in templates when the rewrite engine is ON.
-    $settings->root = (IS_LOCAL? $settings->root_local : $settings->siteurl).'/';
-    $settings->rewriteEngine = isset($settings->rewriteEngine) && $settings->rewriteEngine;
-    $_SERVER['SERVER_ADMIN'] = $settings->serverAdmin;
-    return $settings;
-}
-
-
 function getPagesFromDB()
 {
     $db = database::getInstance();
@@ -127,7 +64,8 @@ function getPagesFromDB()
         $pages[$k]->id = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $p->page))));
         foreach ($p as $attr => $val)
         {
-            // Convert sth like metaDesc_fr to sth like metaDesc->fr.
+            // Look for language-related vars (texts) and convert sth like metaDesc_fr to sth like metaDesc->fr
+            // if recognised language.
             if (preg_match('~^([-_a-zA-Z0-9]+)_([a-z]{2})$~', $attr, $matches) && array_key_exists($matches[2], Language::allowedLanguages))
             {
                 if (!isset($pages[$k]->$matches[1])) $pages[$k]->$matches[1] = new StdClass();
@@ -140,18 +78,19 @@ function getPagesFromDB()
 }
 
 /**
- * find the wanted page informations from only one property
+ * find the wanted page informations from only one property.
+ * The most common way to look for a page is from the 'page' property which is unique simple and in lowercase.
  *
  * @param string $property: the property (page/id/path/title) on which to make comparison to get the wanted page
- * @param string $propertyValue: the page/id/path/title of the wanted page
- * @param string $language: the target language for the wanted page
- * @return object: the wanted page informations (page/id/path/title)
+ * @param string $propertyValue: the page/id/path/title of the wanted page.
+ * @param string $language: the target language for the wanted page.
+ * @return object: the wanted page informations (page/id/path/title).
  */
 function getPageByProperty($property, $propertyValue, $language = null)
 {
     global $pages, $aliases;
 
-    if (!$language) $language = Language::getInstance()->getCurrent();
+    if (!$language) $language = Language::getCurrent();
 
     foreach($pages as $page)
     {
@@ -173,9 +112,29 @@ function getPageByProperty($property, $propertyValue, $language = null)
  */
 function getPagesAlias($pages)
 {
-    $aliases= array();
+    $aliases = array();
     foreach($pages as $page) if (isset($page->alias)) $aliases[$page->alias] = $page->id;
     return $aliases;
+}
+
+/**
+ * Fetch the article from db and return the full row.
+ * @param integer $articleId: the article id.
+ * @return object: the article row from db.
+ */
+function getArticleInfo($articleId)
+{
+    $return = false;
+    if (is_numeric($articleId))
+    {
+        $db = database::getInstance();
+        $q = $db->query()
+                ->select('articles', '*');
+        $w = $q->where();
+        $w->col('id')->eq($articleId);
+        $return = $q->run()->loadObject();
+    }
+    return $return;
 }
 
 
@@ -184,19 +143,29 @@ function getPagesAlias($pages)
  *
  * @param string $url: accept a full URL (http://), a page name like 'home.php' or 'backstage.php' ("$page->page.php"), or case insensitive 'self'
  * @param array $data: some data to add in the URL. If rewriteEngine is on, the added data may be recognized to change the URL path accordingly
- * urlPath is before '?' and $data is after
+ *                     urlPath is before '?' and $data is after.
+ * @param boolean $fullUrl: set to true to force the use of distant URL. Useful for mails. Default to false.
  */
-function url($url, $data = array())
+function url($url, $data = [], $fullUrl = false)
 {
-    global $language, $settings, $gets, $page;
-    // As $page is global, create another var $matchedPage to not overwrite $page
+    global $page;
+    $settings = Settings::get();
+    $gets = Userdata::get();
+    $language = Language::getCurrent();
+    $root = $fullUrl ? "$settings->siteUrl/" : $settings->root;
+
+    // As $page is global, create another var $matchedPage to not overwrite $page.
     $matchedPage = $page;
 
     // First get URL vars and store in $urlData.
     $urlParts = parse_url($url);
     $queryString = isset($urlParts['query'])? $urlParts['query'] : '';
-    $urlData = array();// Useful if !$queryString.
-    if ($queryString) parse_str($queryString, $urlData);// Put every url var in $data array
+    $urlData = [];// Useful if !$queryString.
+
+    // Put every url var in $urlData array and convert $data string into indexed array:
+    // A string like 'js=1&article=1' becomes ['js' => 1, 'article' => 1].
+    if ($queryString) parse_str($queryString, $urlData);
+    if (is_string($data)) parse_str($data, $data);
 
     // Merge arrays to reinject data provided in parameter in the $data array.
     // Note: array_merge overwrites $urlData with $data in case of common key.
@@ -204,24 +173,24 @@ function url($url, $data = array())
 
     //-------------------------- full url ---------------------------//
     $pos = strpos($url, 'http://');
-    if ($pos !== false && !$pos)// Found at the beginning
+    if ($pos !== false && !$pos)// Found at the beginning.
     {
-        $urlPath= $urlParts['path'];
+        $urlPath = $urlParts['path'];
     }
     //---------------------------------------------------------------//
 
     //---------------------------- images ---------------------------//
     $pos = strpos($url, 'images/');
-    if ($pos !== false && !$pos)// Found at the beginning
+    if ($pos !== false && !$pos)// Found at the beginning.
     {
-        $urlPath = $settings->root.$urlParts['path'];
+        $urlPath = $root.$urlParts['path'];
     }
     //---------------------------------------------------------------//
 
     //---------------------- Rewrite Engine OFF ---------------------//
     elseif (!$settings->rewriteEngine)
     {
-        $urlPath = $settings->root;
+        $urlPath = $root;
         if (!isset($data['lang'])) $data['lang'] = $language;
         if (strtolower($urlParts['path']) == 'self') $data['page'] = $matchedPage->page;
         else
@@ -237,21 +206,31 @@ function url($url, $data = array())
     //----------------------- Rewrite Engine ON ---------------------//
     elseif ($settings->rewriteEngine)
     {
-        if (strtolower($urlParts['path']) == 'self') $urlPath = "$settings->root$language/{$matchedPage->url->$language}.html";
+        if (strtolower($urlParts['path']) == 'self') $urlPath = "$root$language/{$matchedPage->url->$language}.html";
         else
         {
             $basename = str_replace('.php', '', $url);
             // Access the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
             $matchedPage = getPageByProperty('page', $basename, $language);
         }
-        list($matchedPage->url->$language, $data) = seo($matchedPage->url->$language, $data, $language);
-        $urlPath = "$settings->root$language/{$matchedPage->url->$language}.html";
+        list($matchedPage->url->$language, $seoData) = seo($matchedPage->url->$language, $data, $language);
+        $data = array_merge($seoData, $data);
+        $urlPath = "$root$language/{$matchedPage->url->$language}.html";
     }
     //---------------------------------------------------------------//
 
     return $urlPath.(count($data)? '?'.http_build_query($data/*, '', '&amp;'*/) : '');
 }
 
+/**
+ * If $settings->rewriteEngine is on, perform a replacement of a few vars.
+ * Used by the url() function.
+ *
+ * @param string $url: the url to check.
+ * @param array $data: the array of data to check.
+ * @param string $language: the language to check the url for.
+ * @return array.
+ */
 function seo($url, $data, $language)
 {
     unset($data['lang']);
@@ -291,6 +270,31 @@ function textf()
     $parameters = func_get_args();
     unset($parameters[0]);
     return text(func_get_arg(0), ['formats' => ['sprintf' => $parameters]]);
+}
+
+/**
+ * Perform a callback function Foreach available language.
+ *
+ * @param Function $callback: the callback function to execute for each known language.
+ * @return void
+ *
+ * Example of use:
+ * foreachLang(function($lang, $fullLang)
+ * {
+ *     echo " $lang=$fullLang!";
+ * });
+ * Or:
+ * foreachLang(function($lang)
+ * {
+ *     echo " $lang!";
+ * });
+ */
+function foreachLang($callback)
+{
+    if (is_callable($callback)) foreach (Language::allowedLanguages as $lang => $fullLang)
+    {
+        $callback($lang, $fullLang);
+    }
 }
 
 /**

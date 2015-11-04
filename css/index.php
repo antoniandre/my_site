@@ -1,52 +1,68 @@
 <?php
 //======================= VARS ========================//
-$css= ['common'];// CSS files to load
+$css = ['common'.($settings->useMinified ? '.min' : '')];// CSS files to load.
+//=====================================================//
 
-// Detect if old browser with get var 'ie={version}' and add css file to the stack.
-if (isset($_GET['ie']))
-{
-    // Add a generic 'old-browsers' css file to the stack. (adding support for HTML5 tags)
-    $css[]= 'old-browsers';
-    // Add a possible more specific 'ie{version}' css file to the stack. E.g. 'ie7.css'.
-    if (in_array($_GET['ie'], [6, 7, 8])) $css[]= 'ie'.$_GET['ie'];
-}
+
+//===================== INCLUDES ======================//
 //=====================================================//
 
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-if (!isset($_GET['p'])) die;
-$page= isset($_GET['p'])? $_GET['p'] : '';
+$gets = Userdata::get();
+$settings = Settings::get();
 
-if (isset($_GET['backstage']))
+// $onlyCss & $extraCss can both be array or string. E.g: 'o[]=css1&o[]=css2' or 'o=css'.
+$onlyCss = isset($gets->o) ? $gets->o : '';
+$extraCss = isset($gets->e) ? $gets->e : '';
+
+if (!$page && !$extraCss && !$onlyCss) die;
+
+
+// Detect if old browser with get var 'ie={version}' and add css file to the stack.
+if (isset($gets->ie))
 {
-    $css[]= 'backstage';
+    // Add a generic 'old-browsers' css file to the stack. (adding support for HTML5 tags).
+    $css[] = 'old-browsers';
+    // Add a possible more specific 'ie{version}' css file to the stack. E.g. 'ie7.css'.
+    if (in_array($gets->ie, [6, 7, 8])) $css[] = 'ie'.$gets->ie;
 }
 
-if (1 == 1)// TODO: secure this:
+// If only one css file is needed.
+if ($onlyCss) $css = (array)$onlyCss;
+else
 {
-    $css[]= (isset($_GET['backstage']) ? 'backstage.' : '').$_GET['p'];
+	if ($extraCss) $css = array_merge($css, (array)$extraCss);
+	if ($page->isBackstage()) $css[] = 'backstage.common';
+	elseif ($page->isArticle()) $css[] = 'article';
+
+	$css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;	
 }
 
-$cssFiles= '';
-foreach($css as $k => $filename) if ($filename && is_file("$filename.css"))
+// Now add each css file in the output string if the file exists.
+$cssFiles = '';
+foreach($css as $k => $filename)
 {
-    $cssFiles.=  ($k?"\n\n\n":'').file_get_contents("$filename.css");
+	if ($filename && is_file(__DIR__."/$filename.css"))
+	{
+	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(__DIR__."/$filename.css");
+	}
 }
 
+// Preg_replace to replace css 'url(/path)' with 'url(ROOT.'css/path)' except if 'data:' is found.
+$cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:)(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~', 'url("'.$settings->root.'css/$2$3")', $cssFiles);
 
-$cssOutput= $cssFiles;
 
-// TODO: find the right cache for images
+// @TODO: find the right cache for images.
 // header("Pragma: public");
 // header("Cache-Control: maxage=$expires");
 // header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
 // header('Content-Type: text/html; charset=utf-8');
 // header('Content-language: '.strtolower($language));
 
-//if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start('ob_gzhandler');else ob_start();
-header('Content-type: text/css');
-echo $cssOutput;
+header('Content-type: text/css; charset=utf-8');
+die("$cssOutput");
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 ?>

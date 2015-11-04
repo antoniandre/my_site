@@ -1,0 +1,16 @@
+.languageBlock {float:left;width: 48.4%;margin-top: 20px;margin-bottom: 20px;}
+.languageBlock.first {border-left:none;margin-right:1.5%;padding-right:1.5%;border-right:1px solid #ddd;}
+.languageBlock .language {text-align:right;}
+.languageBlock h2, .languageBlock h3
+{color:#666;
+letter-spacing:5px;
+margin: 0 0 15px;
+padding: 10px;
+background: rgba(0,0,0,.075);}
+.languageBlock label {display:none;vertical-align:middle;min-width: 100px;}
+.languageBlock input, .languageBlock textarea {width:260px;vertical-align:middle;}
+.languageBlock.first label {display:inline-block;}
+.panes .nopadding {padding:5px 0;}
+.panes .pane p.intro {padding:10px 0 10px 0px;}
+
+article {width:1060px;max-width:101%;}

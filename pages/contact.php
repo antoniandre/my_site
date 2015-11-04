@@ -11,7 +11,7 @@
 //============================================= MAIN ===================================================//
 handlePostedData();
 
-$tpl = new Template('.');
+$tpl = new Template();
 $tpl->set_file("$page->page-page", "backstage/templates/$page->page.html");
 $tpl->set_var(['SELF' => SELF,
 			   'cancelText' => text(17),
@@ -36,7 +36,7 @@ $content = $tpl->parse('display', "$page->page-page");
 //=========================================== FUNCTIONS ================================================//
 function handlePostedData()
 {
-	global $gets;
+	$gets = Userdata::get();
 
 	if (!count((array)$gets) && !count((array)$posts)) return false;// If no posted data do not go further.
 
@@ -45,10 +45,10 @@ function handlePostedData()
 		$object = new StdClass();
 		$object->error = 0;
 		$object->message = '';
-		$patterns= array('message' => '[^<>(){}\[\]\\\]+',
-						 'email' => '[a-z0-9-_.]+@[a-z0-9-_.]',
-						 'firstname' => '[^<>(){}\[\]\\|.,;:?/`\~@#$%^&*()+=0-9\x22]+',// \x22 = '"'
-						 'lastname' => '[^<>(){}\[\]\\|.,;:?/`\~!@#$%^&*()+=0-9\x22]+');
+		$patterns = array('message' => '[^<>(){}\[\]\\\]+',
+						  'email' => '[a-z0-9-_.]+@[a-z0-9-_.]',
+						  'firstname' => '[^<>(){}\[\]\\|.,;:?/`\~@#$%^&*()+=0-9\x22]+',// \x22 = '"'
+						  'lastname' => '[^<>(){}\[\]\\|.,;:?/`\~!@#$%^&*()+=0-9\x22]+');
 		foreach ($patterns as $postName => $pattern)
 		{
 			if (!preg_match("~$pattern~i", $gets->$postName))
@@ -79,7 +79,7 @@ function handlePostedData()
 							</body>
 						</html>';
 
-			$sent = mail('antoniandre.web@gmail.com', textf(33, $settings->siteUrl, $gets->firstname, $gets->lastname), $message, $headers);
+			$sent = mail('disadb@gmail.com', textf(33, $settings->siteUrl, $gets->firstname, $gets->lastname), $message, $headers);
 			$object->error = !$sent;
 			$object->message = text($sent? 34 : 35);
 		}

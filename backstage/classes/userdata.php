@@ -9,25 +9,28 @@ class Userdata
 	const DATA_EMPTY = 0;
 	const DATA_FILLED = 1;
 	const DATA_VALID = 2;
-	const knownSources = ['post', 'get', 'cookie', 'session'];
+	const knownSources = ['post', 'get', 'cookie', 'session', 'files'];
 	private static $instance = null;
-	public static $post = [];
-	public static $get = [];
-	public static $cookie = [];
-	public static $session = [];
+	private $isAjax = null;
+	private $post = [];
+	private $get = [];
+	private $cookie = [];
+	private $session = [];
+	private $files = [];
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	private function __construct()
 	{
-		self::$post = $this->secureVars($_POST);
-		self::$get = $this->secureVars($_GET);
-		self::$cookie = $this->secureVars($_COOKIE);
+		$this->post = $this->secureVars($_POST);
+		$this->get = $this->secureVars($_GET);
+		$this->cookie = $this->secureVars($_COOKIE);
+		$this->files = null;
 
 		// First and only time to start session in the whole page.
 		session_start();
-		self::$session = $this->secureVars($_SESSION);
+		$this->session = $this->secureVars($_SESSION);
 	}
 
 
@@ -45,7 +48,7 @@ class Userdata
 
 	/**
 	 * Recursively secure any given var.
-	 * This is required security, preventing mysql injections, XSS crack and others.
+	 * This is required security, preventing mysql injections, XSS cracks and others.
 	 *
 	 * @param mixed $inputVar: the var to secure, can be string, array or object
 	 * @param boolean $asObject: return the var converted to array or object
@@ -64,10 +67,11 @@ class Userdata
 	    if (is_object($inputVar)) $inputVar = (array)$inputVar;
 	    if (is_array($inputVar))
 	    {
-	        $var = $asObject? new StdClass() : array();
+	        $var = $asObject ? new StdClass() : array();
 	        foreach($inputVar as $key => $value)
 	        {
-	            if (is_string($value)) $tmp = self::secureString($value, $acceptHTML);
+	            if (is_numeric($value)) $tmp = (int)$value;
+	            elseif (is_string($value)) $tmp = self::secureString($value, $acceptHTML);
 	            elseif (is_object($value) || is_array($value)) $tmp = self::secureVars($value, $asObject, $acceptHTML);
 	            if ($asObject) $var->$key = $tmp;
 	            else $var[$key] = $tmp;
@@ -78,16 +82,54 @@ class Userdata
 	    return $var;
 	}
 
-
+	/**
+	 * secureString called by secureVars() method.
+	 *
+	 * @param string $string: the string to sanitize.
+	 * @param boolean $acceptHTML: strip html tags or not. Default to false to refuse html.
+	 * @return the sanitized string.
+	 */
 	public static function secureString($string, $acceptHTML = false)
 	{
-	    $string = $acceptHTML? $string : strip_tags($string);
+	    $string = $acceptHTML ? $string : strip_tags($string);
 	    $string = str_replace(array("\r", '<script', '</script'), array('', '&lt;script', '&lt;/script'), $string);
-	    return get_magic_quotes_gpc()? $string : addslashes($string);
+	    return get_magic_quotes_gpc() ? $string : addslashes($string);
 	    /*return str_ireplace(array('PHNjcmlw', '`', '<script', 'base64', '/', '"', '\''),
 	                        array('', '&#96;', '&lt;script', '', '&#x2F;', '&quot;', '&#039;'), $string);*/
 	}
 
+	/**
+	 * get userdata tree of the given known source (among self::knownSources).
+	 *
+	 * @see self::knownSources.
+	 * @param  string $dataSource [description]
+	 * @return array or object representation of the userdata tree or null if no data.
+	 */
+	public static function get($dataSource = 'get')
+	{
+		return in_array(strtolower($dataSource), self::knownSources) ? self::getInstance()->$dataSource : null;
+	}
+
+
+	public static function is_set($dataSource = 'get')
+	{
+		return (boolean)count((array)self::get($dataSource));
+	}
+
+	/**
+	 * Tell wether the http request is made from ajax or not.
+	 *
+	 * @return boolean: true if ajax false otherwise.
+	 */
+	public static function isAjax()
+	{
+		$return = false;
+
+		if (!is_null(self::getInstance()->isAjax)) $return = self::getInstance()->isAjax;
+	    else $return = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+	    return $return;
+	}
 
 	/*
 	  if we don't want htmlentities
@@ -97,18 +139,19 @@ class Userdata
 	    return str_replace(array('&quot;', '&#039;', '&#x2F;'), array('"', '\'', '/'), $string);
 	}
 
-
-	public static function validate()
-	{
-
-	}
-
-
-	/**/
-	public static function checkFields($dataNameList, $dataSource = 'post')
+	/**
+	 * UNUSED FOR NOW.
+	 * Check the fields.
+	 *
+	 * @param array $dataNameList:
+	 * @param  string $dataSource:
+	 * @return boolean: true if field is valid false otherwise.
+	 */
+	/*public static function checkFields($dataNameList, $dataSource = 'post')
 	{
 		$countData = count($dataNameList);
 		$filledFields = 0;
+		$dataSource = strtolower($dataSource);
 
 		// First check the data source.
 		if (!in_array($dataSource, self::knownSources))
@@ -117,7 +160,7 @@ class Userdata
 			return false;
 		}
 
-		$dataSource = self::$$dataSource;
+		$dataSource = self::getInstance()->$dataSource;
 		foreach ($dataNameList as $k => $dataName)
 		{
 			// Case of subdata like $_POST['text']['context'].
@@ -140,10 +183,10 @@ class Userdata
 
 		// Then compare $filledFields with $countData and if different then not all fields are provided.
 		return $filledFields == $countData;
-	}
+	}*/
 
-	/**/
-	public static function info($dataName, $dataSource = 'post', $isLanguageData = false)
+	/* UNUSED FOR NOW. */
+	/*public static function info($dataName, $dataSource = 'post', $isLanguageData = false)
 	{
 		if (!in_array($dataSource, self::knownSources))
 		{
@@ -151,7 +194,7 @@ class Userdata
 			return;
 		}
 		$return = null;
-		$dataSource = self::$$dataSource;
+		$dataSource = self::getInstance()->$dataSource;
 		if (is_object($dataSource->$dataName))
 		{
 			$return = new StdClass();
@@ -166,11 +209,11 @@ class Userdata
 					if (!isset($dataSource->$dataName->$lang)) $return->count_unset++;
 					elseif (!$dataSource->$dataName->$lang) $return->count_empty++;
 					else $return->count_filled++;
-					/*$arr = ['language' => $lang,
-						    'value' => !isset($dataSource->$dataName->$lang) ? self::DATA_NOT_SET
-																	    : ($dataSource->$dataName->$lang ? self::DATA_FILLED
-																								    : self::DATA_EMPTY)];
-					$return[] = (object)$arr;*/
+					// $arr = ['language' => $lang,
+					// 	    'value' => !isset($dataSource->$dataName->$lang) ? self::DATA_NOT_SET
+					// 												    : ($dataSource->$dataName->$lang ? self::DATA_FILLED
+					// 																			    : self::DATA_EMPTY)];
+					// $return[] = (object)$arr;
 				}
 			}
 			else foreach ($dataSource->$dataName as $k => $data)
@@ -185,7 +228,7 @@ class Userdata
 		}
 
 		return $return;
-	}
+	}*/
 
 	/**
 	 * Check posted data for each expected language and return a summary.

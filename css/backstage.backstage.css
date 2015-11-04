@@ -1,0 +1,3 @@
+.content ul {margin-left: 0;}
+ul li {list-style-type: none;padding: 3px 0;}
+ul :before {font-size: 200%;padding-right: 10px;}

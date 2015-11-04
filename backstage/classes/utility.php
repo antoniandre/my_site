@@ -1,15 +1,207 @@
 <?php
 /**
- * Design pattern: -
+ * Design pattern: singleton.
+ *
+ * @todo: implement whole class.
  */
 Class Utility
 {
+	private static $instance = null;
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	private function __construct()
 	{
+	}
+
+	/**
+	 * Get the only instance of this class.
+	 *
+	 * @return User object: the only instance of this class.
+	 */
+	public static function getInstance()
+	{
+		if (!isset(self::$instance)) self::$instance = new self;
+		return self::$instance;
+	}
+
+	public static function generateCommentSystem($orderColumn, $orderDirection)
+	{
+		$db = database::getInstance();
+		$page = Page::getInstance();
+		$language = Language::getCurrent();
+		$return = '';
+
+		$tpl = new Template();
+		$tpl->set_file('comments', 'backstage/templates/comments.html');
+		$tpl->set_block('comments', 'commentBlock', 'theCommentBlock');
+
+		$form = new Form(['class' => 'leaveComment']);
+		$form->addElement('paragraph',
+						  ['class' => 'intro floatLeft'],
+						  ['text' => 'Laisser un Commentaire : ', 'rowSpan' => 2]);
+		$form->addElement('radio',
+		                  ['name' => 'gender'],
+		                  ['validation' => 'required', 'inline' => true, 'options' => ['female' => 'Femme', 'male' => 'Homme'], 'rowClass' => 'floatLeft']);
+		$form->addElement('textarea',
+		                  ['name' => 'comment', 'placeholder' => text('Commentaire'), 'cols' => 70, 'rows' => 4],
+		                  ['validation' => 'required', 'rowClass' => 'clear']);
+		$form->addElement('text',
+		                  ['name' => 'firstName', 'placeholder' => text('Prénom')],
+		                  ['validation' => 'required', 'rowSpan' => 2]);
+		$form->addElement('email',
+		                  ['name' => 'email', 'placeholder' => text('Email : restera invisible sur le site')],
+		                  ['validation' => 'required', 'rowClass' => 'floatLeft']);
+
+		$form->addButton('validate', text(18));
+		$form->validate(function($result, $form)
+		{
+			$return = false;
+			$db = database::getInstance();
+			$q = $db->query();
+			$page = Page::getInstance();
+			$comment = $form->getPostedData('comment');
+
+			// Do not perform the insertion in db if page found in DB.
+			$q->select('comments', [$q->col('comment'), $q->col('created')]);
+			$w = $q->where();
+			$w->col('published')->eq(1)
+			  ->and($w->col('page')->eq($page->isArticle() ? $page->article->id : $page->id))
+			  ->and($w->col('comment')->eq($comment));
+
+			$isInDB = $q->run()->info()->numRows;
+
+			if ($isInDB)
+			{
+				new Message(text('Votre commentaire existe déjà !<br>Vous pouvez en saisir un nouveau si vous souhaitez.'), 'info', 'info', 'header');
+				$form->unsetPostedData('comment', false);
+			}
+			else
+			{
+				$q->insert('users', ['login' => $form->getPostedData('firstName'),
+									 'firstName' => $form->getPostedData('firstName'),
+									 'email' => $form->getPostedData('email'),
+									 'type' => 3,
+									 'gender' => $form->getPostedData('gender')]);
+				$q->run();
+				if ($userId = $q->info()->insertId)
+				{
+					$q->insert('comments', ['page' => $page->isArticle() ? $page->article->id : $page->id,
+											'author' => $userId,
+											'comment' => $comment]);
+					$q->run();
+
+					if ($q->info()->affectedRows)
+					{
+						new Message(text('Votre commentaire a bien été enregistré !'), 'valid', 'success', 'header');
+						$return = true;
+
+						$subject = textf('%s a commenté l\'article: "%s"', ucfirst($form->getPostedData('firstName')), $page->getTitle());
+					    $message = '<html>
+						 				<head>
+											<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+										</head>
+										<body>
+											<p>'.$form->getPostedData('firstName').' (email: '.$form->getPostedData('email').') a laissé un commentaire sur l\'article <a href="'.url($page->getUrl()).'">'.$page->getTitle().'</a> :</p>
+											<p>'.nl2br(stripslashes($comment)).'</p>
+										</body>
+									</html>';
+						self::mailAdmin($subject, $message);
+					}
+					else new Message('There was a problem.', 'error', 'error', 'header');
+				}
+				else new Message('There was a problem.', 'error', 'error', 'header');
+			}
+
+			return $return;
+		});
+
+		$tpl->set_var(['leaveCommentForm' => $form->render()]);
+
+		$q = $db->query();
+		$q->select('comments',
+				   [$q->colIn('id', 'comments'),
+				    $q->col('page'),
+				    $q->col("comment"),
+				    $q->colIn('created', 'comments'),
+				    $q->colIn('firstName', 'users')->as('author'),
+				    $q->col('gender'),
+				    $q->col('published')])
+		  ->relate('comments.author', 'users.id');
+		$w = $q->where();
+		$w->col('published')->eq(1)->and($w->col('page')->eq($page->isArticle() ? $page->article->id : $page->id));
+		if ($orderColumn && $orderDirection) $q->orderBy($orderColumn, $orderDirection);
+		$comments = $q->run()
+		              ->loadObjects();
+
+		if (count($comments)) foreach ($comments as $k => $comment)
+		{
+			$created = new DateTime($comment->created);
+			$tpl->set_var(['id' => $comment->id,
+						   'comment' => nl2br(ucfirst($comment->comment)),
+						   'gender' => $comment->gender,
+						   'createdByOn'=> text(21,
+						   					[
+						   					    'contexts' => 'article',
+						   						'formats' =>
+						   						[
+						   							'sprintf' =>
+						   							[
+				   										ucfirst($comment->author),
+													  	$created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
+													 	$created->format($language == 'fr' ? 'H\hi' : 'H:i')
+													]
+												]
+											])
+						   ]);
+			$tpl->parse('theCommentBlock', 'commentBlock', true);
+		}
+
+		$return = $tpl->parse('display', "comments");
+
+		return $return;
+	}
+
+	/**
+	 * Send a mail to the administrator.
+	 *
+	 * @param  String $subject: the object of the mail to send.
+	 * @param  String $message: the email contents to send.
+	 * @param  String $params: to provide extra params if needed.
+	 * @return boolean: true if sent correctly false otherwise.
+	 */
+	public static function mailAdmin($subject, $message, $params = [])
+	{
+		$settings = Settings::get();
+
+		$headers = "From: $settings->adminEmail\n"
+				  ."Reply-To: $settings->adminEmail\n"
+				  ."Content-Type: text/html; charset=\"utf-8\"\n"
+				  ."Content-Transfer-Encoding: 8bit";
+
+		return mail($settings->adminEmail, "[$settings->siteName] $subject", $message, $headers);
+	}
+
+	/**
+	 * Send a mail to a user.
+	 *
+	 * @param  String $email: the user mail.
+	 * @param  String $subject: the object of the mail to send.
+	 * @param  String $message: the email contents to send.
+	 * @param  String $params: to provide extra params if needed.
+	 * @return boolean: true if sent correctly false otherwise.
+	 */
+	public static function mailUser($email, $subject, $message, $params = [])
+	{
+		$settings = Settings::get();
+
+		$headers = "From: $settings->adminEmail\n"
+				  ."Reply-To: $settings->adminEmail\n"
+				  ."Content-Type: text/html; charset=\"utf-8\"\n"
+				  ."Content-Transfer-Encoding: 8bit";
+
+		$sent = mail($email, $subject, $message, $headers);
 	}
 
 	/*
@@ -22,9 +214,10 @@ Class Utility
 
 		use: dateFormat(null,'{Day} d {Month} Y');
 	*/
-	function dateFormat($timestmp= null, $format= '')
+	/*function dateFormat($timestmp= null, $format= '')
 	{
-		global $timestamp, $language, $months, $days;
+		global $timestamp, $months, $days;
+		$language = Language::getCurrent();
 
 		$timestamp= !$timestmp? time(): $timestmp;
 
@@ -42,8 +235,8 @@ Class Utility
 		else $date= date($format, $timestamp);
 
 		return $date;
-	}
-	function dateFormatCallback($matches)
+	}*/
+	/*function dateFormatCallback($matches)
 	{
 		global $timestamp;
 
@@ -62,7 +255,7 @@ Class Utility
 		//if (ctype_upper($matches[1]{0}))//check if first letter is uppercase
 
 		return $return;
-	}
+	}*/
 
 
 	/*
@@ -71,7 +264,7 @@ Class Utility
 		if showDigits=1 displays digits links such as '... X Y Z 0-9'
 		TODO: use parse_str and http_build_query
 	*/
-	function alphaIndex($showDigits= 0)
+	/*function alphaIndex($showDigits= 0)
 	{
 		$alphaIndex= '';
 		define(URI, QUERY_STRING?preg_replace("/(?:&|&amp;)*index=\w/i",'',URI):URI);
@@ -79,14 +272,14 @@ Class Utility
 		foreach($alphabet as $index)
 			$alphaIndex.= '<a href="'.url(URI.(QUERY_STRING?'&amp;':'?')."index=$index")."\">$index</a>";
 		return '<div><div id="indexAlphaWrapper"><div id="indexAlpha">'.$alphaIndex.'</div></div><br class="clear" /></div>';
-	}
+	}*/
 
 	/*
 		$totalItems is the $mysqli->num_rows of the query displaying all items.
 		returns a div containing all the links to available pages
 		For DB limits (according to current page) use $DBlimits.
 	*/
-	function pagination($totalItems, $itemsPerPage)
+	/*function pagination($totalItems, $itemsPerPage)
 	{
 		global $gets;
 		$GLOBALS['DBlimits']= $pagination= '';
@@ -107,12 +300,13 @@ Class Utility
 			$pagination.= '</div></div><br class="clear" />';
 		}
 		return $pagination;
-	}
+	}*/
+
 	/*
 		paginanation with '...' to skip pages when too many
 		//TODO: merge with the above pagination function
 	*/
-	function pagination2($totalItems, $itemsPerPage)
+	/*function pagination2($totalItems, $itemsPerPage)
 	{
 		global $gets;
 
@@ -135,6 +329,6 @@ Class Utility
 			$pagination= '<div class="pagination">'.implode(' ',$links).'</div><br class="clear" />';
 		}
 		return $pagination;
-	}
+	}*/
 }
 ?>
