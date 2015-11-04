@@ -355,6 +355,7 @@ Class Page
 					   'social' => $this->social ? '<div class="social"></div>' : '',
 					   'brClear' => $this->showBreadcrumbs || $this->social ? '<br class="clear"/>' : '',
 					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
+					   'backToHomeText' => text(45),
 					   'homeText' => getPageByProperty('id', 'home', $language)->title->$language,
 					   'contactUrl' => url(getPageByProperty('id', 'contact', $language)->page.'.php'),
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,

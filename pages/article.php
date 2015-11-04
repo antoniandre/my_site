@@ -15,26 +15,17 @@ $settings = Settings::get();
 $db = database::getInstance();
 $q = $db->query();
 $q->select('articles',
-		   [$q->colIn('id', 'articles'),
-		    $q->col("content_$language"),
-		    $q->colIn('created', 'articles'),
+		   [$q->col("content_$language"),
+		    $q->col('created'),
 		    $q->concat($q->colIn('firstName', 'users'), ' ', $q->colIn('lastName', 'users'))->as('author'),
-		    $q->col('page'),
-		    $q->col('image'),
-		    $q->col('published'),
-		    $q->colIn("url_$language", 'pages')])
+		    $q->col('published')])
   ->relate('articles.author', 'users.id')
-  ->relate('pages.article', 'articles.id')
-  ->relate('articles.category', 'article_categories.id')
-  ->orderBy('articles.created', 'desc');
-$w = $q->where();
-$w->colIn('name', 'article_categories')->eq('travel');
-$q->orderBy('created', 'desc');
-$articles = $q->run()
-            ->loadObjects('id');
-$tpl = new Template();
+  ->where()->colIn('id', 'articles')->eq($page->article);
+$article = $q->run()
+            ->loadObject();
+$tpl = new Template('.');
 $tpl->set_file("$page->page-page", "backstage/templates/article.html");
-dbg($q);
+
 // Get the current article.
 $article = $articles[$page->article->id];
 if ($article && $article->published)
@@ -48,20 +39,11 @@ if ($article && $article->published)
 
 	$created = new DateTime($article->created);
 	$content = $article->{"content_$language"};
-	$cnt = 0;
-	// Set the right route in img src and replace img src with
-	// data-original for postponed load with JS lazyload.
-	$articleContent = preg_replace_callback('~<img(.+?)src="(?:(images\/\?(?:i|u)=[^"]+)|(https?:\/\/[^"]+))(?=")~i', function($matches)
-	{
-		global $cnt;
-		$settings = Settings::get();
-		$src = $matches[2] ? $settings->root.$matches[2] : $matches[3];
-		return '<img'.$matches[1].($settings->useLazyLoad && $cnt++ > USE_LAZY_FROM ? 'data-original="' : 'src="').$src;
-	}, $content);
-
-	$tpl->set_var(['articleId' => $page->article->id,
-				   'content' => $articleContent,
-				   'created' => text(21,
+	// Set correct src paths for img tags.
+	$content = preg_replace('~src="uploads/~', 'src="'.$settings->root.'images/?u=', $content);
+	$content = preg_replace('~src="images/~', 'src="'.$settings->root.'images/?i=', $content);
+	$tpl->set_var(['content'=> $content,
+				   'created'=> text(21,
 				   					[
 				   					    'contexts' => 'article',
 				   						'formats' =>

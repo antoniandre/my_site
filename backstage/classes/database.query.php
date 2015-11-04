@@ -140,9 +140,11 @@ Class Query extends DatabaseEntity
 	 *            true)//true since we have a simple quote. In PHP side made code this should never happen...
 	 *   ->run()
 	 */
+
 	public function insert($table, $pairs, $replaceIfExists = false, $secureInternalData = false)
 	{
 		$this->currentQueryType = $replaceIfExists ? 'replace' : 'insert';
+
 		$this->setTable($table);
 		$this->checkPairs($pairs, $secureInternalData);
 		return $this;
