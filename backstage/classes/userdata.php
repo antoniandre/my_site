@@ -102,7 +102,7 @@ class Userdata
 	 * get userdata tree of the given known source (among self::knownSources).
 	 *
 	 * @see self::knownSources.
-	 * @param  string $dataSource: get/post, the method to get user data from.
+	 * @param string $dataSource: get/post, the method to get user data from.
 	 * @return array or object representation of the userdata tree or null if no data.
 	 */
 	public static function get($dataSource = 'get')
@@ -125,7 +125,7 @@ class Userdata
 
 
 	/**
-	 * check if any data is sent from user, whatever the method. (check post & get).
+	 * Check if any data is sent from user, whatever the method. (check post & get).
 	 *
 	 * @return boolean: true if data is sent false otherwise.
 	 */
