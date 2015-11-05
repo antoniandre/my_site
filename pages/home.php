@@ -19,6 +19,7 @@ $tpl->set_block("$page->page-page", 'latestArticlesBlockImages', 'theLatestArtic
 $tpl->set_block('latestArticlesBlockImages', 'articleBlockImages', 'theArticleBlockImages');
 $tpl->set_var('ROOT', $settings->root);
 
+// renderArticles() needs the template to be already set.
 handleAjax(function()
 {
 	$articles = getArticles(10);
@@ -26,12 +27,12 @@ handleAjax(function()
 });
 
 
-
-
 // Disable breadcrumbs on home page only.
+// Don't do this before ajax for faster result.
 $page->setBreadcrumbsVisiblity(false);
 
 // Disable h1 title on home page only.
+// Don't do this before ajax for faster result.
 $page->setH1(null);
 
 $articles = getArticles();
