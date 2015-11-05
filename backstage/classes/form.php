@@ -239,7 +239,7 @@ Class Form
 	 *
 	 * @return (string) generated form HTML.
 	 */
-	/*public function render_old()
+	public function render()
 	{
 		$tpl = new Template(__DIR__.'/../templates/');
 		$tpl->set_file(['form-tpl' => 'form.html',
@@ -345,112 +345,6 @@ Class Form
 						   'btnName' => isset($button->name) && $button->name ? " name=\"form{$this->id}[$button->name]\"" : '',
 						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '',
 						   'toggle' => $this->getToggle($button)]);
-			$tpl->parse('theButtonBlock', 'buttonBlock', true);
-		}
-		//======================================================================//
-
-		return $tpl->parse('display', 'form-tpl');
-	}*/
-
-	/**
-	 * render function.
-	 * Render the generated form and return the full HTML.
-	 *
-	 * @return (string) generated form HTML.
-	 */
-	public function render()
-	{
-		$tpl = new Template(__DIR__.'/../templates/');
-		$tpl->set_file(['form-tpl' => 'form.html',
-						'form-element-tpl' => 'form-elements.html']);
-		$tpl->set_block('form-tpl', 'wrapperBlock', 'theWrapperBlock');
-		$tpl->set_block('wrapperBlock', 'rowBlock', 'theRowBlock');
-		$tpl->set_block('rowBlock', 'elementBlock', 'theElementBlock');
-		foreach (self::existingElements as $existingElement) if ($existingElement !== 'wrapper')
-		{
-			$tpl->set_block('form-element-tpl', $existingElement.'Block', 'the'.ucfirst($existingElement).'Block');
-		}
-		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
-		$tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
-
-		$tpl->set_var(['formId' => "form$this->id",
-					   'method' => $this->method,
-					   'action' => $this->action,
-					   'class' => $this->class ? " class=\"$this->class\"" : '',
-					   'enctype' => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
-
-
-		foreach ($this->elements as $k => $element)
-		{
-			$k++;
-			if ($element->type === 'wrapper') $wrappers['wrapper'.$k] = ['wrap' => $element->numberElements, 'state' => 'unset'];
-		}
-
-		$rowSpan = 0;
-		//========================= ELEMENTS RENDERING =========================//
-		foreach ($this->elements as $k => $element)
-		{
-			$k++;
-			$tpl->set_var(['wrapperBegin' => '',
-						   'wrapperEnd' => '',
-						   'rowClass' => isset($element->options->rowClass) ? " {$element->options->rowClass}" : '']);
-
-			if ($element->type === 'wrapper') $tpl->set_var(['theRowBlock' => '']);
-
-			$closingWrappers = 0;
-			foreach ($wrappers as $wrapperId => $wrapper) if ($wrapper['state'] !== 'closed')
-			{
-				if ($wrapper['state'] === 'unset')
-				{
-					// create wrapper
-					if ($wrapperId == "wrapper$k") $wrappers[$wrapperId]['state'] = 'opened';
-				}
-				else
-				{
-					// Decrement the wrapper number of remaining element.
-					$wrappers[$wrapperId]['wrap']--;					
-				}
-				if (!$wrappers[$wrapperId]['wrap'])
-				{
-					$wrappers[$wrapperId]['state'] = 'closed';
-					$closingWrappers++;
-				}
-			}
-
-			// If element is a wrapper, skip the current lap setting the $wrapFollowingElmts var for next loop lap.
-			if ($element->type === 'wrapper')
-			{
-				$tpl->set_var(['wrapperBegin' => $element->attributes->class ? "<div class=\"{$element->attributes->class}\">" : '<div>']);
-			}
-
-			else
-			{
-				$this->renderElement($element, $tpl);
-				$this->renderLabel($element, $tpl);
-				$tpl->parse('theElementBlock', 'elementBlock', $rowSpan);
-
-				$rowSpan = isset($element->options->rowSpan) && $element->options->rowSpan > 1 ? $element->options->rowSpan : $rowSpan;
-				if ($rowSpan) $rowSpan--;
-				if (!$rowSpan) $tpl->parse('theRowBlock', 'rowBlock', $rowSpan);
-			}
-			$tpl->set_var(['wrapperEnd' => str_repeat('</div><!-- closing tag -->', $closingWrappers)]);
-			// if ($closingWrappers) dbg("closing $closingWrappers wrapper.");
-			// dbg($element->type,$wrappers, $closingWrappers);
-			$tpl->parse('theWrapperBlock', 'wrapperBlock',  true);
-
-			// $tpl->parse('theElementBlock', 'elementBlock', false);
-			// $tpl->parse('theRowBlock', 'rowBlock', true);
-		}
-		//======================================================================//
-
-		//========================== BUTTONS RENDERING =========================//
-		foreach ($this->buttons as $k => $button)
-		{
-			$tpl->set_var(['btnText' => $button->label,
-						   'btnClass' => $button->class,
-						   'btnType' => $button->type,
-						   'btnName' => isset($button->name) && $button->name ? " name=\"form{$this->id}[$button->name]\"" : '',
-						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '']);
 			$tpl->parse('theButtonBlock', 'buttonBlock', true);
 		}
 		//======================================================================//
