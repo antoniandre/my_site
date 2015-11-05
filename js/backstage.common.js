@@ -7,9 +7,9 @@ var backstageReady = function()
 {
 	if ($('#createNewTextPage').length)
 	{
-		$('#pageContext').on('change', function()
+		$('#form1pagecontext8opt15').on('change', function()
 		{
-			$(this).prev().val($(this).val());
+			$(this).parent().prev().children().val($(this).val());
 		});
 	}
 
