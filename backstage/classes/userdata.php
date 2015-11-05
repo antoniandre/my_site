@@ -102,7 +102,7 @@ class Userdata
 	 * get userdata tree of the given known source (among self::knownSources).
 	 *
 	 * @see self::knownSources.
-	 * @param  string $dataSource [description]
+	 * @param  string $dataSource: get/post, the method to get user data from.
 	 * @return array or object representation of the userdata tree or null if no data.
 	 */
 	public static function get($dataSource = 'get')
@@ -111,9 +111,27 @@ class Userdata
 	}
 
 
+	/**
+	 * isset keyword already taken.
+	 * Check if data is sent through the given method (post or get).
+	 *
+	 * @param string $dataSource: get/post, the method to check for any user data.
+	 * @return boolean: true if data is sent false otherwise.
+	 */
 	public static function is_set($dataSource = 'get')
 	{
 		return (boolean)count((array)self::get($dataSource));
+	}
+
+
+	/**
+	 * check if any data is sent from user, whatever the method. (check post & get).
+	 *
+	 * @return boolean: true if data is sent false otherwise.
+	 */
+	public static function is_set_any()
+	{
+		return (boolean)count((array)self::get())+count((array)self::get('post'));
 	}
 
 	/**
@@ -132,7 +150,7 @@ class Userdata
 	}
 
 	/*
-	  if we don't want htmlentities
+	  if we don't want htmlentities.
 	*/
 	public static function unsecureString($string)
 	{
