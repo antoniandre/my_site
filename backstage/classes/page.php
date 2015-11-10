@@ -339,13 +339,13 @@ Class Page
 					   'author' => $settings->author,
 					   'siteUrl' => $settings->siteUrl,
 					   'pageTitle' => htmlentities($page->title->{$this->language}, ENT_NOQUOTES, 'utf-8').$settings->titleSuffix,
-					   'socialImgSrc' => $this->socialImage ? $this->socialImage : url('images/?i=logo.jpg'),
+					   'socialImgSrc' => $this->socialImage ? $this->socialImage : url('images/?i='.$settings->logoSrc),
 					   'noCrawl', strpos(SELF, 'backstage') !== false ? 'no' : '',
 				       'page' => $page->page,
 
 					   'newsletter' => $newsletter->render(),
 
-					   'logoSrc' => url('images/logo.png'),
+					   'logoSrc' => url('images/?i='.$settings->logoSrc),
 					   'backToHomeText' => text(68),
 					   'h1' => ucfirst($this->h1 ? $this->h1 : $page->title->$language),
 					   // If h1 is explicitly set to null then set an h1 with the site name for SEO.

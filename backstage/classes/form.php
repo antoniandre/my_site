@@ -241,7 +241,7 @@ Class Form
 	 */
 	public function render()
 	{
-		$tpl = new Template(__DIR__.'/../templates/');
+		$tpl = new Template(ROOT.'backstage/templates/');
 		$tpl->set_file(['form-tpl' => 'form.html',
 						'form-element-tpl' => 'form-elements.html']);
 		$tpl->set_block('form-tpl', 'wrapperBlock', 'theWrapperBlock');
@@ -775,7 +775,15 @@ Class Form
 			$grantClearing = true;
 
 			// Call a potential validate function if it is set in calling file.
-			if ($callback && is_string($callback)) $grantClearing = $callback($return, $this);
+			if ($callback && is_string($callback))
+			{
+				if (is_callable($callback)) $grantClearing = $callback($return, $this);
+				else
+				{
+					Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
+					return null;
+				}
+			}
 			elseif ($callback && is_callable($callback)) $grantClearing = $callback($return, $this);
 
 			// If all the posts are valid, and unless callback function returns false, clear all the fields.

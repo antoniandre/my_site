@@ -7574,3 +7574,798 @@
 - NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
   Undefined property: stdClass::$backtrace
 
+2015-11-05 05:23:45
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 05:25:31
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 05:25:32
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:07:54
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Undefined variable: settings
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:07:54
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Undefined variable: settings
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:07:56
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Undefined variable: settings
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:07:56
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Undefined variable: settings
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/home.php at line 19:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:08:44
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:08:44
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:46:16
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:46:16
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:52:50
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:52:51
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:52:54
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 06:52:54
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Undefined variable: wrappers
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 401:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 07:07:58
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 07:07:58
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 07:08:01
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 07:08:01
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_en`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 67:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 73:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 75:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 86:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 87:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-05 08:42:56
+- MISSING DATA ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 783:
+  Form::Validate(): The given callback function "validateContact" does not exist.
+
+2015-11-08 09:58:42
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_fr`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 76:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 95:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 96:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 09:58:42
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_fr`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 76:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 95:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 96:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 09:58:45
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_fr`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 76:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 95:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 96:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 09:58:45
+- UNKNOWN ERROR (4096) in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.entity.php at line 160:
+  Object of class stdClass could not be converted to string
+- MYSQLI ERROR in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/database.query.php at line 905:
+  Query::Select(): Column 'created' in field list is ambiguous
+  SQL = "SELECT `content_fr`, `created`, CONCAT(`users`.`firstName`, ' ', `users`.`lastName`) AS `author`, `published` FROM `articles` JOIN users ON (`articles`.`author`=`users`.`id`) WHERE (`articles`.`id` = '')".
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 30:
+  Undefined variable: articles
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 76:
+  Trying to get property of non-object
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 82:
+  array_values() expects parameter 1 to be array, null given
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Undefined variable: articles
+- WARNING in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 84:
+  Invalid argument supplied for foreach()
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 95:
+  Undefined variable: prev
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/pages/article.php at line 96:
+  Undefined variable: next
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:56:49
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:56:55
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 145:
+  Uninitialized string offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:57:00
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 145:
+  Uninitialized string offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:57:18
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:57:22
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-08 10:57:33
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 186:
+  Undefined offset: 0
+- NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+

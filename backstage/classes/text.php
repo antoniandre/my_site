@@ -5,6 +5,8 @@
  */
 Class Text
 {
+	const NOT_FOUND = 'NOT_FOUND_IN_DB';
+ 
 	// An array of contexts in which are stored "ID => String" pairs.
 	// (Context = place of a text in the site E.g. 'general', 'sitemap')
 	// That array is extended each time a new text is requested from an ID.
@@ -142,10 +144,11 @@ Class Text
 
 		if ($q->info()->numRows)
 		{
-			$textsFromDB = $q->loadObjects();
+			$textsFromDB = $q->loadObjects('id');
+		}
 
 			// Store in Text::$texts the texts for each context.
-			foreach ($textsFromDB as $text)
+			/*foreach ($textsFromDB as $text)
 			{
 				$context = $text->context;
 				$id = $text->id;
@@ -156,9 +159,26 @@ Class Text
 				Text::$texts[$context][$id] = $text;
 				Text::$textContexts[$id] = $context;
 				$this->tempStrings[$id] = $text;
-			}
-		}
+			}*/
+			foreach ($idList as $id)
+			{
+				dbg($id);
+				$text = self::NOT_FOUND;
+				if (isset($textsFromDB[$id]))
+				{
+					$text = $textsFromDB[$id];
+					$context = $text->context;
 
+					Text::$texts[$context][$id] = $text;
+					Text::$textContexts[$id] = $context;
+
+					// Remove unwanted information from the final array.
+					unset($text->context, $text->id);
+				}
+				else Error::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
+
+				$this->tempStrings[$id] = $text;
+			}
 	}
 
 	/**
@@ -181,30 +201,36 @@ Class Text
 		if (!func_num_args()) list($id, $languages) = [null, []];
 		// list($id, $languages) = func_num_args() == 2 ? func_get_args() : [null, func_get_arg(0)];
 
+
 		// If no id is provided, look into $this->tempStrings and take the first found.
 		// The purpose is to allow only $t = new Text(33);$t->get();
 		$id = $id ? $id : array_keys($this->tempStrings)[0];
 
+		// if (!count($this->tempStrings)) dbg($id, debug_backtrace());
 		if ($id !== null)
 		{
-			if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
-			$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
-
-			// Convert possible one-string to an array of strings.
-			$languages = (array)$languages;
-			// Set the requested language to currentLanguage if none.
-			$currentLanguage = Language::getInstance()->getCurrent();
-			if (!count($languages)) $languages = [$currentLanguage];
-
-			// Check each requested language to see if it exists.
-			if (count($languages) > 1)
+			if ($this->tempStrings[$id] === self::NOT_FOUND) {dbg($this->tempStrings);}
+			else
 			{
-				$object = new StdClass();
-				foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $object->$lang = $textObject->$lang;
-			}
-			else {$object = $textObject->{$languages[0]};}
+				if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
+				$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
 
-			$this->tempStrings[$id] = null;// Empty the current text Id
+				// Convert possible one-string to an array of strings.
+				$languages = (array)$languages;
+				// Set the requested language to currentLanguage if none.
+				$currentLanguage = Language::getInstance()->getCurrent();
+				if (!count($languages)) $languages = [$currentLanguage];
+
+				// Check each requested language to see if it exists.
+				if (count($languages) > 1)
+				{
+					$object = new StdClass();
+					foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $object->$lang = $textObject->$lang;
+				}
+				else {$object = $textObject->{$languages[0]};}
+
+				$this->tempStrings[$id] = null;// Empty the current text Id
+			}
 		}
 
 		return $object;

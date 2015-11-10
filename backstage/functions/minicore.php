@@ -9,10 +9,10 @@ define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
 
 
 //======================= INCLUDES ====================//
-include __DIR__.'/../classes/error.php';
-include __DIR__.'/../classes/settings.php';
-include __DIR__.'/../classes/userdata.php';
-include __DIR__.'/../classes/user.php';
+include ROOT.'backstage/classes/error.php';
+include ROOT.'backstage/classes/settings.php';
+include ROOT.'backstage/classes/userdata.php';
+include ROOT.'backstage/classes/user.php';
 //=====================================================//
 
 

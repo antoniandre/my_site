@@ -3,8 +3,8 @@
  * Database Query Model.
  * Design pattern: singleton.
  */
-include __DIR__.'/database.entity.php';
-include __DIR__.'/database.query.where.php';
+include ROOT.'backstage/classes/database.entity.php';
+include ROOT.'backstage/classes/database.query.where.php';
 
 Class Query extends DatabaseEntity
 {

@@ -1,10 +1,11 @@
 <?php
 //======================= VARS ========================//
+define('ROOT', __DIR__.'/');
 //=====================================================//
 
 
 //===================== INCLUDES ======================//
-include 'backstage/functions/core.php';
+include ROOT.'backstage/functions/core.php';
 //=====================================================//
 
 
@@ -13,12 +14,12 @@ include 'backstage/functions/core.php';
 if ($page->isArticle())
 {
 	$article = getPageByProperty('id', 'article', $language);
-	$includePath = __DIR__."/$article->path$article->page.php";
+	$includePath = ROOT."$article->path$article->page.php";
 }
 else
 {
-	if (!is_file(__DIR__."/$page->path$page->page.php")) $page = getPageByProperty('id', 'notFound', $language);
-	$includePath = __DIR__."/$page->path$page->page.php";
+	if (!is_file(ROOT."$page->path$page->page.php")) $page = getPageByProperty('id', 'notFound', $language);
+	$includePath = ROOT."$page->path$page->page.php";
 }
 
 include($includePath);

@@ -5,18 +5,18 @@
 
 
 //======================= INCLUDES ====================//
-require __DIR__.'/minicore.php';// Minimum required core. (the min for js/, css/, images/).
+require ROOT.'backstage/functions/minicore.php';// Minimum required core. (the min for js/, css/, images/).
 
-include __DIR__.'/../classes/debug.php';
-include __DIR__.'/../classes/utility.php';
-include __DIR__.'/../classes/message.php';
-include __DIR__.'/../classes/form.php';
-include __DIR__.'/../classes/page.php';
-include __DIR__.'/../classes/language.php';
-include __DIR__.'/../classes/database.php';
-include __DIR__.'/../classes/text.php';
-include __DIR__.'/../classes/encryption.php';
-include __DIR__.'/../libraries/template.inc';
+include ROOT.'backstage/classes/debug.php';
+include ROOT.'backstage/classes/utility.php';
+include ROOT.'backstage/classes/message.php';
+include ROOT.'backstage/classes/form.php';
+include ROOT.'backstage/classes/page.php';
+include ROOT.'backstage/classes/language.php';
+include ROOT.'backstage/classes/database.php';
+include ROOT.'backstage/classes/text.php';
+include ROOT.'backstage/classes/encryption.php';
+include ROOT.'backstage/libraries/template.inc';
 //=====================================================//
 
 
@@ -36,11 +36,11 @@ if (Language::getTarget()) $page->refresh();
 // todo: write a Cache class.
 /*if ($settings->useCache && !Userdata::is_set('post'))
 {
-    include(__DIR__."/cache/$page->path$page->page.html");
+    include(ROOT."backstageche/$page->path$page->page.html");
 }*/
 
-if (isset(UserData::get()->js)) include __DIR__.'/../../js/index.php';
-if (isset(UserData::get()->css)) include __DIR__.'/../../css/index.php';
+if (isset(UserData::get()->js)) include ROOT.'js/index.php';
+if (isset(UserData::get()->css)) include ROOT.'css/index.php';
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -254,6 +254,7 @@ function seo($url, $data, $language)
 function text($id, $parameters = ['htmlentities' => 1, 'contexts'=> [], 'languages'=> []])
 {
     $text = new Text($id, $parameters);
+
     if (isset($parameters['formats'])) $text->format($parameters['formats']);
     return $text->get();
 }

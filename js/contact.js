@@ -7,7 +7,7 @@ var contactReady = function()
 {
 	$('#captcha').hide();
     $('#captchaSwitch').prepend('<input type="checkbox" id="switch"/><label class="switch" for="switch"/>');
-    $('#contactPage form').on('submit', function(e)
+    /*$('#contactPage form').on('submit', function(e)
     {
         if (validateForm(this))
         {
@@ -30,7 +30,7 @@ var contactReady = function()
             }
         }
         e.preventDefault();
-    });
+    });*/
 };
 
 /**

@@ -8,11 +8,11 @@
  *        DROP DATABASE  `my_site` ;
  * @dependencies: Settings.
  **/
-include __DIR__.'/../classes/database.query.php';
+include ROOT.'backstage/classes/database.query.php';
 
 Class Database
 {
-	const connectionError = '<p>Un probleme de connection &agrave; la base de donn&eacute;es est survenu.<br />Ce probl&egrave;me temporaire sera r&eacute;solu d&egrave;s que possible aupr&egrave;s de notre h&eacute;bergeur.<br />Merci de votre compr&eacute;hension.</p><hr />'
+	const connectionError = '<p>Un probl&egrave;me de connection &agrave; la base de donn&eacute;es est survenu.<br />Ce probl&egrave;me temporaire sera r&eacute;solu d&egrave;s que possible aupr&egrave;s de notre h&eacute;bergeur.<br />Merci de votre compr&eacute;hension.</p><hr />'
 						   .'<p>A database connection error occured.<br />We are already working on solving this problem with our host.<br />Thank you for your understanding.</p>';
 	const minimumDbSqlFile = 'backstage/install/minimum-db.sql';
 	private static $instance = null;
@@ -80,7 +80,7 @@ Class Database
 	 */
 	private function createDB($dbName)
 	{
-		if (is_file(__DIR__.'/../../'.self::minimumDbSqlFile))
+		if (is_file(ROOT.self::minimumDbSqlFile))
 		{
 			$result = $this->mysqli->query($q = "CREATE DATABASE `$dbName`");
 			if (!$result) $this->setError(__FUNCTION__, $q);
@@ -96,12 +96,12 @@ Class Database
 	 */
 	private function populateDB($dbName)
 	{
-		if (is_file(__DIR__.'/../../'.self::minimumDbSqlFile))
+		if (is_file(ROOT.self::minimumDbSqlFile))
 		{
 			$this->mysqli->select_db($dbName);
 			// First set the DB charset to utf8 before importing utf8-encoded file into DB (for accents and special chars).
 			$this->mysqli->set_charset('utf8');
-			$result = $this->mysqli->multi_query($q = file_get_contents(__DIR__.'/../../'.self::minimumDbSqlFile));
+			$result = $this->mysqli->multi_query($q = file_get_contents(ROOT.self::minimumDbSqlFile));
 			if (!$result) $this->setError(__FUNCTION__, $q);
 			else
 			{

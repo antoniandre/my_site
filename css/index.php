@@ -44,9 +44,9 @@ else
 $cssFiles = '';
 foreach($css as $k => $filename)
 {
-	if ($filename && is_file(__DIR__."/$filename.css"))
+	if ($filename && is_file(ROOT."css/$filename.css"))
 	{
-	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(__DIR__."/$filename.css");
+	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."css/$filename.css");
 	}
 }
 

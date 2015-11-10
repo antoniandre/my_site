@@ -143,7 +143,7 @@ Class Debug
 		}
 		$output .= "\n";
 
-		error_log($output, 3, __DIR__."/../../$settings->debugLogFile");
+		error_log($output, 3, ROOT.$settings->debugLogFile);
 	}
 
 	/**

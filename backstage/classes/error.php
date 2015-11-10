@@ -79,7 +79,7 @@ Class Error
 		$error = new StdClass();
 		$error->number = null;
 		$error->type = "$errorType ERROR";
-		$error->file = isset($trace[0]['file']) ? $trace[0]['file'] : '';
+		$error->file = isset($trace[0]['file']) ? $this->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$error->backtrace = $backtrace ? $trace : null;
 		$error->text = $errorMessage;
@@ -110,7 +110,7 @@ Class Error
 				// Show the error backtrace if it was requested when error was added.
 				if ($error->backtrace)
 				{
-					$output .= "\n\n<div class=\"backtrace\"><strong>BACKTRACE</strong>\n<ol reversed=\"reversed\">";
+					$output .= "\n\n<div class=\"backtrace\"><strong class=\"i-triangle-r\">BACKTRACE</strong>\n<ol reversed=\"reversed\">";
 						foreach($error->backtrace as $k => $step) if ($k)
 						{
 							$what= '';
@@ -127,14 +127,47 @@ Class Error
 									$args = '';
 									foreach ($step['args'] as $k => $arg)
 									{
-										if (is_string($arg)) $args .= ($k ? ', ' : '')."\"$arg\"";
-										else $args .= ($k? ', ' : '').(string)$arg;
+										$args .= ($k ? ', ' : '');
+										switch (gettype($arg))
+										{
+											case 'array':
+												$json = json_encode($arg);
+												$args .= '['.substr($json, 1, strlen($json)-2).']';
+												break;
+											case 'object':
+												$args .= ucfirst(gettype($arg)).json_encode($arg);
+												break;
+											case 'integer':
+											case 'double':
+												$args .= $arg;
+												break;
+											case 'string':
+												$args .= "\"$arg\"";
+												break;
+											case 'boolean':
+											default:
+												$args .= (string)$arg;
+												break;
+										}
+										/*if (is_string($arg)) $args .= "\"$arg\"";
+										elseif (is_array($arg))
+										{
+											$subargs = [];
+											foreach ($arg as $k => $subarg)
+											{
+												$k = is_int($k) ? $k : "\"$k\"";
+												$subargs[] = "$k => $subarg";
+											}
+											$args .= '['.implode(', ', $subargs).']';
+										}
+										else $args .= (string)$arg;*/
+										// $args .= preg_replace('~\n|\t|(?<= ) ~', '', print_r($arg, 1));
 									}
 								}
 								$what = "$class$function($args);";
 							}
 
-							$output .= "<li>Called from <strong>$caller</strong> at <strong>line $line</strong>: <em>$what</em></li>";
+							$output .= "<li>Called from <strong>/".$this->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";
 						}
 						$output .= "</ol></div>";
 				}
@@ -158,11 +191,17 @@ Class Error
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach ($this->stack as $i => $error)
 		{
-		    $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n";
+		    $output .= "- $error->type in file /$error->file at line $error->line:\n  $error->text\n";
 		}
 		$output .= "\n";
 
-		error_log($output, 3, __DIR__."/../../$settings->errorLogFile");
+		error_log($output, 3, ROOT.$settings->errorLogFile);
+	}
+
+	/**/
+	private function pathFromSiteRoot($path)
+	{
+		return str_replace([ROOT, dirname(dirname(__DIR__)).'/'], '', $path);
 	}
 
 	/**

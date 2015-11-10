@@ -9,24 +9,28 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-handlePostedData();
+$form = new Form();
+$form->addElement('header', [], ['level' => 2, 'text' => text(29)]);
+$form->addElement('textarea',
+                  ['name' => 'message', 'placeholder' => text(30),
+                   'cols' => 50, 'rows' => 10, 'required' => 'required', 'pattern' => '[^<>(){}\[\]\\]+'],
+                  ['validation' => ['required', 'alphanum+'], 'label' => text(25)]);
+$form->addElement('text',
+                  ['name' => 'lastName', 'value' => '', 'placeholder' => text(26),
+                   'required' => 'required', 'pattern' => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
+                  ['validation' => ['required', 'alpha+'], 'label' =>  text(26)]);
+$form->addElement('text',
+                  ['name' => 'firstName', 'placeholder' => text(27),
+                   'required' => 'required', 'pattern' => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
+                  ['validation' => ['required', 'alpha+'], 'label' =>  text(27)]);
+$form->addElement('email',
+                  ['name' => 'email', 'placeholder' => text(28), 'required' => 'required'],
+                  ['validation' => 'required', 'label' =>  text(28)]);
+$form->addButton('cancel', text(17));
+$form->addButton('validate', text(18));
 
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "backstage/templates/$page->page.html");
-$tpl->set_var(['SELF' => SELF,
-			   'cancelText' => text(17),
-			   'sendText' => text(24),
-			   'messageText' => text(25),
-			   'lastNameText' => text(26),
-			   'firstNameText' => text(27),
-			   'emailText' => text(28),
-			   'introText' => text(29),
-			   'messagePlaceholder' => text(30),
-			   'activateSwitchText' => text(31),
-			   'captchaSrc' => url('images/captcha/'),
-			   'captchaText' => text(36)
-			  ]);
-$content = $tpl->parse('display', "$page->page-page");
+$form->validate('validateContact');
+$content = $form->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -34,12 +38,11 @@ $content = $tpl->parse('display', "$page->page-page");
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
-function handlePostedData()
+function validateContact()
 {
+	if (!Userdata::is_set_any()) return false;// If no posted data do not go further.
+
 	$gets = Userdata::get();
-
-	if (!count((array)$gets) && !count((array)$posts)) return false;// If no posted data do not go further.
-
 	if (isset($gets->captcha) && $gets->captcha === 'passed')
 	{
 		$object = new StdClass();
