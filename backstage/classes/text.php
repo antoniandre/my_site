@@ -162,7 +162,6 @@ Class Text
 			}*/
 			foreach ($idList as $id)
 			{
-				dbg($id);
 				$text = self::NOT_FOUND;
 				if (isset($textsFromDB[$id]))
 				{
@@ -209,8 +208,7 @@ Class Text
 		// if (!count($this->tempStrings)) dbg($id, debug_backtrace());
 		if ($id !== null)
 		{
-			if ($this->tempStrings[$id] === self::NOT_FOUND) {dbg($this->tempStrings);}
-			else
+			if ($this->tempStrings[$id] !== self::NOT_FOUND)
 			{
 				if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
 				$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
@@ -227,7 +225,7 @@ Class Text
 					$object = new StdClass();
 					foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $object->$lang = $textObject->$lang;
 				}
-				else {$object = $textObject->{$languages[0]};}
+				else $object = $textObject->{$languages[0]};
 
 				$this->tempStrings[$id] = null;// Empty the current text Id
 			}

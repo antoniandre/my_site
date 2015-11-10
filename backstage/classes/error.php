@@ -106,11 +106,11 @@ Class Error
 		    if ($hidden) $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
 			else
 			{
-				$output.= "<div><p><strong>$error->type</strong> in file <em>$error->file</em> at line $error->line:</p><code style=\"white-space:pre-wrap;\">$error->text";
+				$output.= "<div><p><strong>$error->type</strong> in file <em>/$error->file</em> at line $error->line:</p><code style=\"white-space:pre-wrap;\">$error->text";
 				// Show the error backtrace if it was requested when error was added.
 				if ($error->backtrace)
 				{
-					$output .= "\n\n<div class=\"backtrace\"><strong class=\"i-triangle-r\">BACKTRACE</strong>\n<ol reversed=\"reversed\">";
+					$output .= "\n<div class=\"backtrace\"><strong class=\"i-triangle-r\">BACKTRACE</strong>\n<ol reversed=\"reversed\">";
 						foreach($error->backtrace as $k => $step) if ($k)
 						{
 							$what= '';
@@ -130,38 +130,27 @@ Class Error
 										$args .= ($k ? ', ' : '');
 										switch (gettype($arg))
 										{
-											case 'array':
-												$json = json_encode($arg);
-												$args .= '['.substr($json, 1, strlen($json)-2).']';
-												break;
-											case 'object':
-												$args .= ucfirst(gettype($arg)).json_encode($arg);
-												break;
 											case 'integer':
-											case 'double':
 												$args .= $arg;
 												break;
 											case 'string':
 												$args .= "\"$arg\"";
 												break;
+											case 'array':
+												// Json string is the nicest & shortest way to see subargs at unknown depth.
+												$json = json_encode($arg);
+												$args .= '['.substr($json, 1, strlen($json)-2).']';
+												break;
+											case 'object':
+												// Json string is the nicest & shortest way to see subargs at unknown depth.
+												$args .= ucfirst(gettype($arg)).json_encode($arg);
+												break;
 											case 'boolean':
+											case 'double':
 											default:
 												$args .= (string)$arg;
 												break;
 										}
-										/*if (is_string($arg)) $args .= "\"$arg\"";
-										elseif (is_array($arg))
-										{
-											$subargs = [];
-											foreach ($arg as $k => $subarg)
-											{
-												$k = is_int($k) ? $k : "\"$k\"";
-												$subargs[] = "$k => $subarg";
-											}
-											$args .= '['.implode(', ', $subargs).']';
-										}
-										else $args .= (string)$arg;*/
-										// $args .= preg_replace('~\n|\t|(?<= ) ~', '', print_r($arg, 1));
 									}
 								}
 								$what = "$class$function($args);";
