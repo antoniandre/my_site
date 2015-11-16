@@ -11,7 +11,7 @@
 //============================================= MAIN ===================================================//
 $tpl = new Template();
 $tpl->set_file("$page->page-page", "templates/$page->page.html");
-$tpl->set_var(['h2' => text(45),
+$tpl->set_var(['h2' => text(70),
                'createNewPageUrl' => url('create-new-page'),
                'createNewPageText' => getPageByProperty('page', 'create-new-page')->title->$language,
                'editAPageUrl' => url('edit-a-page'),
