@@ -1,8 +1,8 @@
 <?php
 //======================= VARS ========================//
 $isArchive = isset($_GET['archive']) && $_GET['archive'];
-$jsonFile =  __DIR__.'/todo-list.json';
-$archiveJsonFile =  __DIR__.'/todo-list-archive.json';
+$jsonFile =  ROOT.'backstage/pages/todo-list.json';
+$archiveJsonFile =  ROOT.'backstage/pages/todo-list-archive.json';
 //=====================================================//
 
 

@@ -424,12 +424,18 @@ Class Form
 		 		$inline = isset($element->options->inline) && $element->options->inline;
 		 		$tpl->set_var(['the'.ucfirst($element->type).'OptionBlock' => '',
 		 					   'inline' => $inline ? ' inline' : '']);
+
+		 		// If checkbox has multiple options use array (e.g. name="checkbox[]").
+		 		$multiple = $element->type === 'checkbox' && count($element->options->options) > 1;
+
+		 		// Loop through options to generate html.
 		 		$i = 0;
 		 		foreach ($element->options->options as $value => $label)
 		 		{
 		 			$isChecked = (isset($element->userdata) && in_array($value, (array)$element->userdata))
 		 						 || (!isset($element->userdata) && isset($element->options->default) && $element->options->default == $value);
 					$tpl->set_var(['value' => $value,
+								   'ifArray' => $multiple ? '[]' : '',
 								   'br' => $inline ? '' : '<br />',
 								   'label' => $label ? "<label for=\"form$this->id{$element->id}opt$i\">$label</label>" : '',
 								   'opt' => $i,
@@ -490,7 +496,10 @@ Class Form
 			else
 			{
 				$tmpPath = $_POST["form$this->id"];
-				foreach (explode('[', str_replace(']', '', $elementName)) as $bit) $tmpPath = $tmpPath[$bit];
+				foreach (explode('[', str_replace(']', '', $elementName)) as $bit)
+				{
+					$tmpPath = isset($tmpPath[$bit]) ? $tmpPath[$bit] : null;
+				}
 				$return = Userdata::secureVars($tmpPath, true, $acceptHtml);
 			}
 		}

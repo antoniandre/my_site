@@ -157,7 +157,7 @@ function validateForm1($result, $form)
 	$q = $db->query();
 	$pageName = text(($n = $form->getPostedData('page[name]')) ? $n : $form->getPostedData('page[url][en]'),
 					 ['formats' => ['sef']]);
-
+dbgd($form->getPostedData('article[published]'));
 	// Do not perform the insertion in db if page found in DB.
 	$q->select('pages', [$q->col('page')])->where()->col('page')->eq($pageName);
 	$isInDB = $q->run()->info()->numRows;
@@ -169,8 +169,8 @@ function validateForm1($result, $form)
 	}
 	else
 	{
-		if ($form->getPostedData('page[type]') === 'php') createPhpFile($pageName, $form->getPostedData('page[path]'));
-		elseif ($form->getPostedData('page[type]') === 'article')
+		// Article creation.
+		if ($postingArticle = $form->getPostedData('page[type]') === 'article')
 		{
 			$q = $db->query();
 			$contentEn = preg_replace('~(?<=src=\\\")(?:\.\.\/)*\/?(uploads[^"]+|images[^"]+)(?=\\\")~i', '$1', $form->getPostedData('article[content][en]', true));
@@ -183,32 +183,46 @@ function validateForm1($result, $form)
 	                                'published' => (bool)$form->getPostedData('article[published]')]);
 			$q->run();
 			$articleId = $q->info()->insertId;
+
+			if (!$articleId) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
 		}
 
-		$q = $db->query();
-		$q->insert('pages', ['page' => $pageName,
-	                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',
-	                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
-	                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
-	                         'title_en' => $form->getPostedData('page[title][en]'),
-	                         'title_fr' => $form->getPostedData('page[title][fr]'),
-	                         'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
-	                         'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
-	                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
-	                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
-	                         'parent' => $form->getPostedData('page[parent]'),
-	                         'article' => isset($articleId) ? $articleId : null]);
-		$q->run();
-
-		if ($q->info()->affectedRows)
+		// PHP file creation.
+		elseif ($form->getPostedData('page[type]') === 'php')
 		{
-			$pages = getPagesFromDB();
-			$GLOBALS['pages'] = $pages;// Update the $pages global var.
-
-			new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content');
-			$return = true;
+			$fileCreated = createPhpFile($pageName, $form->getPostedData('page[path]'));
+			if (!$fileCreated) new Message('A problem occured while creating the PHP file. Please check you have sufficent privileges and try again.', 'error', 'error', 'content');
 		}
-		else new Message('There was a problem.', 'error', 'error', 'content');
+
+		// Store a new page entry in DB only if previous steps were successful.
+		if (($postingArticle && $articleId) || !$fileCreated)
+		{
+			$q = $db->query();
+			$q->insert('pages', ['page' => $pageName,
+		                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',
+		                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
+		                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
+		                         'title_en' => $form->getPostedData('page[title][en]'),
+		                         'title_fr' => $form->getPostedData('page[title][fr]'),
+		                         'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
+		                         'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
+		                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
+		                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
+		                         'parent' => $form->getPostedData('page[parent]'),
+		                         'article' => isset($articleId) ? $articleId : null]);
+			$q->run();
+			if (!$q->info()->affectedRows) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
+
+			// If everything went fine.
+			else
+			{
+				$pages = getPagesFromDB();
+				$GLOBALS['pages'] = $pages;// Update the $pages global var.
+
+				new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content');
+				$return = true;
+			}
+		}
 	}
 
 	return $return;
@@ -233,10 +247,12 @@ function createPhpFile($fileName, $path)
 				  ."\$content= \$tpl->parse('display', \"\$page->page-page\");\n"
 				  ."//============================================ end of MAIN =============================================//\n"
 				  ."//======================================================================================================//\n?>";
-	$path = __DIR__."/../../$path";
+	$path = ROOT."$path";
 	if (!is_dir($path)) mkdir($path);
 	file_put_contents("$path/$fileName.php", $fileContents);
-	file_put_contents(__DIR__."/../templates/$fileName.html", '{content}');
+	file_put_contents(ROOT."backstage/templates/$fileName.html", '{content}');
+
+	return is_file(ROOT."backstage/templates/$fileName.html");
 }
 //========================================== end of FUNCTIONS ==========================================//
 //======================================================================================================//

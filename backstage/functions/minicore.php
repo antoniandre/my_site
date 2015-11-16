@@ -9,10 +9,10 @@ define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
 
 
 //======================= INCLUDES ====================//
-include ROOT.'backstage/classes/error.php';
-include ROOT.'backstage/classes/settings.php';
-include ROOT.'backstage/classes/userdata.php';
-include ROOT.'backstage/classes/user.php';
+includeClass('error');
+includeClass('settings');
+includeClass('userdata');
+includeClass('user');
 //=====================================================//
 
 
@@ -39,6 +39,17 @@ $user = User::getInstance();
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
+/**
+ * Shortcut function to simply include a php class.
+ *
+ * @param string $class: the php class to include.
+ * @return void.
+ */
+function includeClass($class)
+{
+    include ROOT."backstage/classes/$class.php";
+}
+
 /**
  * handle the user posted data.
  *

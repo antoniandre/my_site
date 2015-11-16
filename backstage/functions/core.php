@@ -7,15 +7,15 @@
 //======================= INCLUDES ====================//
 require ROOT.'backstage/functions/minicore.php';// Minimum required core. (the min for js/, css/, images/).
 
-include ROOT.'backstage/classes/debug.php';
-include ROOT.'backstage/classes/utility.php';
-include ROOT.'backstage/classes/message.php';
-include ROOT.'backstage/classes/form.php';
-include ROOT.'backstage/classes/page.php';
-include ROOT.'backstage/classes/language.php';
-include ROOT.'backstage/classes/database.php';
-include ROOT.'backstage/classes/text.php';
-include ROOT.'backstage/classes/encryption.php';
+includeClass('debug');
+includeClass('utility');
+includeClass('message');
+includeClass('form');
+includeClass('page');
+includeClass('language');
+includeClass('database');
+includeClass('text');
+includeClass('encryption');
 include ROOT.'backstage/libraries/template.inc';
 //=====================================================//
 

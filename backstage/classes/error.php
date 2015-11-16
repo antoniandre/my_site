@@ -15,8 +15,8 @@ Class Error
 	 */
 	private function __construct()
 	{
-    	$this->stack = array();
-    	set_error_handler(array($this, 'errorHandler'));
+    	$this->stack = [];
+    	set_error_handler([$this, 'errorHandler']);
 	}
 
 	/**
@@ -187,7 +187,12 @@ Class Error
 		error_log($output, 3, ROOT.$settings->errorLogFile);
 	}
 
-	/**/
+	/**
+	 * Replace the long absolute path with a shorter path relative to the site root.
+	 *
+	 * @param string $path: the path to replace.
+	 * @return string: the new path relative to the site root.
+	 */
 	private function pathFromSiteRoot($path)
 	{
 		return str_replace([ROOT, dirname(dirname(__DIR__)).'/'], '', $path);
