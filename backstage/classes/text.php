@@ -147,37 +147,29 @@ Class Text
 			$textsFromDB = $q->loadObjects('id');
 		}
 
-			// Store in Text::$texts the texts for each context.
-			/*foreach ($textsFromDB as $text)
-			{
-				$context = $text->context;
-				$id = $text->id;
+		// For each text id,
+		// if text is found in DB Store the texts in Text::$texts
+		// otherwise set $this->tempStrings[$id] to self::NOT_FOUND.
+		foreach ($idList as $id)
+		{
+			$text = self::NOT_FOUND;
 
-				// Remove unwanted information from the final array.
-				unset($text->context, $text->id);
+			// If text is found in DB.
+			if (isset($textsFromDB[$id]))
+			{
+				$text = $textsFromDB[$id];
+				$context = $text->context;
 
 				Text::$texts[$context][$id] = $text;
 				Text::$textContexts[$id] = $context;
-				$this->tempStrings[$id] = $text;
-			}*/
-			foreach ($idList as $id)
-			{
-				$text = self::NOT_FOUND;
-				if (isset($textsFromDB[$id]))
-				{
-					$text = $textsFromDB[$id];
-					$context = $text->context;
 
-					Text::$texts[$context][$id] = $text;
-					Text::$textContexts[$id] = $context;
-
-					// Remove unwanted information from the final array.
-					unset($text->context, $text->id);
-				}
-				else Error::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
-
-				$this->tempStrings[$id] = $text;
+				// Remove unwanted information from the final array.
+				unset($text->context, $text->id);
 			}
+			else Error::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
+
+			$this->tempStrings[$id] = $text;
+		}
 	}
 
 	/**
@@ -193,19 +185,22 @@ Class Text
 	public function get()// Expect at most 2 params: $id, $languages = [].
 	{
 		$object = null;
+		$id = null;
+		$languages = [];
 
+		// Case of call like: get($id, $languages).
 		if (func_num_args() == 2) list($id, $languages) = func_get_args();
-		elseif (func_num_args() == 1 && is_integer(func_get_arg(0))) list($id, $languages) = [func_get_arg(0), []];
-		elseif (func_num_args() == 1) list($id, $languages) = [null, func_get_arg(0)];
-		if (!func_num_args()) list($id, $languages) = [null, []];
-		// list($id, $languages) = func_num_args() == 2 ? func_get_args() : [null, func_get_arg(0)];
 
+		// Case of call like: get($id).
+		elseif (func_num_args() == 1 && is_integer(func_get_arg(0))) $id = func_get_arg(0);
+
+		// Case of call like: get($languages).
+		elseif (func_num_args() == 1) $languages = func_get_arg(0);
 
 		// If no id is provided, look into $this->tempStrings and take the first found.
 		// The purpose is to allow only $t = new Text(33);$t->get();
 		$id = $id ? $id : array_keys($this->tempStrings)[0];
 
-		// if (!count($this->tempStrings)) dbg($id, debug_backtrace());
 		if ($id !== null)
 		{
 			if ($this->tempStrings[$id] !== self::NOT_FOUND)
@@ -225,9 +220,9 @@ Class Text
 					$object = new StdClass();
 					foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $object->$lang = $textObject->$lang;
 				}
-				else $object = $textObject->{$languages[0]};
+				else {$object = $textObject->{$languages[0]};}
 
-				$this->tempStrings[$id] = null;// Empty the current text Id
+				$this->tempStrings[$id] = null;// Empty the current text Id.
 			}
 		}
 
