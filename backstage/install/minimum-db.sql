@@ -143,7 +143,7 @@ INSERT INTO `texts` (`id`, `text_en`, `text_fr`, `context`) VALUES
 (42, 'The duplicate insertion in database was rejected.', 'L''insertion d''un doublon en base de données a été refusée.', 'general'),
 (43, 'Database manager', 'Gestionnaire de base de données', 'backstage'),
 (44, 'Latest articles', 'Derniers articles', 'home'),
-(45, 'Vous voilà dans les coulisses.', 'You''re in the backstage.', 'backstage'),
+(45, 'Back to home', 'Retour à la page d''accueil', 'general'),
 (46, 'd-m-Y', 'd/m/Y', 'date'),
 (47, 'd-m-Y at H:i', 'd/m/Y à Hhi', 'date'),
 (48, 'Monday', 'Lundi', 'date'),
@@ -167,7 +167,8 @@ INSERT INTO `texts` (`id`, `text_en`, `text_fr`, `context`) VALUES
 (66, 'December', 'Décembre', 'date'),
 (67, 'The page "%s" was updated successfully.\nYou can see it here: <a href="%s">%s</a>.', 'La page "%s" a bien été modifiée.\nVous pouvez la voir ici : <a href="%s">%s</a>.', 'edit-new-page'),
 (68, 'No row affected by the update request.', 'Aucune ligne n\'a été affectée par la requête de mise à jour.', 'edit-new-page'),
-(69, 'The page \'%s\' does not exist in database.', 'La page \'%s\' n\'existe pas dans la base de données.', 'edit-new-page');
+(69, 'The page \'%s\' does not exist in database.', 'La page \'%s\' n\'existe pas dans la base de données.', 'edit-new-page'),
+(70, 'You''re in the backstage.', 'Vous voilà dans les coulisses.', 'backstage');
 -- --------------------------------------------------------
 
 
