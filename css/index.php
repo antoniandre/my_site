@@ -1,6 +1,7 @@
 <?php
 //======================= VARS ========================//
-$css = ['common'.($settings->useMinified ? '.min' : '')];// CSS files to load.
+$min = $settings->useMinified ? '.min' : '';
+$css = ["common$min", "form$min"];// CSS files to load.
 //=====================================================//
 
 
@@ -37,7 +38,7 @@ else
 	if ($page->isBackstage()) $css[] = 'backstage.common';
 	elseif ($page->isArticle()) $css[] = 'article';
 
-	$css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;	
+	$css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;
 }
 
 // Now add each css file in the output string if the file exists.
