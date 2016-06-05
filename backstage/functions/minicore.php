@@ -24,10 +24,9 @@ includeClass('user');
 //=============================================== MAIN =================================================//
 ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ? 'ob_gzhandler' : null);
 
-// First of all, set the error handler!
-//if ($user->isAdmin())
-error_reporting(E_ALL);//display errors only for admin (for remote site)
-$error = Error::getInstance()->errorHandler();
+// First of all, set the error handler:
+// First use of the Error class triggers the singleton instanciation and sets the error handler.
+$error = Error::getInstance();
 
 // By default, the secured vars are converted to objects and they do not allow HTML.
 UserData::getInstance();
@@ -74,7 +73,6 @@ function handleAjax($callback)
         $object = $callback();
         header('Content-Type: application/json;charset=utf-8');
         die(json_encode($object));
-
     }
 }
 //========================================== end of FUNCTIONS ==========================================//
