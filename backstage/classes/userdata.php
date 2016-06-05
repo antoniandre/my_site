@@ -26,7 +26,7 @@ class Userdata
 		$this->post = $this->secureVars($_POST);
 		$this->get = $this->secureVars($_GET);
 		$this->cookie = $this->secureVars($_COOKIE);
-		$this->files = null;
+		$this->files = $_FILES;// Be careful with how you use, $_FILES is not a secure array...
 
 		// First and only time to start session in the whole page.
 		session_start();
