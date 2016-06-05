@@ -17,7 +17,8 @@ Class Form
 								 'num+' => ['pattern' => '~^[0-9.,]+$~', 'message' => 'This field must contain numeric chars only.'],
 								 'phone' => ['pattern' => '~^[0-9+ ()-]+$~', 'message' => 'This field must contain phone numbers only.'],
 								 'email' => ['pattern' => '~^[a-z0-9_][a-z0-9._]+@[a-z0-9][a-z0-9._]{1,40}[a-z0-9]$~i', 'message' => 'This field only accept valid emails.']];
-	const uploadDir = 'uploads/';
+	const uploadsDir = '../uploads/';
+	const uploadsDirTemp = '../uploads/temp/';
 	static private $idCounter = 1;// Form id counter. incremented on each new form.
 	private $elementId = 1;
 	private $id;// Form id. Useful when multiple forms on a page to know which form is submitted.
@@ -31,7 +32,7 @@ Class Form
 	// Store the elements indexes, indexed by element name, for conveniance and performances.
 	// Only store indexes and not directly element object for the element to be up to date at any time.
 	private $elementIndexesByName = [];
-	
+
 	private $wrappers = [];
 	private $buttons = [];
 	private $validElements = [];
@@ -100,16 +101,16 @@ Class Form
      *     [attributes] => stdClass Object
      *         (
      *             [name] => text[fr]
-     *             [value] => 
+     *             [value] =>
      *             [placeholder] => Text Fr
      *         )
-     * 
+     *
      *     [options] => stdClass Object
      *         (
      *             [validation] => required
      *         )
-     * 
-     *     [userdata] => 
+     *
+     *     [userdata] =>
      *     [message] => This field is required.
      *     [error] => 1
      * )
@@ -120,33 +121,33 @@ Class Form
 
 		// Error if no element type provided.
 		if (!is_string($type))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
 
 		// Error if provided element type does not exist.
 		elseif (!in_array($type, self::existingElements))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
 
 		// Error if no attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& (!is_array($attributes) || !count($attributes)))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
 
 		// Error if no name attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& !isset($attributes['name']))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif ($type === 'wrapper' && !isset($options->numberElements))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif (($type === 'header' || $type === 'paragraph') && !isset($options->text))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif (($type === 'header') && !isset($options->level))
-			Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
+			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
 
 		// Elements for which attributes are not required:
 		else
@@ -181,10 +182,12 @@ Class Form
 					break;
 				case 'upload':
 					$this->enctype = true;
+					break;
 				case 'email':
 					if (!isset($el->options->validation)) $el->options->validation = [];
 					elseif (!is_array($el->options->validation)) $el->options->validation = [$el->options->validation];
 					if (!in_array('email', $el->options->validation)) $el->options->validation[] = 'email';
+					break;
 				case 'text':
 				default:
 					break;
@@ -206,7 +209,7 @@ Class Form
 	 */
 	public function addButton($type, $label, $options = [])
 	{
-		if (!$label) return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
+		if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
 
 		$button = (object)['class' => $type, 'label' => $label, 'options' => (object)$options];
 		switch ($type)
@@ -220,7 +223,7 @@ Class Form
 		 		break;
 		 	// We do not want an unknown button to be appended.
 		 	default:
-				return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is unknown.', 'WRONG DATA', true);
+				return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is unknown.', 'WRONG DATA', true);
 		 		break;
 		}
 
@@ -444,6 +447,21 @@ Class Form
 		 			$i++;
 		 		}
 		 		break;
+		 	case 'upload':
+		 		$tpl->set_var('the'.ucfirst($element->type).'ItemBlock', '');
+		 		$temporaryFiles = array_diff(scandir(self::uploadsDirTemp), ['.', '..']);
+
+		 		foreach ($temporaryFiles as $k => $tempFile)
+		 		{
+		 			$tpl->set_var(['fileName' => $tempFile,
+								   'filePath' => url("images/?u=temp/$tempFile"),
+								   'addImagesToArticle' => text('add images to article'),
+								   'discardAll' => text('discard all'),
+								   'fileSize' => Utility::human_filesize(self::uploadsDirTemp."/$tempFile"),
+								   'removeFile' => text('Remove file')]);
+		 			$tpl->parse('the'.ucfirst($element->type).'ItemBlock', $element->type.'ItemBlock', true);
+		 		}
+		 		break;
 		 	default:
 		 		break;
 		}
@@ -526,7 +544,7 @@ Class Form
 					$element->error = 0;
 				}
 			}
-		} 
+		}
 		elseif (isset($this->getElementByName($elementName)->userdata))
 		{
 			$element = $this->getElementByName($elementName);
@@ -581,24 +599,24 @@ Class Form
 	public function modifyElementAttributes($elementName, $newAttributesArray)
 	{
 		if (!$elementName)
-			return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
+			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
 
 		$this->modifyElements([$elementName => $newAttributesArray], 'attributes');
 	}
 	public function modifyElementOptions($elementName, $newOptionsArray)
 	{
 		if (!$elementName)
-			return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
+			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
 
 		$this->modifyElements([$elementName => $newOptionsArray], 'options');
 	}
 	public function modifyElements($arrayOfElements = [], $what)
 	{
 		if (!count((array)$arrayOfElements))
-			return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide an indexed array of at least 1 element to modify [\'elementName\' => [modifiedArray]].', 'WRONG DATA', true);
+			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide an indexed array of at least 1 element to modify [\'elementName\' => [modifiedArray]].', 'WRONG DATA', true);
 
 		if (!$what)
-			return Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must explicit the element array you want to modify: attributes or options.', 'WRONG DATA', true);
+			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must explicit the element array you want to modify: attributes or options.', 'WRONG DATA', true);
 
 		foreach ((array)$arrayOfElements as $elementName => $newArray)
 		{
@@ -632,7 +650,7 @@ Class Form
 		{
 			$countFillableElements++;
 
-			// Divide name like form1[text][en] into ['form1','text','en'] to check if user post is set.
+			// Split name like form1[text][en] into ['form1','text','en'] to check if user post is set.
 			$elementNameParts = explode('[', str_replace(']', '', $element->attributes->name));
 
 			if ($element->type === 'wysiwyg') $userDataFromPath = $this->getPostedData($element->attributes->name, true);
@@ -649,7 +667,7 @@ Class Form
 						$userDataFromPath = null;
 						break;// if the path we look into in posts does not exist break the current loop.
 					}
-				}				
+				}
 			}
 
 			// The path is found in posted data, now validate the field.
@@ -663,7 +681,7 @@ Class Form
 				// The element is valid if no validation is set.
 				$isValid = isset($element->options->validation) ? $this->checkElementValidations($element) : true;
 				$element->error = !$isValid;
-				
+
 				if (!$isValid) $countInvalidElements++;
 
 				// Save only valid elements in a private array for easier later access!
@@ -676,7 +694,8 @@ Class Form
 			{
 				if (is_object($files = Userdata::secureVars($_FILES))) $files = $files->{"form$this->id"};
 
-				foreach ($element->options->accept as $l => &$accept)
+				if (!isset($element->options->accept)) $element->options->accept = ['*'];
+				foreach ((array)$element->options->accept as $l => &$accept)
 				{
 					$accept = strtolower($accept);
 					switch($accept)
@@ -691,8 +710,12 @@ Class Form
 							$accept = "image/$accept";
 							break;
 						default:
-							Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
-							unset($element->options->accept[$l]);
+							if (!$accept) $accept = '*';
+							else
+							{
+								Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
+								unset($element->options->accept[$l]->accept[$l]);
+							}
 							break;
 					}
 				}
@@ -717,6 +740,7 @@ Class Form
 				$fileErrorTmpPath = $files->error;
 				$element->message = '';
 
+				// Converting files array to object.
 				foreach (explode('[', str_replace(']', '', $element->attributes->name)) as $bit) if ($bit)
 				{
 					$fileTypesTmpPath = $fileTypesTmpPath->$bit;
@@ -726,9 +750,9 @@ Class Form
 				}
 				foreach ($fileErrorTmpPath as $key => $error)
 				{
-					$name = $fileNamesTmpPath->{"$key"};
-					$tmpName = $fileTmpNamesTmpPath->{"$key"};
-					$mimeType = $fileTypesTmpPath->{"$key"};
+					$name = $fileNamesTmpPath->{"$key"};// E.g. 'picture1.jpg'.
+					$tmpName = $fileTmpNamesTmpPath->{"$key"};// Temporary name given by PHP while transfert.
+					$mimeType = $fileTypesTmpPath->{"$key"};// E.g. 'image/jpg'.
 
 					// Skip empty files.
 					if (!$tmpName) continue;
@@ -743,7 +767,7 @@ Class Form
 				    }
 
 					// If not allowed file mime type.
-					elseif (!in_array($mimeType, $element->options->accept))
+					elseif (!in_array($mimeType, $element->options->accept) && !in_array('*', $element->options->accept))
 					{
 						$element->error = 1;
 						$element->message = 'Unaccepted upload file type.';
@@ -754,9 +778,10 @@ Class Form
 					// If upload is correct, move it into uploads directory.
 					else
 					{
-						if (move_uploaded_file($tmpName, '../'.self::uploadDir.basename($name)))
+						$safeName = md5(date('YmdHis')).basename($name);
+						if (move_uploaded_file($tmpName, self::uploadsDirTemp.basename($name)))
 							$element->message .= "The file \"$name\" is valid, and was successfully uploaded.\n";
-						else echo "Could not move uploaded file \"$tmpName\" to \"".'../'.self::uploadDir.basename($name)."\".";
+						else echo "Could not move uploaded file \"$tmpName\" to \"".self::uploadsDirTemp.basename($name)."\".";
 					}
 				}
 			}
@@ -789,7 +814,7 @@ Class Form
 				if (is_callable($callback)) $grantClearing = $callback($return, $this);
 				else
 				{
-					Error::getInstance()->add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
+					Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
 					return null;
 				}
 			}
@@ -841,7 +866,7 @@ Class Form
 								   || ($isConditionTrue && isset($element->userdata) && is_object($element->userdata))
 								   // Otherwise check the validation pattern.
 								   || ($isConditionTrue && preg_match(self::existingValidations[$validation]['pattern'], (string)trim($element->userdata)));
-						
+
 						// Need to sprintf the message, so set an array of arguments to inject in message.
 						$messageArgs = [$referedElement->options->options[$rightHand]];
 						break;

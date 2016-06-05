@@ -6,7 +6,22 @@
 <div id="{formId}{id}" class="Dropzone" data-name="{formId}{name}">
 	<div id="{formId}{id}" class="fallback">
 		<input name="{formId}{name}" type="file" multiple />
-	</div>{errorMessage}
+	</div>
+	<!-- BEGIN uploadItemBlock -->
+	<div class="dz-preview dz-image-preview">
+	    <div class="dz-image"><div style="background-image:url({filePath});background-size: cover;height: 100%;"></div></div>
+	    <div class="dz-details">
+	        <div class="dz-size"><span>{fileSize}</span></div>
+	        <div class="dz-filename"><span>{fileName}</span></div>
+	    </div>
+	    <a class="dz-remove i-x" href="javascript:;" data-dz-remove="" title="{removeFile}"></a>
+	</div>
+	<!-- END uploadItemBlock -->
+	{errorMessage}
+	<div class="buttons">
+	    <div class="discardAll i-x">{discardAll}</div>
+	    <div class="addImagesToArticle i-check">{addImagesToArticle}</div>
+	</div>
 </div>
 <!-- END uploadBlock -->
 
@@ -52,7 +67,7 @@
 		<option value=""> - </option>
 		<!-- BEGIN selectOptionBlock -->
 		<option value="{value}"{selected}>{label}</option>
-		<!-- END selectOptionBlock -->	
+		<!-- END selectOptionBlock -->
 	</select>{errorMessage}
 </span>
 <!-- END selectBlock -->
