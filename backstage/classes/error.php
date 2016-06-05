@@ -16,7 +16,7 @@ Class Error
 	private function __construct()
 	{
     	$this->stack = [];
-    	set_error_handler([$this, 'errorHandler']);
+    	$this->errorHandler();
 	}
 
 	/**
@@ -35,12 +35,13 @@ Class Error
 	 *
 	 * @return integer: number of errors.
 	 */
-	public function getCount()
+	public static function getCount()
 	{
-		return count($this->stack);
+		return count(self::getInstance()->stack);
 	}
 
 	/**
+	 * PHP error handler.
 	 * 2  	E_WARNING  	Non-fatal run-time errors. Execution of the script is not halted
 	 * 8 	E_NOTICE 	Run-time notices. The script found something that might be an error, but could also happen when running a script normally
 	 * 256 	E_USER_ERROR 	Fatal user-generated error. This is like an E_ERROR set by the programmer using the PHP function trigger_error()
@@ -48,23 +49,33 @@ Class Error
 	 * 1024 	E_USER_NOTICE 	User-generated notice. This is like an E_NOTICE set by the programmer using the PHP function trigger_error()
 	 * 4096 	E_RECOVERABLE_ERROR 	Catchable fatal error. This is like an E_ERROR but can be caught by a user defined handle (see also set_error_handler())
 	 * 8191 	E_ALL 	All errors and warnings, except level E_STRICT (E_STRICT will be part of E_ALL as of PHP 6.0)
+	 *
+	 * @param integer $errno: error number.
+	 * @param string $errstr: error string message.
+	 * @param string $errfile: error file.
+	 * @param integer $errline: error line.
+	 * @return boolean: used only to disable/enable internal PHP error handler.
 	 */
-	public function errorHandler($errno = 0, $errstr = '', $errfile = '', $errline = 0)
+	private function errorHandler()
 	{
-		if (!(error_reporting() & $errno)) return;// Don't display error if no error number
+    	error_reporting(E_ALL);// Display all errors.
+    	set_error_handler(function($errno = 0, $errstr = '', $errfile = '', $errline = 0)
+    	{
+			if (!(error_reporting() & $errno)) return;// Don't display error if no error number
 
-		$error = new StdClass();
-		$error->number = $errno;
-	    if ($error->number == E_USER_ERROR) $error->type = 'ERROR';
-	    elseif ($error->number == E_WARNING) $error->type = 'WARNING';
-	    elseif ($error->number == E_NOTICE) $error->type = 'NOTICE';
-	    else $error->type = "UNKNOWN ERROR ($error->number)";
-		$error->file = $errfile;
-		$error->line = $errline;
-		$error->text = $errstr;
-		$this->stack[] = $error;
+			$error = new StdClass();
+			$error->number = $errno;
+		    if ($error->number == E_USER_ERROR) $error->type = 'ERROR';
+		    elseif ($error->number == E_WARNING) $error->type = 'WARNING';
+		    elseif ($error->number == E_NOTICE) $error->type = 'NOTICE';
+		    else $error->type = "UNKNOWN ERROR ($error->number)";
+			$error->file = $errfile;
+			$error->line = $errline;
+			$error->text = $errstr;
+			$this->stack[] = $error;
 
-		return true;// True disables internal PHP error handler
+			return true;// True disables internal PHP error handler.
+    	});
 	}
 
 	/**
@@ -73,19 +84,19 @@ Class Error
 	 * @param string $errorMessage: the message to display.
 	 * @param string $errorType: the kind of error.
 	 */
-	public function add($errorMessage, $errorType = 'USER CUSTOM', $backtrace = false)
+	public static function add($errorMessage, $errorType = 'USER CUSTOM', $backtrace = false)
 	{
 		$trace = debug_backtrace();
 		$error = new StdClass();
 		$error->number = null;
 		$error->type = "$errorType ERROR";
-		$error->file = isset($trace[0]['file']) ? $this->pathFromSiteRoot($trace[0]['file']) : '';
+		$error->file = isset($trace[0]['file']) ? self::getInstance()->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$error->backtrace = $backtrace ? $trace : null;
 		$error->text = $errorMessage;
-		$this->stack[] = $error;
+		self::getInstance()->stack[] = $error;
 
-		return $this;
+		return self::getInstance();
 	}
 
 	/**
@@ -98,10 +109,10 @@ Class Error
 	 *                          an HTML comment.
 	 * @return the generated HTML markup of the error.
 	 */
-	public function show($hidden = false)
+	public static function show($hidden = false)
 	{
 		$output = '';
-		foreach ($this->stack as $i => $error)
+		foreach (self::getInstance()->stack as $i => $error)
 		{
 		    if ($hidden) $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
 			else
@@ -156,7 +167,7 @@ Class Error
 								$what = "$class$function($args);";
 							}
 
-							$output .= "<li>Called from <strong>/".$this->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";
+							$output .= "<li>Called from <strong>/".self::getInstance()->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";
 						}
 						$output .= "</ol></div>";
 				}
@@ -173,12 +184,12 @@ Class Error
 	 *
 	 * @return void.
 	 */
-	public function log()
+	public static function log()
 	{
 		$settings = Settings::get();
 
 		$output = date('Y-m-d H:i:s')."\n";
-		foreach ($this->stack as $i => $error)
+		foreach (self::getInstance()->stack as $i => $error)
 		{
 		    $output .= "- $error->type in file /$error->file at line $error->line:\n  $error->text\n";
 		}

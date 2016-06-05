@@ -8369,3 +8369,64 @@
 - NOTICE in file /Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
   Undefined property: stdClass::$backtrace
 
+2015-11-12 05:37:35
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/form.php at line 493:
+  Undefined index: published
+- MYSQLI ERROR in file /backstage/classes/database.query.php at line 905:
+  Query::Insert(): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1
+  SQL = "INSERT INTO `articles` (`content_en`, `content_fr`, `author`, `category`, `image`, `published`) VALUES ('Hôi An - Mid autumn festival', 'Hôi An - Mid autumn festival', 1, 2, 'images/gallery/___.jpg', )".
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-12 05:37:49
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 335:
+  Undefined property: stdClass::$metaDescription
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 335:
+  Trying to get property of non-object
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 336:
+  Undefined property: stdClass::$metaKeywords
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 336:
+  Trying to get property of non-object
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+
+2015-11-16 12:57:01
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 170:
+  Undefined variable: id
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 170:
+  Undefined variable: id
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 170:
+  Undefined variable: id
+
+2015-11-16 12:58:02
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 179:
+  Undefined variable: id
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 179:
+  Undefined variable: id
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 111:
+  Undefined property: stdClass::$backtrace
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/text.php at line 179:
+  Undefined variable: id
+
+2016-01-20 14:58:21
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/page.php at line 177:
+  Uninitialized string offset: 0
+- NOTICE in file //Users/anto/Dropbox/web/localhost/my_site/site/backstage/classes/error.php at line 122:
+  Undefined property: stdClass::$backtrace
+
+2016-01-20 15:11:27
+- WRONG DATA ERROR in file /backstage/classes/text.php at line 169:
+  The text id #70 is not found in database.
+
