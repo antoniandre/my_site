@@ -94,17 +94,19 @@ Class Where extends DatabaseEntity
      * $q= $db->query();
      * $q->select('pages', [$q->col('page'), $q->concat($q->col('url_en'), ' && ', $q->col('url_fr'))->as('concat')]);
      * $w= $q->where();
+     * $w->and($w->col('page')->eq("sitemap"), $w->col('url_fr')->eq("accueil"));
      *
-     * 2 possible syntaxes for where clause:
-	 * 1.    $w->and($w->col('page')->eq("sitemap"), $w->col('url_fr')->eq("accueil"));
-     * 2.    $w->col('page')->eq("sitemap")->and($w->col('url_fr')->eq("accueil"));
+     * 3 possible syntaxes for where clause with conditions noted '_COND_':
+	 * 1.    $w->and(_COND_, _COND_, _COND_);
+     * 2.    $w->_COND_->and(_COND_)->and(_COND_);
+     * 3.    $w->and()->_COND_->and()->_COND_->and()->_COND_;
      *
 	 */
 	public function _and()
 	{
-		$args= $this->gatherArgs(func_get_args());
-		$this->tempPieces[]= (count($args)> 1) ? (' ('.implode(" AND ", $args).')') : (' AND '.$args[0]);
-		$this->where= implode("\n", $this->tempPieces);
+		$args = $this->gatherArgs(func_get_args());
+		$this->tempPieces[] = (count($args) > 1) ? (' ('.implode(" AND ", $args).')') : (' AND '.(isset($args[0]) ? $args[0] : ''));
+		$this->where = implode("\n", $this->tempPieces);
 		return $this;
 	}
 
@@ -119,17 +121,19 @@ Class Where extends DatabaseEntity
      * $q= $db->query();
      * $q->select('pages', [$q->col('page'), $q->concat($q->col('url_en'), ' && ', $q->col('url_fr'))->as('concat')]);
      * $w= $q->where();
+     * $w->or($w->col('page')->eq("sitemap"), $w->col('page')->eq("home"));
      *
-     * 2 possible syntaxes for where clause:
-	 * 1.    $w->or($w->col('page')->eq("sitemap"), $w->col('page')->eq("home"));
-     * 2.    $w->col('page')->eq("sitemap")->or($w->col('page')->eq("home"));
+     * 3 possible syntaxes for where clause with conditions noted '_COND_':
+	 * 1.    $w->or(_COND_, _COND_, _COND_);
+     * 2.    $w->_COND_->or(_COND_)->or(_COND_);
+     * 3.    $w->or()->_COND_->or()->_COND_->or()->_COND_;
      *
 	 */
 	public function _or()
 	{
-		$args= $this->gatherArgs(func_get_args());
-		$this->tempPieces[]= (count($args)> 1) ? (' ('.implode(" OR ", $args).')') : (' OR '.$args[0]);
-		$this->where= implode("\n", $this->tempPieces);
+		$args = $this->gatherArgs(func_get_args());
+		$this->tempPieces[] = (count($args) > 1) ? (' ('.implode(" OR ", $args).')') : (' OR '.(isset($args[0]) ? $args[0] : ''));
+		$this->where = implode("\n", $this->tempPieces);
 		return $this;
 	}
 
@@ -154,10 +158,12 @@ Class Where extends DatabaseEntity
 	/**/
 	public function eq($rightHandArg)
 	{
-		$currIndex= count($this->tempPieces)-1;
-		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
-		else $this->tempPieces[$currIndex].= ' = '.$this->gatherArgs(func_get_args())[0];
-		$this->where= implode("\n", $this->tempPieces);
+		$currIndex = count($this->tempPieces)-1;
+
+		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+
+		$this->tempPieces[$currIndex] .= ' = '.$this->gatherArgs(func_get_args())[0];
+		$this->where = implode("\n", $this->tempPieces);
 		return $this;
 	}
 
@@ -204,18 +210,14 @@ Class Where extends DatabaseEntity
 	/**/
 	public function dif($rightHandArg)
 	{
-		$currIndex= count($this->tempPieces)-1;
-		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
-		else $this->tempPieces[$currIndex].= ' <> '.$this->gatherArgs(func_get_args())[0];
-		$this->where= implode("\n", $this->tempPieces);
-		return $this;
+		return $this->ne($rightHandArg);
 	}
 	public function ne($rightHandArg)
 	{
-		$currIndex= count($this->tempPieces)-1;
-		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
-		else $this->tempPieces[$currIndex].= ' <> '.$this->gatherArgs(func_get_args())[0];
-		$this->where= implode("\n", $this->tempPieces);
+		$currIndex = count($this->tempPieces)-1;
+		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
+		else $this->tempPieces[$currIndex] .= ' <> '.$this->gatherArgs(func_get_args())[0];
+		$this->where = implode("\n", $this->tempPieces);
 		return $this;
 	}
 
@@ -259,6 +261,22 @@ Class Where extends DatabaseEntity
 		parent::{__FUNCTION__}(func_get_arg(0));
 		$this->where= implode("\n", $this->tempPieces);
 		return $this;
+	}
+
+	/**
+	 * Tells the query this word is not a string but a column name prefixed by a table name.
+	 * E.g. 'articles.id'
+	 *
+	 * @param string $column: the column name.
+	 * @param string $table: the table name.
+	 * @return The current Query instance.
+	 */
+	public function colIn($column, $table)
+	{
+		// PHP5.6+
+		// parent::{__FUNCTION__}(...func_get_args());
+		// PHP5.5-
+		return call_user_func_array(['parent', __FUNCTION__], func_get_args());
 	}
 
 	/**/
