@@ -49,10 +49,10 @@ Class Utility
 		                  ['validation' => 'required', 'rowClass' => 'clear']);
 		$form->addElement('text',
 		                  ['name' => 'firstName', 'placeholder' => text('Prénom')],
-		                  ['validation' => 'required', 'rowSpan' => 2]);
-		$form->addElement('email',
+		                  ['validation' => 'required', 'rowClass' => 'floatLeft'/*, 'rowSpan' => 2*/]);
+		/*$form->addElement('email',
 		                  ['name' => 'email', 'placeholder' => text('Email : restera invisible sur le site')],
-		                  ['validation' => 'required', 'rowClass' => 'floatLeft']);
+		                  ['validation' => 'required']);*/
 
 		$form->addButton('validate', text(18));
 		$form->validate(function($result, $form)
@@ -202,6 +202,13 @@ Class Utility
 				  ."Content-Transfer-Encoding: 8bit";
 
 		$sent = mail($email, $subject, $message, $headers);
+	}
+
+	public static function human_filesize($filePath, $decimals = 2) {
+	  $sz = 'BKMGTP';
+	  $filesize = filesize($filePath);
+	  $factor = floor((strlen($filesize) - 1) / 3);
+	  return sprintf("%.{$decimals}f", $filesize / pow(1024, $factor)) . @$sz[$factor];
 	}
 
 	/*
