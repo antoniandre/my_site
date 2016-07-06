@@ -1,7 +1,6 @@
 /*
 	Redactor 10.2.4
 	Updated: September 25, 2015.
-	MODIFIED BY ANTONI ANDRÉ TO ADD FIGURE TAG SUPPORT.
 
 	http://imperavi.com/redactor/
 
@@ -140,16 +139,11 @@
 		linkNofollow: false,
 		linkSize: 50,
 
-		imageEditable: true,
+		imageEditable: false,
 		imageLink: true,
 		imagePosition: true,
 		imageFloatMargin: '10px',
 		imageResizable: true,
-		figureEditable: true,
-		figureLink: true,
-		figurePosition: true,
-		figureFloatMargin: '10px',
-		figureResizable: true,
 
 		imageUpload: null,
 		imageUploadParam: 'file',
@@ -185,7 +179,7 @@
 
 		source: true,
 		buttons: ['html', 'formatting', 'bold', 'italic', 'deleted', 'unorderedlist', 'orderedlist',
-				  'outdent', 'indent', 'image', 'figure', 'file', 'link', 'alignment', 'horizontalrule'], // + 'underline'
+				  'outdent', 'indent', 'image', 'file', 'link', 'alignment', 'horizontalrule'], // + 'underline'
 
 		buttonsHide: [],
 		buttonsHideOnMobile: [],
@@ -269,7 +263,6 @@
 				html: 'HTML',
 				video: 'Insert Youtube Video',
 				image: 'Insert Image',
-				figure: 'Insert Figure',
 				table: 'Table',
 				link: 'Link',
 				link_insert: 'Insert link',
@@ -311,7 +304,6 @@
 				delete_head: 'Delete Head',
 				title: 'Title',
 				image_position: 'Position',
-				figure_position: 'Position',
 				none: 'None',
 				left: 'Left',
 				right: 'Right',
@@ -2065,7 +2057,7 @@
 
 					if (this.opts.cleanSpaces)
 					{
-						html = html.replace(/&nbsp;/gi, ' ');
+						html = html.replace(/&nbsp;(?![!?])/gi, ' ');
 					}
 
 					if (html.search(/^<p>(||\s||<br\s?\/?>||&nbsp;)<\/p>$/i) != -1)
@@ -2133,11 +2125,6 @@
 					html = html.replace(/<span(.*?)id="redactor-image-box"(.*?[^>])>([\w\W]*?)<img(.*?)><\/span>/gi, '$3<img$4>');
 					html = html.replace(/<span(.*?)id="redactor-image-resizer"(.*?[^>])>(.*?)<\/span>/gi, '');
 					html = html.replace(/<span(.*?)id="redactor-image-editter"(.*?[^>])>(.*?)<\/span>/gi, '');
-
-					// remove figure resize
-					html = html.replace(/<span(.*?)id="redactor-figure-box"(.*?[^>])>([\w\W]*?)<figure(.*?)>(.*?)<\/figure><\/span>/gi, '$3<figure$4>$5</figure>');
-					html = html.replace(/<span(.*?)id="redactor-figure-resizer"(.*?[^>])>(.*?)<\/span>/gi, '');
-					html = html.replace(/<span(.*?)id="redactor-figure-editter"(.*?[^>])>(.*?)<\/span>/gi, '');
 
 					// remove font tag
 					html = html.replace(/<font(.*?)>/gi, '');
@@ -2461,7 +2448,7 @@
 							['td', ['colspan', 'rowspan']],
 							['a', '*'],
 							['img', ['src', 'alt', 'data-redactor-inserted-image']],
-							['figure', ['data-redactor-inserted-figure']],
+							['figure', ['*']],
 							['figcaption', '*'],
 							['span', ['class', 'rel', 'data-verified']],
 							['iframe', '*'],
@@ -2581,7 +2568,7 @@
 							var arr = s.match(/<pre(.*?)>([\w\W]*?)<\/pre>/i);
 
 							arr[2] = arr[2].replace(/<br\s?\/?>/g, '\n');
-							arr[2] = arr[2].replace(/&nbsp;/g, ' ');
+							arr[2] = arr[2].replace(/&nbsp;(?![!?])/g, ' ');
 
 							if (this.opts.preSpaces)
 							{
@@ -2610,7 +2597,7 @@
 						{
 							var arr = s.match(/<code(.*?)>([\w\W]*?)<\/code>/i);
 
-							arr[2] = arr[2].replace(/&nbsp;/g, ' ');
+							arr[2] = arr[2].replace(/&nbsp;(?![!?])/g, ' ');
 							arr[2] = this.clean.encodeEntities(arr[2]);
 							arr[2] = arr[2].replace(/\$/g, '&#36;');
 
@@ -3254,8 +3241,6 @@
 					$(document).off('mousedown.redactor.' + this.uuid);
 					$(document).off('click.redactor-image-delete.' + this.uuid);
 					$(document).off('click.redactor-image-resize-hide.' + this.uuid);
-					$(document).off('click.redactor-figure-delete.' + this.uuid);
-					$(document).off('click.redactor-figure-resize-hide.' + this.uuid);
 					$(document).off('touchstart.redactor.' + this.uuid + ' click.redactor.' + this.uuid);
 					$("body").off('scroll.redactor.' + this.uuid);
 					$(this.opts.toolbarFixedTarget).off('scroll.redactor.' + this.uuid);
@@ -4037,7 +4022,6 @@
 				{
 					var $image = $(image);
 					var $link = $image.closest('a', this.$editor[0]);
-					var $figure = $image.closest('figure', this.$editor[0]);
 					var $parent = $image.parent();
 					if ($('#redactor-image-box').length !== 0)
 					{
@@ -4045,12 +4029,7 @@
 					}
 
 					var $next;
-					if ($figure.length !== 0)
-					{
-						$next = $figure.next();
-						$figure.remove();
-					}
-					else if ($link.length !== 0)
+					if ($link.length !== 0)
 					{
 						$parent = $link.parent();
 						$link.remove();
@@ -4062,7 +4041,7 @@
 
 					$('#redactor-image-box').remove();
 
-					if ($figure.length !== 0)
+					if ($image.length !== 0)
 					{
 						this.caret.setStart($next);
 					}
@@ -4144,510 +4123,6 @@
 
 					this.core.setCallback('imageUpload', $image, json);
 
-				}
-			};
-		},
-		figure: function()
-		{
-			return {
-				show: function()
-				{
-					this.modal.load('figure', this.lang.get('figure'), 700);
-					this.upload.init('#redactor-modal-image-droparea', this.opts.imageUpload, this.image.insert);
-
-					this.selection.save();
-					this.modal.show();
-				},
-				showEdit: function($figure)
-				{
-					var $link = $figure.closest('a', this.$editor[0]);
-
-					this.modal.load('figureEdit', this.lang.get('edit'), 705);
-
-					this.modal.createCancelButton();
-					this.figure.buttonDelete = this.modal.createDeleteButton(this.lang.get('_delete'));
-					this.figure.buttonSave = this.modal.createActionButton(this.lang.get('save'));
-
-					this.figure.buttonDelete.on('click', $.proxy(function()
-					{
-						this.figure.remove($figure);
-
-					}, this));
-
-					this.figure.buttonSave.on('click', $.proxy(function()
-					{
-						this.figure.update($figure);
-
-					}, this));
-
-					// hide link's tooltip
-					$('.redactor-link-tooltip').remove();
-
-					$('#redactor-figure-title').val($figure.attr('alt'));
-
-					if (!this.opts.figureLink) $('.redactor-figure-link-option').hide();
-					else
-					{
-						var $redactorfigureLink = $('#redactor-figure-link');
-
-						$redactorfigureLink.attr('href', $figure.find('[src]').attr('src'));
-						if ($link.length !== 0)
-						{
-							$redactorfigureLink.val($link.attr('href'));
-							if ($link.attr('target') == '_blank') $('#redactor-figure-link-blank').prop('checked', true);
-						}
-					}
-
-					if (!this.opts.figurePosition) $('.redactor-figure-position-option').hide();
-					else
-					{
-						var floatValue = ($figure.css('display') == 'block' && $figure.css('float') == 'none') ? 'center' : $figure.css('float');
-						$('#redactor-figure-align').val(floatValue);
-					}
-
-					this.modal.show();
-					$('#redactor-figure-title').focus();
-				},
-				setFloating: function($figure)
-				{
-					var floating = $('#redactor-figure-align').val();
-
-					var figureFloat = '';
-					var figureDisplay = '';
-					var figureMargin = '';
-
-					switch (floating)
-					{
-						case 'left':
-							figureFloat = 'left';
-							figureMargin = '0 ' + this.opts.figureFloatMargin + ' ' + this.opts.figureFloatMargin + ' 0';
-						break;
-						case 'right':
-							figureFloat = 'right';
-							figureMargin = '0 0 ' + this.opts.figureFloatMargin + ' ' + this.opts.figureFloatMargin;
-						break;
-						case 'center':
-							figureDisplay = 'block';
-							figureMargin = 'auto';
-						break;
-					}
-
-					$figure.css({ 'float': figureFloat, display: figureDisplay, margin: figureMargin });
-					$figure.attr('rel', $figure.attr('style'));
-				},
-				update: function($figure)
-				{
-					this.figure.hideResize();
-					this.buffer.set();
-
-					var $link = $figure.closest('a', this.$editor[0]);
-
-					var title = $('#redactor-figure-title').val().replace(/(<([^>]+)>)/ig,"");
-					$figure.find('img').attr('alt', title);
-
-					this.figure.setFloating($figure);
-
-					// as link
-					var link = $.trim($('#redactor-figure-link').val());
-					var link = link.replace(/(<([^>]+)>)/ig,"");
-					if (link !== '')
-					{
-						// test url (add protocol)
-						var pattern = '((xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}';
-						var re = new RegExp('^(http|ftp|https)://' + pattern, 'i');
-						var re2 = new RegExp('^' + pattern, 'i');
-
-						if (link.search(re) == -1 && link.search(re2) === 0 && this.opts.linkProtocol)
-						{
-							link = this.opts.linkProtocol + '://' + link;
-						}
-
-						var target = ($('#redactor-figure-link-blank').prop('checked')) ? true : false;
-
-						if ($link.length === 0)
-						{
-							var a = $('<a href="' + link + '">' + this.utils.getOuterHtml($figure) + '</a>');
-							if (target) a.attr('target', '_blank');
-
-							$figure.replaceWith(a);
-						}
-						else
-						{
-							$link.attr('href', link);
-							if (target)
-							{
-								$link.attr('target', '_blank');
-							}
-							else
-							{
-								$link.removeAttr('target');
-							}
-						}
-					}
-					else if ($link.length !== 0)
-					{
-						$link.replaceWith(this.utils.getOuterHtml($figure));
-
-					}
-
-					this.modal.close();
-					this.observe.figures();
-					this.code.sync();
-				},
-				setEditable: function($figure)
-				{
-					if (this.opts.figureEditable)
-					{
-						$figure.on('dragstart', $.proxy(this.figure.onDrag, this));
-					}
-
-					var handler = $.proxy(function(e)
-					{
-						if (!$(e.target).is('figcaption'))
-						{
-							this.observe.figure = $figure;
-
-							this.figure.resizer = this.figure.loadEditableControls($figure);
-
-							$(document).on('mousedown.redactor-figure-resize-hide.' + this.uuid, $.proxy(this.figure.hideResize, this));
-
-							// resize
-							if (!this.opts.figureResizable) return;
-
-							this.figure.resizer.on('mousedown.redactor touchstart.redactor', $.proxy(function(e)
-							{
-								this.figure.setResizable(e, $figure);
-							}, this));
-						}
-					}, this);
-
-					$figure.off('mousedown.redactor').on('mousedown.redactor', $.proxy(this.figure.hideResize, this));
-					$figure.off('click.redactor touchstart.redactor').on('click.redactor touchstart.redactor', handler);
-				},
-				setResizable: function(e, $figure)
-				{
-					e.preventDefault();
-
-				    this.figure.resizeHandle = {
-				        x : e.pageX,
-				        y : e.pageY,
-				        el : $figure,
-				        ratio: $figure.width() / $figure.height(),
-				        h: $figure.height()
-				    };
-
-				    e = e.originalEvent || e;
-
-				    if (e.targetTouches)
-				    {
-				         this.figure.resizeHandle.x = e.targetTouches[0].pageX;
-				         this.figure.resizeHandle.y = e.targetTouches[0].pageY;
-				    }
-
-					this.figure.startResize();
-				},
-				startResize: function()
-				{
-					$(document).on('mousemove.redactor-figure-resize touchmove.redactor-figure-resize', $.proxy(this.figure.moveResize, this));
-					$(document).on('mouseup.redactor-figure-resize touchend.redactor-figure-resize', $.proxy(this.figure.stopResize, this));
-				},
-				moveResize: function(e)
-				{
-					e.preventDefault();
-
-					e = e.originalEvent || e;
-
-					var height = this.figure.resizeHandle.h;
-
-		            if (e.targetTouches) height += (e.targetTouches[0].pageY -  this.figure.resizeHandle.y);
-		            else height += (e.pageY -  this.figure.resizeHandle.y);
-
-					var width = Math.round(height * this.figure.resizeHandle.ratio);
-
-					if (height < 50 || width < 100) return;
-
-					// this.figure.resizeHandle.el.attr({width: width});
-		            this.figure.resizeHandle.el.width(width);
-
-		            this.code.sync();
-				},
-				stopResize: function()
-				{
-					this.handle = false;
-					$(document).off('.redactor-figure-resize');
-
-					this.figure.hideResize();
-				},
-				onDrag: function(e)
-				{
-					if (this.$editor.find('#redactor-figure-box').length !== 0)
-					{
-						e.preventDefault();
-						return false;
-					}
-
-					this.$editor.on('drop.redactor-figure-inside-drop', $.proxy(function()
-					{
-						setTimeout($.proxy(this.figure.onDrop, this), 1);
-
-					}, this));
-				},
-				onDrop: function()
-				{
-					this.figure.fixfigureSourceAfterDrop();
-					this.observe.figures();
-					this.$editor.off('drop.redactor-figure-inside-drop');
-					this.clean.clearUnverified();
-					this.code.sync();
-				},
-				fixfigureSourceAfterDrop: function()
-				{
-					this.$editor.find('img[data-save-url]').each(function()
-					{
-						var $el = $(this);
-						$el.attr('src', $el.attr('data-save-url'));
-						$el.removeAttr('data-save-url');
-					});
-				},
-				hideResize: function(e)
-				{
-					if (e && $(e.target).closest('#redactor-figure-box', this.$editor[0]).length !== 0) return;
-					if (e && e.target.tagName == 'FIGURE')
-					{
-						var $figure = $(e.target);
-						$figure.find('[src]').attr('data-save-url', $figure.find('[src]').attr('src'));
-					}
-
-					var figureBox = this.$editor.find('#redactor-figure-box');
-					if (figureBox.length === 0) return;
-
-					$('#redactor-figure-editter').remove();
-					$('#redactor-figure-resizer').remove();
-
-					if (figureBox[0].style.margin)
-					{
-						figureBox.find('figure').css({
-							margin: figureBox[0].style.margin
-						});
-					}
-					else
-					{
-						figureBox.find('figure').css({
-							marginTop: figureBox[0].style.marginTop,
-							marginBottom: figureBox[0].style.marginBottom,
-							marginLeft: figureBox[0].style.marginLeft,
-							marginRight: figureBox[0].style.marginRight
-						});
-					}
-
-					figureBox.css('margin', '');
-					figureBox.find('figure').css('opacity', '');
-					figureBox.replaceWith(function()
-					{
-						return $(this).contents();
-					});
-
-					$(document).off('mousedown.redactor-figure-resize-hide.' + this.uuid);
-
-
-					if (typeof this.figure.resizeHandle !== 'undefined')
-					{
-						this.figure.resizeHandle.el.attr('rel', this.figure.resizeHandle.el.attr('style'));
-					}
-
-					this.code.sync();
-				},
-				loadResizableControls: function($figure, figureBox)
-				{
-					if (this.opts.figureResizable && !this.utils.isMobile())
-					{
-						var figureResizer = $('<span id="redactor-figure-resizer" data-redactor="verified"></span>');
-
-						if (!this.utils.isDesktop())
-						{
-							figureResizer.css({ width: '15px', height: '15px' });
-						}
-
-						figureResizer.attr('contenteditable', false);
-						figureBox.append(figureResizer);
-						figureBox.append($figure);
-
-						return figureResizer;
-					}
-					else
-					{
-						figureBox.append($figure);
-						return false;
-					}
-				},
-				loadEditableControls: function($figure)
-				{
-					var figureBox = $('<span id="redactor-figure-box" data-redactor="verified">');
-					figureBox.css('float', $figure.css('float')).attr('contenteditable', false);
-
-					console.log($figure.css('margin'), $figure[0].style.margin, 'ok')
-
-					// Case of inline css style.
-					if ($figure[0].style.margin && $figure[0].style.margin != 'auto')
-					{
-						figureBox.css({
-							marginTop: $figure[0].style.marginTop,
-							marginBottom: $figure[0].style.marginBottom,
-							marginLeft: $figure[0].style.marginLeft,
-							marginRight: $figure[0].style.marginRight
-						});
-
-						$figure.css('margin', 0);
-					}
-					// Case of in file css style.
-					else if ($figure.css('margin') != 'auto')
-					{
-						console.log($figure.css('margin'))
-						figureBox.css({
-							margin: $figure.css('margin')
-						});
-
-						$figure.css('margin', 0);
-					}
-					else
-					{
-						figureBox.css({ 'display': 'block', 'margin': 'auto' });
-					}
-
-					$figure.css('opacity', '.5').after(figureBox);
-
-
-					if (this.opts.figureEditable)
-					{
-						// editter
-						this.figure.editter = $('<span id="redactor-figure-editter" data-redactor="verified">' + this.lang.get('edit') + '</span>');
-						this.figure.editter.attr('contenteditable', false);
-						this.figure.editter.on('click', $.proxy(function()
-						{
-							this.figure.showEdit($figure);
-						}, this));
-
-						figureBox.append(this.figure.editter);
-
-						// position correction
-						var editerWidth = this.figure.editter.innerWidth();
-						this.figure.editter.css('margin-left', '-' + editerWidth/2 + 'px');
-					}
-
-					return this.figure.loadResizableControls($figure, figureBox);
-				},
-				remove: function(figure)
-				{
-					var $figure = $(figure);
-					var $link = $figure.closest('a', this.$editor[0]);
-					var $figure = $figure.closest('figure', this.$editor[0]);
-					var $parent = $figure.parent();
-					if ($('#redactor-figure-box').length !== 0)
-					{
-						$parent = $('#redactor-figure-box').parent();
-					}
-
-					var $next;
-					if ($figure.length !== 0)
-					{
-						$next = $figure.next();
-						$figure.remove();
-					}
-					else if ($link.length !== 0)
-					{
-						$parent = $link.parent();
-						$link.remove();
-					}
-					else
-					{
-						$figure.remove();
-					}
-
-					$('#redactor-figure-box').remove();
-
-					if ($figure.length !== 0)
-					{
-						this.caret.setStart($next);
-					}
-					else
-					{
-						this.caret.setStart($parent);
-					}
-
-					// delete callback
-					this.core.setCallback('figureDelete', $figure[0].src, $figure);
-
-					this.modal.close();
-					this.code.sync();
-				},
-				insert: function(json, direct, e)
-				{
-					// error callback
-					if (typeof json.error != 'undefined')
-					{
-						this.modal.close();
-						this.selection.restore();
-						this.core.setCallback('figureUploadError', json);
-						return;
-					}
-
-					var $img, $figure;
-					if (typeof json == 'string')
-					{
-						$img = $(json).attr('data-redactor-inserted-figure', 'true');
-					}
-					else
-					{
-						$img = $('<img>');
-						$img.attr('src', json.filelink);
-						$figure = $('<figure><figcaption></figure>');
-						$figure = $figure.attr('data-redactor-inserted-figure', 'true').prepend($img);
-					}
-
-
-					var node = $figure;
-					var isP = this.utils.isCurrentOrParent('P');
-					if (isP)
-					{
-						// will replace
-						node = $('<blockquote />').append($figure);
-					}
-
-					if (direct)
-					{
-						this.selection.removeMarkers();
-						var marker = this.selection.getMarker();
-						this.insert.nodeToCaretPositionFromPoint(e, marker);
-					}
-					else
-					{
-						this.modal.close();
-					}
-
-					this.selection.restore();
-					this.buffer.set();
-
-					this.insert.html(this.utils.getOuterHtml(node), false);
-
-					var $figure = this.$editor.find('figure[data-redactor-inserted-figure=true]').removeAttr('data-redactor-inserted-figure');
-
-					if (isP)
-					{
-						$figure.parent().contents().unwrap().wrap('<p />');
-					}
-					else if (this.opts.linebreaks)
-					{
-						if (!this.utils.isEmpty(this.code.get()))
-						{
-							$figure.before('<br>');
-						}
-
-						$figure.after('<br>');
-					}
-
-					if (typeof json == 'string') return;
-
-					this.core.setCallback('imageUpload', $image, json);
 				}
 			};
 		},
@@ -5722,31 +5197,6 @@
 										last = nodes[i];
 									}
 								}
-
-								// Figures.
-								var children = $(nodes[i]).children('figure');
-								if (children.length !== 0)
-								{
-									var self = this;
-									$.each(children, function(z,s)
-									{
-										var $s = $(s);
-										if ($s.css('float') != 'none') return;
-
-										// figure delete callback
-										self.core.setCallback('figureDelete', s.id, $s);
-										last = s;
-									});
-								}
-								else if (nodes[i].tagName == 'FIGURE')
-								{
-									if (last != nodes[i])
-									{
-										// figure delete callback
-										this.core.setCallback('figureDelete', nodes[i].id, $(nodes[i]));
-										last = nodes[i];
-									}
-								}
 							}
 						}
 					}
@@ -6208,19 +5658,6 @@
 							this.buffer.set();
 							this.image.remove(this.observe.image);
 							this.observe.image = false;
-
-							return false;
-						}
-
-						if (this.observe.figure)
-						{
-							e.preventDefault();
-
-							this.figure.hideResize();
-
-							this.buffer.set();
-							this.figure.remove(this.observe.figure);
-							this.observe.figure = false;
 
 							return false;
 						}
@@ -7076,22 +6513,6 @@
 				loadTemplates: function()
 				{
 					this.opts.modal = {
-						figureEdit: String()
-						+ '<section id="redactor-modal-figure-edit">'
-							+ '<label>' + this.lang.get('title') + '</label>'
-							+ '<input type="text" id="redactor-figure-title" />'
-							+ '<label class="redactor-figure-link-option">' + this.lang.get('link') + '</label>'
-							+ '<input type="text" id="redactor-figure-link" class="redactor-figure-link-option" aria-label="' + this.lang.get('link') + '" />'
-							+ '<label class="redactor-figure-link-option"><input type="checkbox" id="redactor-figure-link-blank" aria-label="' + this.lang.get('link_new_tab') + '"> ' + this.lang.get('link_new_tab') + '</label>'
-							+ '<label class="redactor-figure-position-option">' + this.lang.get('figure_position') + '</label>'
-							+ '<select class="redactor-figure-position-option" id="redactor-figure-align" aria-label="' + this.lang.get('figure_position') + '">'
-								+ '<option value="none">' + this.lang.get('none') + '</option>'
-								+ '<option value="left">' + this.lang.get('left') + '</option>'
-								+ '<option value="center">' + this.lang.get('center') + '</option>'
-								+ '<option value="right">' + this.lang.get('right') + '</option>'
-							+ '</select>'
-						+ '</section>',
-
 						imageEdit: String()
 						+ '<section id="redactor-modal-image-edit">'
 							+ '<label>' + this.lang.get('title') + '</label>'
@@ -7111,11 +6532,6 @@
 						image: String()
 						+ '<section id="redactor-modal-image-insert">'
 							+ '<div id="redactor-modal-image-droparea"></div>'
- 						+ '</section>',
-
-						figure: String()
-						+ '<section id="redactor-modal-figure-insert">'
-							+ '<div id="redactor-modal-figure-droparea"></div>'
  						+ '</section>',
 
 						file: String()
@@ -7451,7 +6867,6 @@
 					}
 
 					this.observe.images();
-					this.observe.figures();
 					this.observe.links();
 				},
 				toolbar: function(e, btnName)
@@ -7618,32 +7033,6 @@
 						}
 
 					}, this));
-				},
-				figures: function()
-				{
-					this.$editor.find('figure').each($.proxy(function(i, fig)
-					{
-						var $fig = $(fig);
-
-						// IE fix (when we clicked on an figure and then press backspace IE does goes to figure's url)
-						$fig.closest('a', this.$editor[0]).on('click', function(e) { e.preventDefault(); });
-
-						if (this.utils.browser('msie')) $fig.attr('unselectable', 'on');
-
-						this.figure.setEditable($fig);
-
-					}, this));
-
-					$(document).on('click.redactor-figure-delete.' + this.uuid, $.proxy(function(e)
-					{
-						this.observe.figure = false;
-						if (e.target.tagName == 'FIGURE' && this.utils.isRedactorParent(e.target))
-						{
-							this.observe.figure = (this.observe.figure && this.observe.figure == e.target) ? false : e.target;
-						}
-
-					}, this));
-
 				},
 				links: function()
 				{
@@ -9021,7 +8410,7 @@
 						var $el = $(this);
 						var text = $el.text();
 						text = text.replace(/\u200B/g, '');
-						text = text.replace(/&nbsp;/gi, '');
+						text = text.replace(/&nbsp;(?![!?])/gi, '');
 						text = text.replace(/\s/g, '');
 
 		    	    	if (text === '' && $el.children().length === 0)
@@ -9161,11 +8550,6 @@
 							title: this.lang.get('image'),
 							func: 'image.show'
 						},
-						figure:
-						{
-							title: this.lang.get('figure'),
-							func: 'figure.show'
-						},
 						file:
 						{
 							title: this.lang.get('file'),
@@ -9288,12 +8672,6 @@
 						}
 
 						if (btnName === 'image')
-						{
-							 if (this.opts.imageUpload === false) return;
-							 else if (!this.opts.imageUpload && this.opts.s3 === false) return;
-						}
-
-						if (btnName === 'figure')
 						{
 							 if (this.opts.imageUpload === false) return;
 							 else if (!this.opts.imageUpload && this.opts.s3 === false) return;
