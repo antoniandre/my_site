@@ -34,13 +34,13 @@ $form->addElement('paragraph',
 				  ['class' => 'intro'],
 				  ['text' => text(1)]);
 $form->addElement('radio',
-                  ['name' => 'page[type]'],
+                  ['name' => 'page[type]', 'tabindex' => 1],
                   ['validation' => 'required', 'inline' => true, 'options' => ['php' => 'PHP', 'article' => 'Article'], 'label' => text(14)]);
 $form->addElement('text',
-                  ['name' => 'page[name]', 'placeholder' => text(10)],
+                  ['name' => 'page[name]', 'placeholder' => text(10), 'tabindex' => 2],
                   ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(9)]);
 $form->addElement('text',
-                  ['name' => 'page[path]', 'placeholder' => text(12)],
+                  ['name' => 'page[path]', 'placeholder' => text(12), 'tabindex' => 3],
                   ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(11)]);
 
 $form->addElement('wrapper',
@@ -50,16 +50,16 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'En']);
 $form->addElement('text',
-                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page')],
-                  ['validation' => 'required', 'label' => text(5)]);
-$form->addElement('text',
-                  ['name' => 'page[title][en]', 'placeholder' => text('The page title')],
+                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 4],
                   ['validation' => 'required', 'label' => text(6)]);
+$form->addElement('text',
+                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6],
+                  ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 8],
                   ['label' => text(7), 'default' => $settings->defaultMetaDesc['en']]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][en]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaKey][en]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 10],
                   ['label' => text(8), 'default' => $settings->defaultMetaKey['en']]);
 
 $form->addElement('wrapper',
@@ -69,22 +69,22 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
-                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page')],
+                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 5],
                   ['validation' => 'required']);
 $form->addElement('text',
-                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title')],
+                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7],
                   ['validation' => 'required']);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
                   ['default' => $settings->defaultMetaDesc['fr']]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 11],
                   ['default' => $settings->defaultMetaKey['fr']]);
 
 
 
 $form->addElement('select',
-                  ['name' => 'page[parent]'],
+                  ['name' => 'page[parent]', 'tabindex' => 12],
                   ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home']);
 
 
@@ -107,24 +107,26 @@ $form->addElement('wysiwyg',
                   ['name' => 'article[content][en]',
                    'placeholder' => text('The article content in English.'),
                    'cols' => 50,
-                   'rows' => 30],
+                   'rows' => 30,
+                   'tabindex' => 13],
                   ['label' => textf(20, 'En'),
                    'validation' => 'requiredIf(page[type]=article)']);
 $form->addElement('wysiwyg',
                   ['name' => 'article[content][fr]',
                    'placeholder' => text('The article content in French.'),
                    'cols' => 50,
-                   'rows' => 30],
+                   'rows' => 30,
+                   'tabindex' => 14],
                   ['label' => textf(20, 'Fr'),
                    'validation' => 'requiredIf(page[type]=article)']);
 $form->addElement('select',
-                  ['name' => 'article[category]'],
+                  ['name' => 'article[category]', 'tabindex' => 15],
                   ['validation' => 'requiredIf(page[type]=article)', 'options' => [1 => 'system', 2 => 'travel'], 'value' => 2, 'label' => text('Article category'), 'default' => 2]);
 $form->addElement('text',
-                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page')],
+                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 16],
                   ['default' => ['images/gallery/___.jpg', true]]);
 $form->addElement('checkbox',
-                  ['name' => 'article[published]'],
+                  ['name' => 'article[published]', 'tabindex' => 17],
                   ['inline' => true,
                    'options' => ['published' => 'published'],
                    'checked' => isset($posts->article->published) && $posts->article->published]);
@@ -153,11 +155,13 @@ function validateForm1($result, $form)
 {
 	$language = Language::getCurrent();
 	$return = false;
+	$fileCreated = false;
+	$articleId = null;
 	$db = database::getInstance();
 	$q = $db->query();
 	$pageName = text(($n = $form->getPostedData('page[name]')) ? $n : $form->getPostedData('page[url][en]'),
 					 ['formats' => ['sef']]);
-dbgd($form->getPostedData('article[published]'));
+
 	// Do not perform the insertion in db if page found in DB.
 	$q->select('pages', [$q->col('page')])->where()->col('page')->eq($pageName);
 	$isInDB = $q->run()->info()->numRows;
@@ -180,7 +184,7 @@ dbgd($form->getPostedData('article[published]'));
 	                                'author' => User::getInstance()->getId(),
 	                                'category' => (int)$form->getPostedData('article[category]'),
 	                                'image' => $form->getPostedData('article[image]'),
-	                                'published' => (bool)$form->getPostedData('article[published]')]);
+	                                'published' => (string)$form->getPostedData('article[published]')]);
 			$q->run();
 			$articleId = $q->info()->insertId;
 
@@ -195,7 +199,7 @@ dbgd($form->getPostedData('article[published]'));
 		}
 
 		// Store a new page entry in DB only if previous steps were successful.
-		if (($postingArticle && $articleId) || !$fileCreated)
+		if (($postingArticle && $articleId) || $fileCreated)
 		{
 			$q = $db->query();
 			$q->insert('pages', ['page' => $pageName,
@@ -219,11 +223,16 @@ dbgd($form->getPostedData('article[published]'));
 				$pages = getPagesFromDB();
 				$GLOBALS['pages'] = $pages;// Update the $pages global var.
 
-				new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content');
-				$return = true;
-			}
-		}
-	}
+                // Before redirecting to the 'edit-a-page' edition script, postpone a message to say everything went fine.
+                new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content', true);
+
+                // Now redirect to the edition script. Everything after that will never be executed (due to exit).
+                redirectTo('edit-a-page');
+
+                $return = true;
+            }
+        }
+    }
 
 	return $return;
 }
