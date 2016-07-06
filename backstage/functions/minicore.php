@@ -1,4 +1,10 @@
 <?php
+/**
+ * Minimum required core.
+ * The minimum for js/, css/, images/.
+ * /!\ WARNING: the debug class is not loaded here. So you won't be abble to use dbg() or dbgd().
+ */
+
 //===================== CONSTANTS =====================//
 define('IS_LOCAL', $_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '192.168.0.33');// desktop localhost or iphone access to localhost
 define('SELF', $_SERVER['PHP_SELF']{0} == '/' ? substr($_SERVER['PHP_SELF'], 1) : $_SERVER['PHP_SELF']);
@@ -46,13 +52,14 @@ $user = User::getInstance();
  */
 function includeClass($class)
 {
-    include ROOT."backstage/classes/$class.php";
+    if (!include ROOT."backstage/classes/$class.php")
+        Error::add("The class '$class' was not found in '".ROOT."backstage/classes/$class.php'.", 'NOT FOUND');
 }
 
 /**
  * handle the user posted data.
  *
- * @param  callable $callback: a function to execute when user has posted some data.
+ * @param callable $callback: a function to execute when user has posted some data.
  * @return void.
  */
 function handlePosts($callback)
@@ -62,8 +69,10 @@ function handlePosts($callback)
 
 /**
  * Handle ajax requests.
+ * /!\ Can only be called once per page load if the callback returns not null - since there is a die.
  *
  * @param  callable $callback: a function to execute when an ajax request is made.
+ *                             The callback function must return an object or an indexed array to send back to JS.
  * @return String: a json string to send back to JS.
  */
 function handleAjax($callback)
@@ -71,8 +80,16 @@ function handleAjax($callback)
     if (Userdata::isAjax() && is_callable($callback))
     {
         $object = $callback();
-        header('Content-Type: application/json;charset=utf-8');
-        die(json_encode($object));
+
+        // If $object is null no task has been performed so don't die to let a possible other AJAX handler treat unmatched task.
+        if ($object)
+        {
+            $object = (object)$object;// Cast an acceptable indexed array to object.
+            header('Content-Type: application/json;charset=utf-8');
+
+            if (Error::getCount()) $object->message .= "\n\nPHP SAID:\n" . Error::get();
+            die(json_encode($object));
+        }
     }
 }
 //========================================== end of FUNCTIONS ==========================================//
