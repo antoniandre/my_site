@@ -74,7 +74,7 @@ class Userdata
             if (count($inputVar)) foreach($inputVar as $key => $value) if (is_numeric($key) || $key)
             {
                 // If array and numeric key, keep array form even if $asObject is set to true. Makes no sense.
-                $outputVar = $asObject && !is_numeric($key) ? new StdClass() : array();
+                if (!$outputVar) $outputVar = $asObject && !is_numeric($key) ? new StdClass() : array();
                 $tmp = $value;// Init for all cases - like bool, float, int.
 
                 if (is_numeric($value)) $tmp = (int)$value;
