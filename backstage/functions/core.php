@@ -8,6 +8,7 @@
 require ROOT.'backstage/functions/minicore.php';// Minimum required core. (the min for js/, css/, images/).
 
 includeClass('debug');
+
 includeClass('utility');
 includeClass('message');
 includeClass('form');
@@ -36,9 +37,8 @@ if (Language::getTarget()) $page->refresh();
 // todo: write a Cache class.
 /*if ($settings->useCache && !Userdata::is_set('post'))
 {
-    include(ROOT."backstageche/$page->path$page->page.html");
+    include(ROOT."backstage/cache/$page->path$page->page.html");
 }*/
-
 if (isset(UserData::get()->js)) include ROOT.'js/index.php';
 if (isset(UserData::get()->css)) include ROOT.'css/index.php';
 //============================================ end of MAIN =============================================//
@@ -181,7 +181,7 @@ function url($url, $data = [], $fullUrl = false)
 
     //---------------------------- images ---------------------------//
     $pos = strpos($url, 'images/');
-    if ($pos !== false && !$pos)// Found at the beginning.
+    if ($pos === 0)// Found at the beginning.
     {
         $urlPath = $root.$urlParts['path'];
     }
@@ -235,6 +235,13 @@ function seo($url, $data, $language)
 {
     unset($data['lang']);
     return [$url, $data];
+}
+
+function redirectTo($url, $httpCode = 200)
+{
+    // header('HTTP/1.1 503 Service Temporarily Unavailable', true);
+    header('Location: '.url($url));
+    exit;
 }
 
 /**
@@ -296,6 +303,17 @@ function foreachLang($callback)
     {
         $callback($lang, $fullLang);
     }
+}
+
+/**
+ * Returns information on the caller of the function.
+ *
+ * @return array: the debug trace.
+ */
+function getCaller()
+{
+    $caller = debug_backtrace(false);
+    return $caller[1];
 }
 
 /**
