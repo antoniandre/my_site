@@ -240,10 +240,11 @@ function seo($url, $data, $language)
 /**
  * Redirect to a given page using php header location.
  *
- * @param  string  $url: the url you want to redirect to. Use url identidiers.
- *                       @see: function url().
- * @param  integer $httpCode: an optional http code to return to the browser.
- * @return void
+ * @todo: finish functions  to treat http codes in a switch.
+ * @param string $url: the url you want to redirect to. Use url identidiers.
+ *                     @see: function url().
+ * @param integer $httpCode: an optional http code to return to the browser.
+ * @return void.
  */
 function redirectTo($url, $httpCode = 200)
 {
