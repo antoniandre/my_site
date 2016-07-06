@@ -19,26 +19,26 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 $form = new Form();
 $form->addElement('header',
 				  ['class' => 'title'],
-				  ['level' => 2, 'text' => 'Select a page to edit']);
+				  ['level' => 2, 'text' => 'Select a page to edit', 'rowClass' => 'inline']);
 $form->addElement('select',
                   ['name' => 'page[selection]'],
-                  ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required']);
+                  ['options' => $options, 'rowClass' => 'clear', 'validation' => 'required']);
 $form->addElement('radio',
-                  ['name' => 'page[type]'/*, 'disabled' => 'disabled'*/],
+                  ['name' => 'page[type]', 'tabindex' => 1],
                   ['validation' => 'required', 'inline' => true, 'options' => ['php' => 'PHP', 'article' => 'Article'], 'label' => text(14)]);
 
 
 $form->addElement('wrapper',
-				  ['class' => 'pageEdition'],
+				  ['class' => 'pageEdition', 'tabindex' => 2],
 				  ['numberElements' => 22, 'toggle' => 'hideIf(page[type]=undefined)', 'toggleEffect' => 'slide']);
 
 $form->addElement('hidden',
                   ['name' => 'page[nameInDB]']);
 $form->addElement('text',
-                  ['name' => 'page[name]', 'placeholder' => text(10)],
+                  ['name' => 'page[name]', 'placeholder' => text(10), 'tabindex' => 3],
                   ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(9)]);
 $form->addElement('text',
-                  ['name' => 'page[path]', 'placeholder' => text(12)],
+                  ['name' => 'page[path]', 'placeholder' => text(12), 'tabindex' => 4],
                   ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(11)]);
 
 $form->addElement('wrapper',
@@ -48,16 +48,16 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'En']);
 $form->addElement('text',
-                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page')],
+                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 5],
                   ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('text',
-                  ['name' => 'page[title][en]', 'placeholder' => text('The page title')],
+                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 7],
                   ['validation' => 'required', 'label' => text(6)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
                   ['label' => text(7)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][en]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaKey][en]', 'placeholder' => text('Some coma separated words describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 11],
                   ['label' => text(8)]);
 
 $form->addElement('wrapper',
@@ -67,47 +67,57 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
-                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page')],
+                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6],
                   ['validation' => 'required']);
 $form->addElement('text',
-                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title')],
+                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 8],
                   ['validation' => 'required']);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 10],
                   []);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10],
+                  ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 12],
                   []);
+
 $form->addElement('select',
                   ['name' => 'page[parent]'],
-                  ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home']);
+                  ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home', 'tabindex' => 13]);
 
 
 $form->addElement('wrapper',
 				  ['class' => 'articleStuff'],
 				  ['numberElements' => 5, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
+$form->addElement('upload',
+                  ['name' => 'page[uploads]'],
+                  []);
 $form->addElement('wysiwyg',
                   ['name' => 'article[content][en]',
-                   'placeholder' => text('Some coma separated words describing the content at stake.'),
+                   'placeholder' => text('Some coma separated words describing the content of the current page.'),
                    'cols' => 50,
-                   'rows' => 30],
+                   'rows' => 30,
+                   'tabindex' => 14],
                   ['label' => textf(20, 'En'),
                    'validation' => 'requiredIf(page[type]=article)']);
 $form->addElement('wysiwyg',
                   ['name' => 'article[content][fr]',
-                   'placeholder' => text('Some coma separated words describing the content at stake.'),
+                   'placeholder' => text('Some coma separated words describing the content of the current page.'),
                    'cols' => 50,
-                   'rows' => 30],
+                   'rows' => 30,
+                   'tabindex' => 15],
                   ['label' => textf(20, 'Fr'),
                    'validation' => 'requiredIf(page[type]=article)']);
 $form->addElement('select',
                   ['name' => 'article[category]'],
-                  ['options' => [1 => 'system', 2 => 'travel'], 'value' => 2, 'label' => text('Article category')]);
+                  ['options' => [1 => 'system', 2 => 'travel'],
+                   'value' => 2,
+                   'label' => text('Article category'),
+                   'tabindex' => 16]);
 $form->addElement('text',
                   ['name' => 'article[image]', 'placeholder' => text('Article image for home page')],
                   ['default' => ['images/gallery/___.jpg', true]]);
 $form->addElement('checkbox',
-                  ['name' => 'article[published]'],
+                  ['name' => 'article[published]',
+                   'tabindex' => 17],
                   ['inline' => true,
                    'options' => ['1' => 'published'],
                    'checked' => isset($posts->article->published) && $posts->article->published]);
@@ -115,18 +125,27 @@ $form->addElement('checkbox',
 $form->addButton('cancel', text(17), ['toggle' => 'hideIf(page[type]=undefined)']);
 $form->addButton('validate', text(18), ['toggle' => 'hideIf(page[type]=undefined)']);
 
-
 handleAjax(function()
 {
 	global $form;
 
 	$gets = Userdata::get();
 	if (isset($gets->fetchPage)) return ['html' => fetchPage($gets->fetchPage, $form)];
-});
-$form->validate('validateForm1');
 
-// @todo: test this.
-// $form->modifyElementAttributes('page[metaDesc][en]', ['placeholder' => text('A nice hahahahaha')]);
+    $posts = Userdata::get('post');
+    if (isset($posts->task) && $posts->task === 'save') return $form->validate('afterValidateForm');
+
+    if (Userdata::is_set('files'))
+    {
+        $files = Userdata::get('files');
+        return $form->validate('afterValidateForm');
+    }
+});
+
+$form->validate('afterValidateForm');
+
+//  @todo: test this.
+// $form->modifyElementAttributes('page[metaDesc][en]', ['placeholder' => text('A nice hahaha')]);
 
 $content = $form->render();
 //============================================ end of MAIN =============================================//
@@ -137,13 +156,15 @@ $content = $form->render();
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
 /**
- * validate called internally by the form validate() method if the form has no error.
+ * Validation callback is called internally by the form->validate() method if the form has no error.
+ * It allows you to perform an extra check and block form with error if fails or validate form for good if everything alright.
+ * If you don't need to check extra things, youcan just use this function as a callback to do other things on success.
  *
  * @param StdClass Object $result: the result of the validation process provided by the form validate() method.
  * @param Form Object $form: the current $form object, if you need
- * @return void
+ * @return bool: true or false to agree to validate form or block it after an extra check.
  */
-function validateForm1($result, $form)
+function afterValidateForm($result, $form)
 {
 	$language = Language::getCurrent();
 	$return = false;
@@ -178,7 +199,7 @@ function validateForm1($result, $form)
 				global $form;
 				$settings = Settings::get();
 
-				// Don't forget their will be backslashes here.
+				// Don't forget there will be backslashes here.
 				$GLOBALS["content_$lang"] = preg_replace('~(?<=src=\\\")'.$settings->root.'(images/\?(?:i|u)=[^"]+)(?=\\\")~i', '$1', $form->getPostedData("article[content][$lang]", true));
 			});
 
