@@ -14,13 +14,20 @@ Class Page
 	public $path;
 	public $title;
 	public $h1;
-	public $social;// For social networks (facebook, twitter, google plus).
-	public $socialImage;
-	public $icon;
+
+	// A number between 0 and 100 to set the <header> html tag height making the
+	// page to start from this same point. 
+	private $headerHeight;
+	private $topZoneContent;
+	private $bottomZoneContent;
+
+	private $social;// To activate social networks (Facebook, Twitter, Google plus).
+	public $socialImage;// Picture of the page to share on social networks.
+	public $icon;// An icon to display on the left of the <h1> title.
 	public $metaDescription;
 	public $metaKeywords;
-	public $parent;
-	public $article;
+	public $parent;// The parent page for breadcrumbs.
+	public $article;// An article id if any.
 	private $breadcrumbs;
 	private $showBreadcrumbs;
 	private $language;
@@ -37,6 +44,9 @@ Class Page
 		$this->path = null;
 		$this->title = new StdClass();
 		$this->h1 = '';//!\ Empty string is distinct from null in later var use. 
+		$this->headerHeight = 60;
+		$this->topZoneContent = null;
+		$this->bottomZoneContent = null;
 		$this->social = false;
 		$this->socialImage = null;
 		$this->icon = null;
@@ -80,6 +90,28 @@ Class Page
 	public function setH1($h1)
 	{
 		$this->h1 = $h1 ? $h1 : null;
+	}
+
+	/**
+	 * Set the <header> html tag height making the page to start from this same point. 
+	 *
+	 * @param Integer $height: the height of the <header> tag.
+	 */
+	public function setHeaderHeight($height)
+	{
+		$this->headerHeight = (int)$height;
+	}
+
+	/**
+	 * Set the <header> html if any. 
+	 *
+	 * @param String $html: the height of the <header> tag.
+	 * @param String $zone: the <header> zone where to display the given html. Among: 'top', 'bottom'.
+	 */
+	public function setHeaderContent($html, $zone = 'bottom')
+	{
+		if (!in_array($zone, ['top', 'bottom'])) Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given zone \"$zone\" does not exist. Choose among 'top' or 'bottom'.", 'WRONG DATA', true);
+		else $this->{$zone.'ZoneContent'} = $html;
 	}
 
 	/**
@@ -274,7 +306,7 @@ Class Page
 		header('Content-Type: text/html; charset=utf-8');
 		header('Content-language: '.strtolower($language));
 
-		$tpl = new Template(__DIR__.'/../templates');
+		$tpl = new Template(ROOT.'backstage/templates');
 		$tpl->set_file('page-tpl', 'page.html');
 		$tpl->set_block('page-tpl', 'h1Block', 'theH1Block');
 		$tpl->set_block('page-tpl', 'googleAnalytics', 'theGoogleAnalytics');
@@ -346,22 +378,28 @@ Class Page
 					   'newsletter' => $newsletter->render(),
 
 					   'logoSrc' => url('images/?i='.$settings->logoSrc),
-					   'backToHomeText' => text(68),
+					   'headerImgSrc' => url('images/?i=sailing.jpg'),
+					   'footerImgSrc' => url('images/?i=sunset.jpg'),
+					   'pageWatermarkSrc' => url('images/?i=vietnam-map.png'),
+					   'backToHomeText' => text(45),
+					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
+					   'homeText' => getPageByProperty('id', 'home', $language)->title->$language,
 					   'h1' => ucfirst($this->h1 ? $this->h1 : $page->title->$language),
 					   // If h1 is explicitly set to null then set an h1 with the site name for SEO.
+					   'headerHeight' => $this->headerHeight,
+					   'topZoneContent' => $this->topZoneContent ? $this->topZoneContent : '',
+					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
+					   'stickyBarBottom' => 100-$this->headerHeight-.4,// -.4 to hide the breadcrumbs' bottom border.
 					   'strongOrH1' => $this->h1 === null ? 'h1' : 'strong',
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
 					   'breadcrumbs' => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',
-					   'social' => $this->social ? '<div class="social"></div>' : '',
-					   'brClear' => $this->showBreadcrumbs || $this->social ? '<br class="clear"/>' : '',
-					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
-					   'backToHomeText' => text(45),
-					   'homeText' => getPageByProperty('id', 'home', $language)->title->$language,
+					   'goDownLink' => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"goDown i-chevron-d\"></a>" : '',
+					   'social' => $this->social ? '<div class="social"></div><br class="clear"/>' : '',
 					   'contactUrl' => url(getPageByProperty('id', 'contact', $language)->page.'.php'),
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,
 					   'classEn' => $language == 'en' ? ' active' : '',
 					   'classFr' => $language == 'fr' ? ' active' : '',
-					   'error' => Error::getInstance()->getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Error::getInstance()->show()."</div>" : '',
+					   'error' => Error::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Error::show()."</div>" : '',
 					   'debug' => Debug::getInstance()->getCount() && $showErrors ? "<div id=\"debug\"><p><span class=\"i-bug\"></span> DEBUG </p>".Debug::getInstance()->show()."</div>" : '',
 					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"headerMessage\">$headerMessage</div>" : '',
 					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"contentMessage\">$contentMessage</div>" : '',
@@ -385,7 +423,7 @@ Class Page
 		if ($this->h1 === null) $tpl->set_var('theH1Block', '');
 		else $tpl->parse('theH1Block', 'h1Block', true);
 
-		if (Error::getInstance()->getCount()) Error::getInstance()->log();
+		if (Error::getCount()) Error::log();
 		if (Debug::getInstance()->getCount()) Debug::getInstance()->log();
 
 		return $tpl->parse('display', 'page-tpl');
@@ -419,7 +457,7 @@ Class Page
 			array_unshift($this->breadcrumbs, $matchedPage);
 
 			// Prevent an infinite loop if there is an error (too deep).
-			if ($maxDepth && count($this->breadcrumbs) >= $maxDepth) Error::getInstance()->add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
+			if ($maxDepth && count($this->breadcrumbs) >= $maxDepth) Error::add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
 
 			if ($matchedPage->parent) $this->calculateBreadcrumbs($matchedPage);
 		}
