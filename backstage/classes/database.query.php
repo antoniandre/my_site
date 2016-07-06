@@ -618,7 +618,7 @@ Class Query extends DatabaseEntity
 	{
 		list($table1, $field1) = explode('.', $tableField1, 2);
 		list($table2, $field2) = explode('.', $tableField2, 2);
-		
+
 		$joinedTable = $this->table == $table1 ? $table2 : $table1;
 		$this->join[] = "JOIN $joinedTable ON (`$table1`.`$field1`=`$table2`.`$field2`)";
 		return $this;
@@ -755,11 +755,11 @@ Class Query extends DatabaseEntity
 					 	}
 		 				else $value[1][$k] = "'".($this->secureInternalData ? $this->escape($v) : $v)."'";
 		 			}
-		 			$value= 'CONCAT('.implode(',', $value[1]).')';
+		 			$value = 'CONCAT('.implode(',', $value[1]).')';
 		 		}
 		 		break;
 		 	case 'count':// ['count' => (array)[(string)column_names_to_count, ...]]
-		 		if (is_array($value[1])) $value= "COUNT(`".implode("`,`", $value[1])."`)";
+		 		if (is_array($value[1])) $value = "COUNT(`".implode("`,`", $value[1])."`)";
 		 		break;
 		 	default:
 		 		Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): This case does not exist: ".strtolower($value[0]).'. Given array was: '.print_r($value, true));
@@ -784,12 +784,12 @@ Class Query extends DatabaseEntity
 	public function checkLastInsert($table, $fields = [], $compareString)
 	{
 		// PHP 5.5- -- OLD WAY.
-		$concat = call_user_func_array([$this, 'concat'], $fields);
-		$q= $this->select($table, [$concat]);
+		// $concat = call_user_func_array([$this, 'concat'], $fields);
+		// $q= $this->select($table, [$concat]);
 		// PHP 5.6+
-		// $q= $this->select($table, [$this->concat(...$fields)]);
+		$q = $this->select($table, [$this->concat(...$fields)]);
 
-		$result= $q->orderBy('id', 'DESC')
+		$result = $q->orderBy('id', 'DESC')
 		           ->limit(1)
 		           ->run()
 		           ->loadResult();
