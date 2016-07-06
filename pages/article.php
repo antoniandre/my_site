@@ -61,7 +61,7 @@ if ($article && $article->published)
 
 	$tpl->set_var(['articleId' => $page->article->id,
 				   'content' => $articleContent,
-				   'created'=> text(21,
+				   'created' => text(21,
 				   					[
 				   					    'contexts' => 'article',
 				   						'formats' =>
