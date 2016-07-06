@@ -27,15 +27,21 @@ var // General vars.
 				   || 'OBoxShadow' in s,
 		borderRadius: 'borderRadius' in s || 'WebkitBorderRadius' in s ||  'MozBorderRadius' in s
 	},
-	cl = function(){console.log.apply(console, [arguments]);},// Shortcut function for console.log().
+	cl = function(){console.log.apply(console, arguments);},// Shortcut function for console.log().
 	// Check if requested JS file is loaded or not and if it needs a dedicated css. Then load the required files accordingly.
 
 	loadScript = function(scriptName, callback)
 	{
-		if (!g.scripts[scriptName].loaded)
+		if (!g.scripts[scriptName].loaded && !g.scripts[scriptName].loading)
 		{
 			if (g.scripts[scriptName].css) loadStyleSheet(scriptName);
-			$.getScript(ROOT+'js/'+scriptName+'.js', function(){g.scripts[scriptName].loaded = true;callback();});
+			$.getScript(ROOT+'js/'+scriptName+'.js', function()
+			{
+				g.scripts[scriptName].loaded = true;
+				g.scripts[scriptName].loading = false;
+				callback();
+			});
+			g.scripts[scriptName].loading = true;
 		}
 		else callback();
 	},
@@ -70,7 +76,7 @@ var // General vars.
 		{
 			$('#spinner').fadeOut(800, function()
 			{
-				$('#contentWrapper').children('.content').add('#topBar').addClass('show');
+				$('#contentWrapper').children('.content').add('#menu').addClass('show');
 			});
 		};
 
@@ -79,12 +85,14 @@ var // General vars.
 
 	/**
 	 * Set a message.
+	 * Example of use: setMessage(json.message, json.error? 'error' : 'valid', json.error? 'error' : 'success', 'content', [0, null]);
 	 *
 	 * @param String message: the message to display.
 	 * @param String icon: the icon to show with the message among valid, info, warning, invalid.
 	 * @param String Class: the class to apply to the message container.
 	 * @param String position: the position of the message among header or content. default header.
-	 * @param Array animation: an array of [delay_before_display, display_duration] in milliseconds. Default [1000, 3000]
+	 * @param Array animation: an array of [delay_before_display, delay_before_hidding] in milliseconds. Default [1000, 3000]
+	 * @return jQuery object: the appended message.
 	 */
 	setMessage = function(message, icon, Class, position, animation)
 	{
@@ -108,8 +116,10 @@ var // General vars.
 		setTimeout(function()
 		{
 			if (timeToSlideDown !== null) $message.hide().delay(timeToSlideDown).slideDown(500, 'easeInOutQuad');
-			if (timeToSlideUp !== null) $message.delay(timeToSlideUp).slideUp(500, 'easeInOutQuad');
+			if (timeToSlideUp !== null) $message.delay(timeToSlideUp).slideUp(500, 'easeInOutQuad', function(){$(this).remove()});
 		}, 100);
+
+		return $message;
 	},
 
 	handleOldBrowsers = function()
@@ -144,6 +154,15 @@ var // General vars.
 				e.preventDefault();
 			});
 		}
+		if ($('.goDown').length)
+		{
+			$('.goDown').on('click', function(e)
+			{
+				var href = $(this).attr('href');
+				$.scrollTo(href, 600, {easing: 'easeOutQuad'});
+				e.preventDefault();
+			});
+		}
 
     	//--------------------------- Messages --------------------------//
 		// Messages slide down and slide up animations.
@@ -156,10 +175,30 @@ var // General vars.
 			});
 
     	//--------------------------- Spinner ---------------------------//
-		$('#spinner').fadeOut(600, function()
+		$('#spinner').fadeOut(800, function()
 		{
-			$('#contentWrapper').children('.content').add('#topBar').addClass('show');
+			$('#contentWrapper').children('.content').add('body').addClass('show');
 		});
+
+    	//----------------------- Error backtrace -----------------------//
+		if ($('#error .backtrace').length)
+		{
+			$('#error .backtrace').on('click', 'strong', function()
+			{
+				$(this).next().slideToggle(400)
+				.parents('.backtrace').toggleClass('show');
+			});
+		};
+
+    	//----------------------- Error backtrace -----------------------//
+		$('#lang button')
+			.on('mouseenter', function()
+			{
+				$(this).siblings('button').addClass('blur');
+			}).on('mouseleave', function()
+			{
+				$(this).siblings('button').removeClass('blur');
+			});
     },
 
 	initForm = function()
@@ -243,6 +282,246 @@ var // General vars.
 		{
 			if ($(this).val()) $(this).parents('.comment').attr('class', 'comment i-'+($(this).val()));
 		}).filter(':checked').trigger('change');
+	},
+
+	handleSlideshow = function()
+	{
+		$('.slideshow').each(function(i, curr)
+		{
+			var self = $(this),
+				duration = self.attr('data-duration') || 1000,
+				animDuration = self.attr('data-anim-duration') || 1000,
+				firstImage = self.find('figure:first').addClass('first').children('img'),
+				hasGlobalCaption = self.find('.caption').length;
+
+			self.css({width:firstImage.width(), height:firstImage.height()})
+				.wrap('<div class="slideshowWrapper"/>');
+
+			if (hasGlobalCaption) self.after(self.find('.caption'));
+
+			setInterval(function()
+			{
+				self.find('figure:first').fadeTo(animDuration, 0, function()
+				{
+					var currFig = $(this);
+					currFig.appendTo(currFig.parent());
+					currFig.css('opacity', 1);
+				})
+			}, parseInt(duration)+parseInt(animDuration));
+		});
+	},
+
+	scrollHandler = function()
+	{
+		var bar = $('#stickyBar'),
+			barThreshold = null,
+			page = $('#page'),
+			footer = $('#footer'),
+            documentHeight = $(document).outerHeight(),
+			winHeight = $(window).height(),
+			parallaxObj = [],
+			self = this,
+			// window.pageYOffset undefined in IE8 (http://stackoverflow.com/questions/16618785/ie8-alternative-to-window-scrolly)
+            // documentScroll = $(window).documentScroll(),
+            documentScroll = window.pageYOffset/*IE9+*/ || document.documentElement.scrollTop;// Cross-browser.
+
+
+		this.calculateCurrScrollEl = function(el, i)
+		{
+        	var elTop = el.$el.offset().top,
+        		elHeight = parseInt(el.$el.outerHeight()),
+
+        		// If parallax element bellow winHeight, add winHeight to the current document scroll for calculation.
+        		// Usefull when reaching document end and can't scroll until the parallax element.
+        		docScrollModified = documentScroll + (elTop > winHeight ? winHeight : 0),
+
+				// If scrolled bellow elHeight or scroll above elementTop, do not keep a number out of bounds.
+				// Scroll in px.
+				outOfBoundsBefore = docScrollModified < elTop,
+				outOfBoundsAfter = (docScrollModified - elTop) > (elHeight+1);
+
+			parallaxObj[i].inBounds = !(outOfBoundsBefore) && !(outOfBoundsAfter);
+			parallaxObj[i].state = outOfBoundsBefore ? 'before' : (outOfBoundsAfter ? 'after' : 'in');
+			parallaxObj[i].currScroll = outOfBoundsAfter ? 100 : (outOfBoundsBefore ? 0 : (docScrollModified - elTop) / elHeight);
+
+        	/*return {
+        		inBounds: outOfBoundsBefore || outOfBoundsAfter,
+	        	// Scroll in percent.
+        		value: outOfBoundsAfter ? 100 : (outOfBoundsBefore ? 0 : (docScrollModified - elTop))
+        	};*/
+
+		};
+
+		this.fillArray = function()
+		{
+			if (!$('.parallax[data-speed]').length) return [];
+
+			$('.parallax[data-speed]').each(function(i, curr)
+			{
+				var $el = $(curr);
+
+				parallaxObj[i] =
+				{
+					el: curr,
+					$el: $el,
+					top: $el.offset().top,
+					height: parseInt($el.outerHeight()),
+					speed: $el.attr('data-speed'),
+					lastState: 'init'
+				};
+
+	            if (curr.attributes['data-start-opacity'] && curr.attributes['data-end-opacity'])
+	            {
+	            	parallaxObj[i].opacity =
+	            	{
+	            		startValue: curr.attributes['data-start-opacity'].value,
+	            		endValue: curr.attributes['data-end-opacity'].value,
+	            	};
+	            }
+
+	            if (curr.attributes['data-perform-out-of-window'])
+	            {
+	            	parallaxObj[i].performOutOfWindow = curr.attributes['data-perform-out-of-window'].value;
+	            }
+
+	            // Only support rgb() colors for now.
+	            if (curr.attributes['data-start-background'] && curr.attributes['data-end-background'])
+	            {
+	            	var bgStart = curr.attributes['data-start-background'].value,
+	            		bgEnd = curr.attributes['data-end-background'].value,
+	            		rgbStart = bgStart.match(/rgb ?\((\d+), ?(\d+), ?(\d+)\)/i),
+	            		rgbEnd = bgEnd.match(/rgb ?\((\d+), ?(\d+), ?(\d+)\)/i);
+	            	parallaxObj[i].background =
+	            	{
+	            		start:
+	            		{
+	            			val1: parseInt(rgbStart[1]),
+	            			val2: parseInt(rgbStart[2]),
+	            			val3: parseInt(rgbStart[3])
+	            		},
+	            		delta:// Simplify the calculation when scrolling - for better performances.
+	            		{
+	            			val1: parseInt(rgbEnd[1])-parseInt(rgbStart[1]),
+	            			val2: parseInt(rgbEnd[2])-parseInt(rgbStart[2]),
+	            			val3: parseInt(rgbEnd[3])-parseInt(rgbStart[3])
+	            		},
+	            	};
+	            }
+			})
+		};
+
+		this.init = function()
+		{
+			$(window).on('scroll', function()
+			{
+				//---------------------------- parallax ----------------------------//
+                if (!parallaxObj.length) self.fillArray();
+
+				documentScroll = window.pageYOffset/*IE9+*/ || document.documentElement.scrollTop;// Cross-browser.
+
+				$(parallaxObj).each(function(i, el)
+                {
+                	var lastState = el.state;
+					self.calculateCurrScrollEl(el, i);
+
+                	var $el = el.$el,
+                		newState = el.state,
+                		currScrollInEl = el.currScroll;
+
+                    // If conditions are verified, proceed to calculations.
+                    // Stop calculating when not in screen for performances except if performOutOfWindow is set to true,
+                    // then only loop if last state out of bound was different (states: init/before/in/after).
+                	if (el.inBounds || (el.performOutOfWindow && el.lastState !== newState)
+                		// when page is loaded from bottom of page, prevent black bg to remain when scrolling up the document.
+                		&& !($el.is('#day') && newState == 'before'))
+                	{
+                    	if ($el.hasClass('stop')) $el.removeClass('stop');
+
+	                    var newCss = {};
+
+	                    // Translation.
+	                    if (el.speed != 1)
+	                    {
+		                    var translateY = parseInt(el.height*currScrollInEl*el.speed);
+	                    	newCss.transform = 'translate3d(0px, -'+translateY+'px, 0px)';
+	                    }
+
+	                    // Opacity.
+	                    if (el.opacity !== undefined)
+	                    {
+	                    	newCss.opacity = parseFloat((el.opacity.endValue - el.opacity.startValue) * currScrollInEl / 100);
+	                    }
+
+	                    // Background.
+	                    if (el.background !== undefined)
+	                    {
+	                    	newCss.background = "rgb("
+	                    		+parseInt(parseFloat(el.background.delta.val1 * currScrollInEl) + el.background.start.val1)+","
+	                    		+parseInt(parseFloat(el.background.delta.val2 * currScrollInEl) + el.background.start.val2)+","
+	                    		+parseInt(parseFloat(el.background.delta.val3 * currScrollInEl) + el.background.start.val3)+")";
+	                    }
+
+	                    // Moving sub-elements.
+	                    if ($el.find('.moving').length)
+	                    {
+	                    	$el.find('.moving').each(function(j, curr2)
+	                    	{
+	                    		var movingEl = $(curr2),
+	                    			move =
+	                    			{
+	                    				x:
+	                    				{
+	                    					raw: movingEl.attr('data-move-from-x') || "0",
+	                    					from: parseFloat(movingEl.attr('data-move-from-x') || 0),
+	                    					to: parseFloat(movingEl.attr('data-move-to-x')) || 0
+	                    				},
+	                    				y:
+	                    				{
+	                    					raw: movingEl.attr('data-move-from-y') || "0",
+	                    					from: parseFloat(movingEl.attr('data-move-from-y') || 0),
+	                    					to: parseFloat(movingEl.attr('data-move-to-y')) || 0
+	                    				}
+	                    			},
+	                    			translateX = parseFloat(move.x.from + (move.x.to - move.x.from) * currScrollInEl),
+	                    			translateY = parseFloat(move.y.from + (move.y.to - move.y.from) * currScrollInEl);
+
+                    			move.x.unit = move.x.raw.replace(move.x.from, '');
+                    			move.y.unit = move.y.raw.replace(move.y.from, '');
+	                    		movingEl.css({'transform': 'translate3d('+translateX+move.x.unit+', '+translateY+move.y.unit+', 0px)'});
+	                    	});
+	                    }
+
+	                    if (el.el.attributes['data-target-element'] !== undefined)
+	                    	$target = $(el.el.attributes['data-target-element'].value.replace('&gt;', '>'));
+	                    else if ($el.find('.bg').length) $target = $el.find('.bg');
+	                    else $target = $el;
+
+	                    $target.css(newCss);
+                    }
+                    else $el.addClass('stop');
+                });
+				//----------------------------------------------------------------//
+
+				//-------------------------- Sticky bar --------------------------//
+				var offsetTop = parseInt(bar.offset().top - documentScroll);
+
+				if (offsetTop <= 0 && !bar.hasClass('sticky'))
+				{
+					// Calculate it only once.
+					if (barThreshold === null) barThreshold = Math.min(documentScroll, bar.offset().top);
+					bar.addClass('sticky');
+				}
+				else if (documentScroll <= barThreshold && bar.hasClass('sticky')) bar.removeClass('sticky');
+				//----------------------------------------------------------------//
+			})
+			.on('resize', function()
+			{
+				barThreshold = null;// Force recalculation.
+	            documentHeight = $(document).outerHeight();
+				winHeight = $(window).height();
+				$(window).trigger('scroll', this);
+			});
+		}();
 	};
 //==================================================================================//
 //==================================================================================//
@@ -255,10 +534,13 @@ var commonReady = function()
 	handleOldBrowsers();
 	initBasics();
 	initForm();
+	new scrollHandler();
 	// new imagePreloader(['vietnam-map.png', 'visa-approved.png', 'logo.jpg']);
 
     if ($('#lightbox').length)               handleLightbox();
     if ($('#cookieNotice').length)           handleCookieNotice();
+    if ($('[data-original]').length)         $("[data-original]").lazyload({effect:"fadeIn", threshold:800, load: function(){$(this).addClass('loaded')}});
+    if ($('.slideshow').length)              handleSlideshow();
 	if ($('.social').length && !localhost)   handleSocials();
     if ($('.comments').length)               handleComments();
 };
