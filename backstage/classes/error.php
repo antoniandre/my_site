@@ -199,6 +199,24 @@ Class Error
 	}
 
 	/**
+	 * Get function.
+	 * Returns the error if any error was detected during execution of the script.
+	 * The error is appended to the file with the current date and time.
+	 *
+	 * @return string: error message.
+	 */
+	public static function get()
+	{
+		$output = '';
+		foreach (self::getInstance()->stack as $i => $error)
+		{
+		    $output .= "- $error->type in file /$error->file at line $error->line:\n  $error->text\n";
+		}
+
+		return $output;
+	}
+
+	/**
 	 * Replace the long absolute path with a shorter path relative to the site root.
 	 *
 	 * @param string $path: the path to replace.
