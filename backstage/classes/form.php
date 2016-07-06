@@ -54,6 +54,106 @@ Class Form
 		$this->action = isset($options['action']) ? $options['action'] : url('SELF');
 		$this->class = isset($options['class']) ? $options['class'] : null;
 		$this->enctype = false;
+
+		if (Userdata::isAjax()) $this->handleAjax();
+	}
+
+	/**
+	 * handle all form-related ajax calls.
+	 *
+	 * @return void.
+	 */
+	private function handleAjax()
+	{
+		handleAjax(function()
+		{
+			$object = null;
+			$gets = Userdata::get();
+
+			switch (true)
+			{
+				case isset($gets->discardUpload) && $gets->discardUpload:
+					$object = $this->discardUploads($gets->discardUpload);
+					break;
+				case isset($gets->discardAllUploads):
+					$object = $this->discardUploads();
+					break;
+				case isset($gets->addImagesToArticle):
+					$object = $this->addImagesToArticle();
+					break;
+
+				default:
+					break;
+			}
+
+			return $object;
+		});
+	}
+
+	/**
+	 * Discard provided (or all if empty) temporary uploads.
+	 *
+	 * @param string|array $fileNames: the file names list of files you want to delete from server temporary uploads folder.
+	 *                          Leave empty to discard all.
+	 * @return void.
+	 */
+	private function discardUploads($fileNames = [])
+	{
+		// Make sure given param is an array. But allow one filename string.
+		if (is_string($fileNames)) $fileNames = array($fileNames);
+
+		// If no file name given crawl temporary uploads folder and remove everything.
+ 		if (!$filesCount = count($fileNames))
+ 		{
+	 		$fileNames = array_diff(scandir(self::uploadsDirTemp), ['.', '..']);
+	 		$filesCount = count($fileNames);
+ 		}
+
+ 		// Keep track of removed files for reporting.
+ 		$removedFilesCount = 0;
+ 		foreach ($fileNames as $k => $fileName) if (unlink(self::uploadsDirTemp.$fileName)) $removedFilesCount++;
+
+ 		return ['error' => $removedFilesCount < count($fileNames), 'message' => "$removedFilesCount/$filesCount files were deleted."];
+	}
+
+	private function addImagesToArticle()
+	{
+		$fileNames = array_diff(scandir(self::uploadsDirTemp), ['.', '..']);
+
+		if (count($fileNames))
+		{
+			$output = '';
+			$imagesFound = 0;
+			$imagesProcessed = 0;
+
+			foreach ($fileNames as $k => $fileName)
+			{
+				// If file is an image, move it to definitive uploads folder and rename file for security.
+				if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), ['jpg', 'png', 'gif']))
+				{
+					$imagesFound++;
+
+					// Rename file for security.
+					$picture_name = md5(date('YmdHis')).'.jpg';
+					$yearMonth = date('Ym');
+					if (rename(self::uploadsDirTemp.$fileName, self::uploadsDir."$yearMonth/$picture_name"))
+					{
+						$url = url("images/?u=$yearMonth/$picture_name");
+						$output .= <<<HTML
+						<figure class="size_$size">
+							<img src="$url" alt="$picture_name">
+							<figcaption></figcaption>
+						</figure>
+HTML;
+						$imagesProcessed++;
+					}
+				}
+			}
+		}
+
+ 		return ['error'   => $imagesProcessed < $imagesFound,
+ 				'message' => "$imagesProcessed/$imagesFound image files were processed.",
+ 				'html'    => $output];
 	}
 
 	/**
@@ -257,6 +357,7 @@ Class Form
 		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
 		$tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
 		$tpl->set_block('selectBlock', 'selectOptionBlock', 'theSelectOptionBlock');
+		$tpl->set_block('uploadBlock', 'uploadItemBlock', 'theUploadItemBlock');
 		$tpl->set_block('radioBlock', 'radioOptionBlock', 'theRadioOptionBlock');
 		$tpl->set_block('checkboxBlock', 'checkboxOptionBlock', 'theCheckboxOptionBlock');
 
@@ -448,16 +549,16 @@ Class Form
 		 		}
 		 		break;
 		 	case 'upload':
-		 		$tpl->set_var('the'.ucfirst($element->type).'ItemBlock', '');
-		 		$temporaryFiles = array_diff(scandir(self::uploadsDirTemp), ['.', '..']);
+		 		$tpl->set_var(['the'.ucfirst($element->type).'ItemBlock' => '',
+		 					   'addImagesToArticle' => text('add images to article'),
+							   'discardAll' => text('discard all')]);
 
-		 		foreach ($temporaryFiles as $k => $tempFile)
+		 		// Append in dropzone box every files found in temporary uploads folder.
+		 		foreach (array_diff(scandir(self::uploadsDirTemp), ['.', '..']) as $fileName)
 		 		{
-		 			$tpl->set_var(['fileName' => $tempFile,
-								   'filePath' => url("images/?u=temp/$tempFile"),
-								   'addImagesToArticle' => text('add images to article'),
-								   'discardAll' => text('discard all'),
-								   'fileSize' => Utility::human_filesize(self::uploadsDirTemp."/$tempFile"),
+		 			$tpl->set_var(['fileName' => $fileName,
+								   'filePath' => url("images/?u=temp/$fileName"),
+								   'fileSize' => Utility::human_filesize(self::uploadsDirTemp."/$fileName"),
 								   'removeFile' => text('Remove file')]);
 		 			$tpl->parse('the'.ucfirst($element->type).'ItemBlock', $element->type.'ItemBlock', true);
 		 		}
