@@ -237,6 +237,14 @@ function seo($url, $data, $language)
     return [$url, $data];
 }
 
+/**
+ * Redirect to a given page using php header location.
+ *
+ * @param  string  $url: the url you want to redirect to. Use url identidiers.
+ *                       @see: function url().
+ * @param  integer $httpCode: an optional http code to return to the browser.
+ * @return void
+ */
 function redirectTo($url, $httpCode = 200)
 {
     // header('HTTP/1.1 503 Service Temporarily Unavailable', true);
