@@ -164,7 +164,7 @@ Class Error
 										}
 									}
 								}
-								$what = "$class$function($args);";
+								$what = str_replace('<', '&lt;', "$class$function($args);");
 							}
 
 							$output .= "<li>Called from <strong>/".self::getInstance()->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";

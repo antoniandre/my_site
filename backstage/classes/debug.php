@@ -42,7 +42,7 @@ Class Debug
 
 	/**
 	 * add a debug message to the stack.
-	 * 
+	 *
 	 * @return the only instance of this class.
 	 */
 	public function add()
@@ -82,14 +82,19 @@ Class Debug
 		{
 			$parentCaller = $this->showLevel2caller ? " (Called by <em>$message->file2</em> at line $message->line2)" : '';
 			if ($hidden) $output .= "- Called by $message->file at line $message->line$parentCaller:\n  $message->text\n\n";
-			else $output .= "<div><p>Called by <em>$message->file</em> at line $message->line$parentCaller:</p><code style=\"white-space:pre-wrap;\">$message->text</code></div>\n";
+			else $output .= "<div><p>Called by <em>$message->file</em> at line $message->line$parentCaller:</p>"
+						   ."<code style=\"white-space:pre-wrap;\">"
+						   // If content is sent to browser inside the <code> tag, convert html opening tags to htmlentities
+						   // for nice rendering.
+						   .($hidden ? $message->text : str_replace('<', '&lt;', $message->text))
+						   ."</code></div>\n";
 		}
 		return $hidden ? "<!-- $output -->" : $output;
 	}
 
 	/**
 	 * For debug function only.
-	 * 
+	 *
 	 * @param  boolean $hidden: hide the debug message in an html comment or not.
 	 * @return void.
 	 */
@@ -99,7 +104,12 @@ Class Debug
 		foreach ($this->stack as $i => $message)
 		{
 			if ($hidden) $output .= "- Called by $message->file3 at line $message->line3:\n  $message->text\n\n";
-			else $output .= "<div><p>Called by <em>$message->file3</em> at line $message->line3:</p><code style=\"white-space:pre-wrap;\">$message->text</code></div>\n";
+			else $output .= "<div><p>Called by <em>$message->file3</em> at line $message->line3:</p>"
+						   ."<code style=\"white-space:pre-wrap;\">"
+						   // If content is sent to browser inside the <code> tag, convert html opening tags to htmlentities
+						   // for nice rendering.
+						   .($hidden ? $message->text : str_replace('<', '&lt;', $message->text))
+						   ."</code></div>\n";
 		}
 		return $hidden ? "<!-- $output -->" : $output;
 	}
