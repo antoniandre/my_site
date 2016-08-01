@@ -69,6 +69,9 @@ Class Settings
 	    // Convert to object.
 	    $settings = (object)$settings;
 
+		// Multiple localhost addresses can be set in the config.ini file.
+		define('IS_LOCAL', in_array($_SERVER['SERVER_NAME'], $settings->localHosts));
+
 	    // This var has to be used in templates when the rewrite engine is ON.
 	    $settings->root = (IS_LOCAL ? $settings->rootLocal : $settings->siteUrl).'/';
 	    $settings->rewriteEngine = isset($settings->rewriteEngine) && $settings->rewriteEngine;

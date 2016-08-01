@@ -6,7 +6,6 @@
  */
 
 //===================== CONSTANTS =====================//
-define('IS_LOCAL', $_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '192.168.0.33');// desktop localhost or iphone access to localhost
 define('SELF', $_SERVER['PHP_SELF']{0} == '/' ? substr($_SERVER['PHP_SELF'], 1) : $_SERVER['PHP_SELF']);
 $qs = $_SERVER['QUERY_STRING'];
 define('QUERY_STRING', @$qs{0} == '&' ? substr($qs, 1) : $qs/*preventing pb*/);
@@ -57,6 +56,18 @@ function includeClass($class)
 }
 
 /**
+ * Shortcut function to simply include a php function.
+ *
+ * @param string $function: the php function to include.
+ * @return void.
+ */
+function includeFunction($function)
+{
+    if (!include ROOT."backstage/functions/$function.php")
+        Error::add("The function '$function' was not found in '".ROOT."backstage/functions/$function.php'.", 'NOT FOUND');
+}
+
+/**
  * handle the user posted data.
  *
  * @param callable $callback: a function to execute when user has posted some data.
@@ -91,6 +102,13 @@ function handleAjax($callback)
             die(json_encode($object));
         }
     }
+}
+
+function updateAjaxProgress($progress)
+{
+    session_start();
+    Userdata::setSession('ajaxProgressUpdate', round($progress, 2));
+    session_write_close();
 }
 //========================================== end of FUNCTIONS ==========================================//
 //======================================================================================================//

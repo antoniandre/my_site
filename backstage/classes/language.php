@@ -6,7 +6,8 @@
 Class Language
 {
 	const siteDefault = 'fr';
-	const allowedLanguages = ['en'=>'en_US', 'fr'=>'fr_FR'];
+	const allowedLanguages = ['en' => 'en_US', 'fr' => 'fr_FR'];
+	const languagesLabelsId = ['en' => 71, 'fr' => 72];
 	private static $instance = null;
 	public $browserDefault;
 	private $current;
@@ -80,6 +81,12 @@ Class Language
 	}
 
 
+	public static function getLanguageLabel($languageCode, $inLanguage = '')
+	{
+		return text(self::languagesLabelsId[$languageCode], $inLanguage && self::exists($inLanguage) ? $inLanguage : self::getCurrent());
+	}
+
+
 	/**
 	 * getCurrentFull function.
 	 * Get the current full language locale code.
@@ -113,6 +120,11 @@ Class Language
 	public static function isAllowed($language)
 	{
 		return array_key_exists($language, self::allowedLanguages);
+	}
+	// Function alias.
+	public static function exists($language)
+	{
+		return self::getInstance()->isAllowed($language);
 	}
 
 

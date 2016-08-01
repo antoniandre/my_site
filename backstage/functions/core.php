@@ -17,6 +17,8 @@ includeClass('language');
 includeClass('database');
 includeClass('text');
 includeClass('encryption');
+includeFunction('sitemap');
+
 include ROOT.'backstage/libraries/template.inc';
 //=====================================================//
 
@@ -151,7 +153,8 @@ function url($url, $data = [], $fullUrl = false)
     global $page;
     $settings = Settings::get();
     $gets = Userdata::get();
-    $language = Language::getCurrent();
+    $language = isset($data['language']) && Language::exists($data['language']) ? $data['language'] : Language::getCurrent();
+    unset($data['language']);
     $root = $fullUrl ? "$settings->siteUrl/" : $settings->root;
 
     // As $page is global, create another var $matchedPage to not overwrite $page.
@@ -310,8 +313,10 @@ function foreachLang($callback)
 {
     if (is_callable($callback)) foreach (Language::allowedLanguages as $lang => $fullLang)
     {
-        $callback($lang, $fullLang);
+        $return = $callback($lang, $fullLang);
     }
+
+    return $return;
 }
 
 /**

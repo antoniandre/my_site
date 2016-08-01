@@ -16,7 +16,7 @@ Class Page
 	public $h1;
 
 	// A number between 0 and 100 to set the <header> html tag height making the
-	// page to start from this same point. 
+	// page to start from this same point.
 	private $headerHeight;
 	private $topZoneContent;
 	private $bottomZoneContent;
@@ -43,7 +43,7 @@ Class Page
 		$this->url = new StdClass();
 		$this->path = null;
 		$this->title = new StdClass();
-		$this->h1 = '';//!\ Empty string is distinct from null in later var use. 
+		$this->h1 = '';//!\ Empty string is distinct from null in later var use.
 		$this->headerHeight = 60;
 		$this->topZoneContent = null;
 		$this->bottomZoneContent = null;
@@ -93,7 +93,7 @@ Class Page
 	}
 
 	/**
-	 * Set the <header> html tag height making the page to start from this same point. 
+	 * Set the <header> html tag height making the page to start from this same point.
 	 *
 	 * @param Integer $height: the height of the <header> tag.
 	 */
@@ -103,7 +103,7 @@ Class Page
 	}
 
 	/**
-	 * Set the <header> html if any. 
+	 * Set the <header> html if any.
 	 *
 	 * @param String $html: the height of the <header> tag.
 	 * @param String $zone: the <header> zone where to display the given html. Among: 'top', 'bottom'.
@@ -172,10 +172,10 @@ Class Page
 			// First get the path without query string.
 			// $_SERVER['REDIRECT_URL'] Not set when rewrite engine is off.
 			$path = str_replace($settings->root, '', $_SERVER['REDIRECT_URL']);
-			
+
 			// Remove the potential uneeded preceding slash.
 			if ($path{0} === '/') $path = substr($path, 1);
-			
+
 			if (!$path) $page = getPageByProperty('id', 'home', $this->language);
 			elseif (preg_match('~^('.implode('|', $allowedLanguages).')/?~', $path, $match))
 			{
@@ -320,9 +320,9 @@ Class Page
 
 		$newsletter = new Form(['class' => 'newsletter']);
 		$newsletter->addElement('email',
-				                ['name' => 'newsletter', 'value' => '', 'placeholder' => text('Your email address')],
-				                ['validation' => 'required', 'label' => text('Subscribe to the newsletter')]);
-		$newsletter->addButton('validate', text('ok'));
+				                ['name' => 'newsletter', 'value' => '', 'placeholder' => text(80)],// Your email address.
+				                ['validation' => 'required', 'label' => text(81)]);// Subscribe to the newsletter.
+		$newsletter->addButton('validate', text(85));// Button label: OK.
 		$newsletter->validate
 		(
 			function($result, $form)
@@ -339,22 +339,22 @@ Class Page
 					if ($q->info()->affectedRows)
 					{
 						$to      = $form->getPostedData('email');
-						$subject = "Newsletter $settings->siteName : activez votre addresse email !";
-						$message = "Bonjour ! Cliquez sur <a href=\"$settings->siteUrl\">ce lien</a> pour activer votre addresse email et vous abonner à la newsletter !";
+						$subject = textf(86, $settings->siteName);// Newsletter: Activate your email address now.
+
+						// @TODO: have a proper link for email activation and do the activation task in the User class.
+						$message = nl2br(textf(87, $settings->siteUrl));
 						$headers = 'MIME-Version: 1.0' . "\r\n".
 								   'Content-type: text/html; charset=iso-8859-1'."\r\n".
 								   "From: $settings->adminEmail\r\n".
 						           "Reply-To: $settings->adminEmail\r\n".
 					               'X-Mailer: PHP/'.phpversion();
 
-						if (mail($to, $subject, $message, $headers))
-						// new Message(text('Your subscription has been registered, Please activate it from the email we sent you.'), 'valid', 'success', 'content');
-						new Message(text('Votre abonnement à la newsletter est enregistré! Merci de l\'activer depuis le mail que nous vous avons envoyé.'), 'valid', 'success', 'header');
-						else new Message(text('L\'envoi du mail a échoué.'), 'error', 'error', 'header');
+						// Your subscription has been registered.
+						if (mail($to, $subject, $message, $headers)) new Message(text(82), 'valid', 'success', 'header');
+						else new Message(text(83), 'error', 'error', 'header');// The email could not be delivered.
 					}
-					
-					// else new Message('There was a problem.', 'error', 'error', 'header');
-					else new Message('Un problème est survenu.', 'error', 'error', 'header');
+
+					else new Message(text(84), 'error', 'error', 'header');// there was a pb.
  				}
 			}
 		);
@@ -378,8 +378,8 @@ Class Page
 					   'newsletter' => $newsletter->render(),
 
 					   'logoSrc' => url('images/?i='.$settings->logoSrc),
-					   'headerImgSrc' => url('images/?i=sailing.jpg'),
-					   'footerImgSrc' => url('images/?i=sunset.jpg'),
+					   'headerImgSrc' => url('images/?i=home-slides/sailing_xl.jpg'),
+					   'footerImgSrc' => url('images/?i=sunset_l.jpg'),
 					   'pageWatermarkSrc' => url('images/?i=vietnam-map.png'),
 					   'backToHomeText' => text(45),
 					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
@@ -389,7 +389,9 @@ Class Page
 					   'headerHeight' => $this->headerHeight,
 					   'topZoneContent' => $this->topZoneContent ? $this->topZoneContent : '',
 					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
-					   'stickyBarBottom' => 100-$this->headerHeight-.4,// -.4 to hide the breadcrumbs' bottom border.
+					   'sitemapTree' => getTree('sitemap', ['[article]']),
+					   'articlesListText' => text('Articles'),
+					   'articlesList' => print_r(Article::getArticlesByYear(2016), 1),
 					   'strongOrH1' => $this->h1 === null ? 'h1' : 'strong',
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
 					   'breadcrumbs' => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',

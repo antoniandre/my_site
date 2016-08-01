@@ -28,6 +28,8 @@ Class Utility
 
 	public static function generateCommentSystem($orderColumn, $orderDirection)
 	{
+		global $likes;
+
 		$db = database::getInstance();
 		$page = Page::getInstance();
 		$language = Language::getCurrent();
@@ -40,15 +42,15 @@ Class Utility
 		$form = new Form(['class' => 'leaveComment']);
 		$form->addElement('paragraph',
 						  ['class' => 'intro floatLeft'],
-						  ['text' => 'Laisser un Commentaire : ', 'rowSpan' => 2]);
+						  ['text' => text(88).' ', 'rowSpan' => 2]);// Leave a comment.
 		$form->addElement('radio',
 		                  ['name' => 'gender'],
-		                  ['validation' => 'required', 'inline' => true, 'options' => ['female' => 'Femme', 'male' => 'Homme'], 'rowClass' => 'floatLeft']);
+		                  ['validation' => 'required', 'inline' => true, 'options' => ['female' => text(90), 'male' => text(91)], 'rowClass' => 'floatLeft']);
 		$form->addElement('textarea',
-		                  ['name' => 'comment', 'placeholder' => text('Commentaire'), 'cols' => 70, 'rows' => 4],
+		                  ['name' => 'comment', 'placeholder' => text(89), 'cols' => 70, 'rows' => 4],
 		                  ['validation' => 'required', 'rowClass' => 'clear']);
 		$form->addElement('text',
-		                  ['name' => 'firstName', 'placeholder' => text('Prénom')],
+		                  ['name' => 'firstName', 'placeholder' => text(27)],
 		                  ['validation' => 'required', 'rowClass' => 'floatLeft'/*, 'rowSpan' => 2*/]);
 		/*$form->addElement('email',
 		                  ['name' => 'email', 'placeholder' => text('Email : restera invisible sur le site')],
@@ -74,7 +76,7 @@ Class Utility
 
 			if ($isInDB)
 			{
-				new Message(text('Votre commentaire existe déjà !<br>Vous pouvez en saisir un nouveau si vous souhaitez.'), 'info', 'info', 'header');
+				new Message(nl2br(text(92)), 'info', 'info', 'header');
 				$form->unsetPostedData('comment', false);
 			}
 			else
@@ -94,10 +96,10 @@ Class Utility
 
 					if ($q->info()->affectedRows)
 					{
-						new Message(text('Votre commentaire a bien été enregistré !'), 'valid', 'success', 'header');
+						new Message(text(93), 'valid', 'success', 'header');// Your comment was saved successfully.
 						$return = true;
 
-						$subject = textf('%s a commenté l\'article: "%s"', ucfirst($form->getPostedData('firstName')), $page->getTitle());
+						$subject = textf(94, ucfirst($form->getPostedData('firstName')), $page->getTitle());
 					    $message = '<html>
 						 				<head>
 											<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
@@ -109,9 +111,9 @@ Class Utility
 									</html>';
 						self::mailAdmin($subject, $message);
 					}
-					else new Message('There was a problem.', 'error', 'error', 'header');
+					else new Message(text(84), 'error', 'error', 'header');// There was a pb.
 				}
-				else new Message('There was a problem.', 'error', 'error', 'header');
+				else new Message(text(84), 'error', 'error', 'header');// There was a pb.
 			}
 
 			return $return;
@@ -141,6 +143,8 @@ Class Utility
 			$tpl->set_var(['id' => $comment->id,
 						   'comment' => nl2br(ucfirst($comment->comment)),
 						   'gender' => $comment->gender,
+						   'dataLikes' => isset($likes["c$comment->id"]['likes']) ? intval($likes["c$comment->id"]['likes']) : 0,
+						   'dataLiked' => isset($likes["c$comment->id"]['liked']) ? intval($likes["c$comment->id"]['liked']) : 0,
 						   'createdByOn'=> text(21,
 						   					[
 						   					    'contexts' => 'article',
@@ -158,7 +162,7 @@ Class Utility
 			$tpl->parse('theCommentBlock', 'commentBlock', true);
 		}
 
-		$return = $tpl->parse('display', "comments");
+		$return = $tpl->parse('display', 'comments');
 
 		return $return;
 	}

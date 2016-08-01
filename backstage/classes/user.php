@@ -2,6 +2,7 @@
 /**
  * User model.
  *
+ * @dependencies: settings class.
  * @todo: develop this whole class.
  */
 class User
@@ -25,6 +26,8 @@ class User
 	 */
 	function __construct()
 	{
+		$settings = Settings::get();
+
 		if (IS_LOCAL)
 		{
 			$this->id = 1;
@@ -51,11 +54,11 @@ class User
 
 		// So the user is a guest.
 		elseif (!isset($sessions->usr)) $this->startGuestSession();
-		
+
 		$this->setSettings();
 		if ($this->message) setMessage($this->message, $this->error? 'failure' : 'success');
 
-		//if user prefered language is different than the active one redirect the user to his language and 
+		//if user prefered language is different than the active one redirect the user to his language and
 		//translate url if SEO is on.
 		if ($this->getSettings() && isset($this->getSettings()->language)
 			&& $language!= @$this->getSettings()->language)//!\ only if pref language is different
@@ -121,7 +124,7 @@ class User
 		if (strpos($pair,"'")!==false || strpos($pair,'"')!==false) setError(744);//error: found " or '
 		else $member= loadObject("SELECT `memberId`,`activated`,`visitsNumber` FROM `members`
 								  WHERE LOWER(CONCAT(`login`,`password`))='$pair'");
-		
+
 		if (!is_object($member)) return setError(569);//did not found user in DB (invalid login or password)
 		elseif (!$member->activated) return setError(getTexts(593).'<br />'.getTexts(594));//block unactiv. accompts
 		else
@@ -157,7 +160,7 @@ class User
 	/*public function activate($id)
 	{
 		$member= loadObject("SELECT * FROM `members` WHERE `memberId`='$id'");
-		if (is_object($member) && !$member->activated) 
+		if (is_object($member) && !$member->activated)
 		{
 			update('members', 'activated', 1, "`memberId`='$id'");
 			$this->login($member->login, $member->password);
@@ -186,8 +189,8 @@ class User
 		$this->login= null;
 		$this->storeInSession();//whatever the type of user, store the userId-login pair in session
 	}*/
-	
-	
+
+
 	/**
 	 * Check if current user is admin or not and return a boolean.
 	 * First check the IP against the admin ip list provided in the config.ini file,
@@ -240,7 +243,7 @@ class User
 		$object= new StdClass();
 		if (func_num_args()==1) $object= func_get_arg(0);
 		else {$a=func_get_arg(0);$object->$a= func_get_arg(1);}
-		
+
 		foreach(get_object_vars($object) as $k=>$v) $this->settings->$k= $v;
 		insert('user_settings',array($this->id,serialize($this->settings)));
 	}*/
@@ -292,7 +295,7 @@ class User
 	*/
 	private function setInfo()
 	{
-		/*global $root;	
+		/*global $root;
 		include $root.'backstage/functions/statistics.php';
 		$this->info = getClientInfo();*/
 	}
@@ -319,10 +322,10 @@ class User
 
 		// Shared internet case.
 		if (isset($_SERVER['HTTP_CLIENT_IP'])) $ip = $_SERVER['HTTP_CLIENT_IP'];
-		
+
 		// Behind proxy case.
 		elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		
+
 		// Normal IP.
 		else $ip = (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null);
 
@@ -364,7 +367,7 @@ class User
 	/* TODO: finish
 
 		//----------------------------- Profile deletion ----------------------------//
-		if (isset($posts->deleteProfile) && !isset($posts->yesConfirmed)) 
+		if (isset($posts->deleteProfile) && !isset($posts->yesConfirmed))
 			// sets the query but does not delete unless ajax brought confirmation.
 			// if not confirmed deletion query is executed in: '-- delete pending queries --' above.
 			delete(array("my_bar||`user`=$user->id",
@@ -374,18 +377,18 @@ class User
 						 "DELETE boutique_orders,boutique_ordered_products FROM boutique_orders,boutique_ordered_products
 						  WHERE `client`=$user->id AND `orderId`=`order`",
 						 "members||`memberId`=$user->id"),isset($posts->ajax)?0:1);
-		
+
 		if (isset($posts->yesConfirmed) && isset($posts->deleteProfile))
 		{
 			$guestId= loadResult('SELECT `value` FROM `misc` WHERE `var`="guestId"');
 			insert('misc',array('guestId',(int)$guestId+1,date('Y-m-d')));
 			$user->logout();//logout the user and start a guest session instead
-			
+
 			//TODO: test following:
 			setMessage(getTexts(634),'success',1);
 			////can't set a 'messageTo$user->id' in misc DB table cz the user id is no longer set
 			//header('location: '.url(URI).(QUERY_STRING?'&amp;accountDeleted=1':'?accountDeleted=1'));
-			
+
 			exit;
 		}
 		if (isset($gets->accountDeleted)) setMessage(getTexts(634),'success');

@@ -152,7 +152,7 @@ class Userdata
         self::getInstance()->onloadTasksTreated = true;
     }
 
-    public static function setSession($key, $var, $overwrite = true)
+    public static function setSession($key, $value, $overwrite = true)
     {
         if (!$key) return Error::add('You must provide a $key in order to register the $value in session.');
 
@@ -160,19 +160,19 @@ class Userdata
         if (!$self->session) $self->session = new StdClass();
         if ($overwrite)
         {
-            $_SESSION[$key] = $var;
-            $self->session->$key = $var;
+            $_SESSION[$key] = $value;
+            $self->session->$key = $value;
         }
         else
         {
-            // If the var is already existing but not a numeric indexed array then convert to an array and place the
+            // If the value is already existing but not a numeric indexed array then convert to an array and place the
             // already set value in first place in array: $_SESSION[$key][0].
             if (isset($_SESSION[$key]) && !isset($_SESSION[$key][0])) $_SESSION[$key] = array($_SESSION[$key]);
             if (isset($self->session->$key) && !isset($self->session->$key[0])) $self->session->$key = array($self->session->$key);
 
-            // Append the given $var in the $session->key array.
-            $_SESSION[$key][] = $var;
-            $self->session->{$key}[] = $var;
+            // Append the given $value in the $session->key array.
+            $_SESSION[$key][] = $value;
+            $self->session->{$key}[] = $value;
         }
     }
 
