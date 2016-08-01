@@ -301,14 +301,19 @@ Class Query extends DatabaseEntity
 	 * Also cleanup current instance attributes.
 	 *
 	 * @param  array $args: the arguments to concat.
-	 * @return The current Query instance.
+	 * @return Boolean true if successfully assembled / false if error detected.
 	 */
 	private function assemble()
 	{
-		// if (!$this->currentQuery) return $this->abort(ucfirst(__FUNCTION__).'(): There is currently no query to assemble.');
-		/*else*/if (!$this->where && in_array($this->currentQueryType, array('update', 'delete')))
+		if (!count($this->tempPieces)) $this->abort(ucfirst(__FUNCTION__).'(): There is currently no query to assemble.');
+
+		// Security in case of update or delete: don't accept query if no explicit where clause.
+		// If no where clause, show a message saying to set a where to 1 ($query->where(1)).
+		elseif ((!$this->where && in_array($this->currentQueryType, ['update', 'delete']))
+			    || ($this->where && !$this->where->get()))
 		{
-			return $this->abort(ucfirst(__FUNCTION__)."(): Omitted WHERE clause.\n"
+			// Query abortion will set $this->error to true.
+			$this->abort(ucfirst(__FUNCTION__)."(): Omitted WHERE clause.\n"
 								."You may have forgotten the WHERE clause for the $this->currentQueryType query.\n"
 								."If you intend to impact all the table rows, please set a WHERE clause to 1: "
 								."\"\$query->where(1);\".");
@@ -338,22 +343,29 @@ Class Query extends DatabaseEntity
 					if (count($this->join)) $this->currentQuery .= ' '.implode(' ', $this->join);
 					break;
 				default:
-					return $this->abort(ucfirst(__FUNCTION__).'(): This case is not developed!');
+					$this->abort(ucfirst(__FUNCTION__).'(): This case is not developed!');
 					break;
 			}
 
-			// Add the WHERE clause to the query if any and reset class attributes to null.
-			if ($this->where !== null) $this->currentQuery .= " WHERE ({$this->where->get()})";
-			$this->currentQuery .= $this->orderBy.$this->limit;
-			$this->table = null;
-			$this->tempPieces = null;
-			if ($this->where instanceof Where)
+			if (!$this->error)
 			{
-				$this->where->kill();
-				$this->where = null;
+				// Add the WHERE clause to the query if any and reset class attributes to null.
+				if ($this->where !== null && $this->where->get()) $this->currentQuery .= " WHERE ({$this->where->get()})";
+
+				$this->currentQuery .= $this->orderBy.$this->limit;
+				$this->table = null;
+				$this->tempPieces = null;
+
+				if ($this->where instanceof Where)
+				{
+					$this->where->kill();
+					$this->where = null;
+				}
 			}
 		}
-		return $this;
+
+		// If query is aborted in a matched case above the error will be set to true.
+		return !$this->error;
 	}
 
 	/**
@@ -366,7 +378,7 @@ Class Query extends DatabaseEntity
 	public function run()
 	{
 		$info = new StdClass();
-		$info->error = true;
+		$info->error = false;
 		$info->errorMessage = '';
 		$info->insertId = null;
 		$info->affectedRows = 0;
@@ -417,7 +429,7 @@ Class Query extends DatabaseEntity
 	 */
 	private function abort($message)
 	{
-		$this->error= true;
+		$this->error = true;
 		Error::getInstance()->add('Mysqli '.__CLASS__."::$message\nQuery was aborted.", null, true);
 		return $this->end();
 	}
@@ -667,23 +679,32 @@ Class Query extends DatabaseEntity
 
 		foreach ($queries as $query)
 		{
-			$this->currentQuery= $query;
-			$this->currentQueryType= null;
+			$this->currentQuery = $query;
+			$this->currentQueryType = null;
 			$this->run();
 		}
 
-		$this->currentQuery= null;
-		$this->currentQueryType= null;
+		$this->currentQuery = null;
+		$this->currentQueryType = null;
 	}
 
 	/**
 	 * Create the WHERE clause instance.
+	 * /!\ /!\ WARNING! the result of $q->where() in a query is the Where instance not the Query instance!
+	 * Doing so, you can add things to the where clause by chaining methods if you need to.
+	 * So this won't work:
+	 *     $q->select('articles', [$q->colIn('id', 'articles')])->where(1)->run();
+	 * but this will:
+	 *     $q->select('articles', [$q->colIn('id', 'articles')]);
+	 *     $w = $q->where(1);
+	 *     $q->run();
 	 *
 	 * @param string $condition: the first WHERE clause condition.
 	 */
 	public function where()
 	{
-		$this->where= Where::getInstance(func_get_args());
+		$this->where = Where::getInstance(func_get_args());
+
 		return $this->where;
 	}
 

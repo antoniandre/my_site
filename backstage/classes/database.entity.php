@@ -159,6 +159,7 @@ abstract Class DatabaseEntity
 			// If the argument is not an instance of Where then it is treated as a simple string.
 			else $return[] = "'$arg'";
 		}
+
 		$this->tempPieces = array_values($this->tempPieces);// Reindex the array after unsetting some keys.
 
 		return $return;
