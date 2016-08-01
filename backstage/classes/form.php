@@ -81,6 +81,12 @@ Class Form
 				case isset($gets->addImagesToArticle):
 					$object = $this->addImagesToArticle();
 					break;
+				case isset($gets->ajaxTrackProgress):
+					$object = $this->ajaxTrackProgress();
+					break;
+				case isset($gets->removeFile):
+					$object = $this->removeFile($gets->removeFile);
+					break;
 
 				default:
 					break;
@@ -88,6 +94,27 @@ Class Form
 
 			return $object;
 		});
+	}
+
+	private function ajaxTrackProgress()
+	{
+		$progress = $_SESSION['ajaxProgressUpdate'] ? $_SESSION['ajaxProgressUpdate'] : 0;
+		if ($progress >= 100)
+		{
+			Userdata::_unset('session', 'ajaxProgressUpdate');
+			// unset($_SESSION['ajaxProgressUpdate']);
+		}
+
+		header('Content-Type: application/json;charset=utf-8');
+		header('Cache-Control: no-cache');
+		die(json_encode(['progress' => $progress]));
+	}
+
+	private function removeFile($fileSrc)
+	{
+		$urlParts = parse_url($fileSrc);
+		// @TODO: Do a file unlink.
+		// unlink(self::uploadsDir.'/'.$urlParts['query']);
 	}
 
 	/**
@@ -119,41 +146,87 @@ Class Form
 	private function addImagesToArticle()
 	{
 		$fileNames = array_diff(scandir(self::uploadsDirTemp), ['.', '..']);
+		$error     = true;
+		$message   = 'No file was found in '.self::uploadsDirTemp;
+		$html      = '';
 
 		if (count($fileNames))
 		{
 			$output = '';
 			$imagesFound = 0;
 			$imagesProcessed = 0;
+			$imagesToProcess = [];
 
-			foreach ($fileNames as $k => $fileName)
+			// First calculate the number of found images to treat so the ajax progress can be calculated.
+			foreach ($fileNames as $fileName)
 			{
 				// If file is an image, move it to definitive uploads folder and rename file for security.
-				if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), ['jpg', 'png', 'gif']))
+				if (in_array($imageExtension = pathinfo($fileName, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif']))
 				{
 					$imagesFound++;
-
-					// Rename file for security.
-					$picture_name = md5(date('YmdHis')).'.jpg';
-					$yearMonth = date('Ym');
-					if (rename(self::uploadsDirTemp.$fileName, self::uploadsDir."$yearMonth/$picture_name"))
-					{
-						$url = url("images/?u=$yearMonth/$picture_name");
-						$output .= <<<HTML
-						<figure class="size_$size">
-							<img src="$url" alt="$picture_name">
-							<figcaption></figcaption>
-						</figure>
-HTML;
-						$imagesProcessed++;
-					}
+					$imagesToProcess[] = $fileName;
 				}
 			}
+
+			// Then loop through matching files.
+			foreach ($imagesToProcess as $k => $fileName)
+			{
+				// If file is an image, move it to definitive uploads folder and rename file for security.
+				// if (in_array($imageExtension = pathinfo($fileName, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif']))
+				// {
+					// Read from pic metadata and keep original picture date and time for img alt attribute.
+					$exif = exif_read_data(self::uploadsDirTemp.$fileName, 'IFD0');
+					$alt = $exif === false && isset($exif['DateTime']) && $exif['DateTime'] ? 'picture '.($k + 1).' (no date)'
+																							: $exif['DateTime'];
+
+
+					$imageNameBase = md5(date('YmdHis') . 'pw-salt');// Rename file for security.
+					$yearMonth = date('Ym');// Organize pics in month folders for convenience.
+
+					// Create folder if it does not exist.
+					if (!is_dir(self::uploadsDir.$yearMonth)) mkdir(self::uploadsDir.$yearMonth);
+
+					$originalImage = self::uploadsDir."$yearMonth/{$imageNameBase}_o.$imageExtension";
+
+					// Move image from temporary upload folder to definitive upload folder.
+					if (rename(self::uploadsDirTemp.$fileName, $originalImage))
+					{
+					    $newImage = self::uploadsDir."$yearMonth/{$imageNameBase}_m.$imageExtension";
+
+					    copy($originalImage, $newImage);
+
+						$sizes = ['m'  => 607500,// 900*900*3/4
+						          'o'  => 3145728];// 2048*2048*3/4
+
+					    // @todo: use imagemagick from the built-in php library (php extension).
+					    // Convert the image to the $size resized format using Imagemagick lib.
+					    exec("/usr/local/bin/convert '$originalImage' -resize $sizes[m]@ -unsharp 2x0.5+0.6+0 -quality 90 '$newImage';");
+						$imagesProcessed += .5;
+						updateAjaxProgress($imagesProcessed * 100 / $imagesFound);
+
+						// Convert the image to the 'original' format (3M pixels max - width: 2000 & ratio: 4/3) using Imagemagic lib.
+						exec("/usr/local/bin/convert '$originalImage' -resize $sizes[o]@ -unsharp 2x0.5+0.6+0 -quality 90 $originalImage;");
+						$imagesProcessed += .5;
+						updateAjaxProgress($imagesProcessed * 100 / $imagesFound);
+
+						$url = url("images/?u=$yearMonth/{$imageNameBase}_m.$imageExtension");
+						$br = $k && ($k+1) % 2 ? '<br>' : '';
+						$output .= <<<HTML
+						<figure class="size_m">
+							<img src="$url" alt="$alt">
+							<figcaption></figcaption>
+						</figure>$br
+HTML;
+					}
+				// }
+			}
+
+			$error   = $imagesProcessed < $imagesFound;
+			$message = "$imagesProcessed/$imagesFound image files were processed.";
+			$html    = $output;
 		}
 
- 		return ['error'   => $imagesProcessed < $imagesFound,
- 				'message' => "$imagesProcessed/$imagesFound image files were processed.",
- 				'html'    => $output];
+ 		return ['error' => $error, 'message' => $message, 'html' => $html];
 	}
 
 	/**
@@ -550,8 +623,8 @@ HTML;
 		 		break;
 		 	case 'upload':
 		 		$tpl->set_var(['the'.ucfirst($element->type).'ItemBlock' => '',
-		 					   'addImagesToArticle' => text('add images to article'),
-							   'discardAll' => text('discard all')]);
+		 					   'addImagesToArticle' => text(77),
+							   'discardAll' => text(78)]);
 
 		 		// Append in dropzone box every files found in temporary uploads folder.
 		 		foreach (array_diff(scandir(self::uploadsDirTemp), ['.', '..']) as $fileName)
@@ -559,7 +632,7 @@ HTML;
 		 			$tpl->set_var(['fileName' => $fileName,
 								   'filePath' => url("images/?u=temp/$fileName"),
 								   'fileSize' => Utility::human_filesize(self::uploadsDirTemp."/$fileName"),
-								   'removeFile' => text('Remove file')]);
+								   'removeFile' => text(79)]);
 		 			$tpl->parse('the'.ucfirst($element->type).'ItemBlock', $element->type.'ItemBlock', true);
 		 		}
 		 		break;
@@ -801,22 +874,22 @@ HTML;
 					$accept = strtolower($accept);
 					switch($accept)
 					{
+						case '':
+						case '*':
+							$accept = '*';
+							break;
+						case 'jpeg':
 						case 'jpg':
 							$accept = 'image/jpeg';
 							break;
-						case 'jpeg':
 						case 'png':
 						case 'gif':
 						case "image/$accept":
 							$accept = "image/$accept";
 							break;
 						default:
-							if (!$accept) $accept = '*';
-							else
-							{
-								Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
-								unset($element->options->accept[$l]->accept[$l]);
-							}
+							Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
+							unset($element->options->accept[$l]->accept[$l]);
 							break;
 					}
 				}
@@ -851,9 +924,9 @@ HTML;
 				}
 				foreach ($fileErrorTmpPath as $key => $error)
 				{
-					$name = $fileNamesTmpPath->{"$key"};// E.g. 'picture1.jpg'.
-					$tmpName = $fileTmpNamesTmpPath->{"$key"};// Temporary name given by PHP while transfert.
-					$mimeType = $fileTypesTmpPath->{"$key"};// E.g. 'image/jpg'.
+					$name = $fileNamesTmpPath[$key];// E.g. 'picture1.jpg'.
+					$tmpName = $fileTmpNamesTmpPath[$key];// Temporary name given by PHP while transfert.
+					$mimeType = $fileTypesTmpPath[$key];// E.g. 'image/jpg'.
 
 					// Skip empty files.
 					if (!$tmpName) continue;

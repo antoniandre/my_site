@@ -50,10 +50,10 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'En']);
 $form->addElement('text',
-                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 4],
+                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 4, 'class' => 'pageTitle'],
                   ['validation' => 'required', 'label' => text(6)]);
 $form->addElement('text',
-                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6],
+                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6, 'class' => 'pageUrl'],
                   ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 8],
@@ -69,10 +69,10 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
-                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 5],
+                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 5, 'class' => 'pageTitle'],
                   ['validation' => 'required']);
 $form->addElement('text',
-                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7],
+                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7, 'class' => 'pageUrl'],
                   ['validation' => 'required']);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
@@ -227,9 +227,10 @@ function validateForm1($result, $form)
                 new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content', true);
 
                 // Now redirect to the edition script. Everything after that will never be executed (due to exit).
-                redirectTo('edit-a-page');
+                // @TODO: find a way to redirect to edit-a-page.php script (independent of language) + hash part.
+                redirectTo('edit-a-page.html#load/'.$pageName);
 
-                $return = true;
+                // $return = true;
             }
         }
     }
@@ -250,10 +251,10 @@ function createPhpFile($fileName, $path)
 				  ."//=====================================================//\n\n\n"
 				  ."//======================================================================================================//\n"
 				  ."//============================================= MAIN ===================================================//\n"
-				  ."\$tpl= new Template();\n"
+				  ."\$tpl = new Template();\n"
 				  ."\$tpl->set_file(\"\$page->page-page\", \"{$backstage}templates/\$page->page.html\");\n"
 				  ."\$tpl->set_var('content', \"The page content goes here for page \\\"\$page->page\\\".\");\n"
-				  ."\$content= \$tpl->parse('display', \"\$page->page-page\");\n"
+				  ."\$content = \$tpl->parse('display', \"\$page->page-page\");\n"
 				  ."//============================================ end of MAIN =============================================//\n"
 				  ."//======================================================================================================//\n?>";
 	$path = ROOT."$path";

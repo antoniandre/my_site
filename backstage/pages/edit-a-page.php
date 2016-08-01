@@ -48,11 +48,11 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'En']);
 $form->addElement('text',
-                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 5],
-                  ['validation' => 'required', 'label' => text(5)]);
-$form->addElement('text',
-                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 7],
+                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 5, 'class' => 'pageTitle'],
                   ['validation' => 'required', 'label' => text(6)]);
+$form->addElement('text',
+                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7, 'class' => 'pageUrl'],
+                  ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
                   ['label' => text(7)]);
@@ -67,10 +67,10 @@ $form->addElement('header',
 				  [],
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
-                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6],
+                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 6, 'class' => 'pageTitle'],
                   ['validation' => 'required']);
 $form->addElement('text',
-                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 8],
+                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 8, 'class' => 'pageUrl'],
                   ['validation' => 'required']);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 10],
@@ -112,15 +112,30 @@ $form->addElement('select',
                    'value' => 2,
                    'label' => text('Article category'),
                    'tabindex' => 16]);
+$form->addElement('checkbox',
+                  ['name' => 'article[tags]',
+                   'tabindex' => 17],
+                  ['inline' => true,
+                   'options' => ['vietnam' => 'Vietnam',
+                                 'singapore' => 'Singapore',
+                                 'france' => 'France',
+                                 'thailand' => 'Thailand',
+                                 'malaysia' => 'Malaysia'
+                                ],
+                   'checked' => isset($posts->article->published) && $posts->article->published]);
 $form->addElement('text',
-                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page')],
+                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 18],
                   ['default' => ['images/gallery/___.jpg', true]]);
 $form->addElement('checkbox',
                   ['name' => 'article[published]',
-                   'tabindex' => 17],
+                   'tabindex' => 19],
                   ['inline' => true,
-                   'options' => ['1' => 'published'],
+                   'options' => ['1' => 'Published'],
                    'checked' => isset($posts->article->published) && $posts->article->published]);
+/*$form->addElement('paragraph',
+                  ['class' => 'viewArticle'],
+                  ['text' => text('View the article here <a href="'.url($posts->page->url->{$language}).'" target="_blank">'.$posts->page->url->{$language}.'</a>.'),
+                   'toggle' => 'hideIf(article[published]=0)']);*/
 
 $form->addButton('cancel', text(17), ['toggle' => 'hideIf(page[type]=undefined)']);
 $form->addButton('validate', text(18), ['toggle' => 'hideIf(page[type]=undefined)']);
