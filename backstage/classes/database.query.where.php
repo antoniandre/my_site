@@ -2,7 +2,7 @@
 /**
  * Design pattern: singleton
  *
- * Example of where usage:
+ * Example of Where usage:
  * $where= $db->where("column_name1 ='value1'");
  * $where->and("column_name2='value2'")
  *       ->or("column_name3 LIKE 'value3'", $where->or("column_name4<=4"), $where->or("column_name5<=5"), $where->or("column_name6<=6"))

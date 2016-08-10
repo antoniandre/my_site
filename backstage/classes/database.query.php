@@ -2,6 +2,30 @@
 /**
  * Database Query Model.
  * Design pattern: singleton.
+ *
+ * Example of Query usage (get all the articles for a given date range):
+ * 		$q = $db->query();
+ *		$fields = [$q->colIn('id', 'articles'),
+ *				   $q->colIn('created', 'articles'),
+ *				   $q->colIn('firstName', 'users')->as('author'),
+ *				   $q->col('page'),
+ *				   $q->col('image'),
+ *				   $q->col('published'),
+ *				   $q->colIn("url_$language", 'pages')->as('url'),
+ *				   $q->colIn("title_$language", 'pages')->as('title')];
+ *
+ *		if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
+ *
+ *		$q->select('articles', $fields)
+ *		  ->relate('articles.author', 'users.id')
+ *		  ->relate('pages.article', 'articles.id')
+ *		  ->relate('articles.category', 'article_categories.id')
+ *		  ->orderBy('articles.created', 'desc');
+ *
+ * 		$w = $q->where();
+ * 		$w->colIn('created', 'articles')->between(...$params['dateRange']);
+ * 		$q->run()->loadObjects();
+ *
  */
 include ROOT.'backstage/classes/database.entity.php';
 include ROOT.'backstage/classes/database.query.where.php';
