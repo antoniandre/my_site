@@ -390,8 +390,8 @@ Class Page
 					   'topZoneContent' => $this->topZoneContent ? $this->topZoneContent : '',
 					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
 					   'sitemapTree' => getTree('sitemap', ['[article]']),
-					   'articlesListText' => text('Articles'),
-					   'articlesList' => print_r(Article::getArticlesByYear(2016), 1),
+					   'articlesListText' => text('Tous les articles'),
+					   'articlesList' => $this->renderArticlesList(),
 					   'strongOrH1' => $this->h1 === null ? 'h1' : 'strong',
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
 					   'breadcrumbs' => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',
@@ -479,6 +479,28 @@ Class Page
 			if ($k !== count($this->breadcrumbs)-1) $output .= ($k ? '<span class="separator i-play"> </span>' : '').'<a href="'.url("$page->page.php").'" class="'.$page->id.'"><span>'.$title.'</span></a>';
 			else $output .= ($k ? '<span class="separator i-play"> </span>' : '').'<span class="current '.$page->id.'"><span>'.$title.'</span></span>';
 		}
+		return $output;
+	}
+
+	public function renderArticlesList()
+	{
+		$output = '<ul class="lvl1 glyph">';
+		$currYear = null;
+		$i = 0;
+		foreach (Article::getMultiple() as $article)
+		{
+			$year = substr($article->created, 0 ,4);
+			if ($currYear !== $year)
+			{
+				$output .= ( $i ? '</ul></li>' : '')."<li class='parent'><h4>$year</h4><ul class='lvl2'>";
+				$currYear = $year;
+			}
+			$title = ucfirst($article->title);
+			$output .= '<li><a href="'.url("$article->page.php").'" class="'.$article->id.'"><span>'.$title.'</span></a></li>';
+			$i++;
+		}
+		$output .= '</ul>';
+
 		return $output;
 	}
 

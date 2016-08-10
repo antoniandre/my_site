@@ -6,7 +6,14 @@ function getTree($page = 'sitemap', $exclude = [])
 	$exclude = array_merge($defaultSkipPages, $exclude);
 
 	$pagesTree = getChildrenPages($page, $exclude);
-	return '<ul class="lvl0 glyph">'.displayTree($pagesTree['home'], 1).'</ul>';
+
+	// Put home page at the same level as home page descendents.
+	$pagesTree = array_merge(
+		['home' => ['id' => $pagesTree['home']['id'], 'title' => $pagesTree['home']['title']]],
+		$pagesTree['home']['children']
+	);
+
+	return '<ul class="lvl0 glyph">'.displayTree($pagesTree, 1).'</ul>';
 }
 
 /**
@@ -22,6 +29,8 @@ function getChildrenPages($page, $exclude = [])
 	global $pages, $user;
 	$language = Language::getCurrent();
 	$pagesTree = [];
+
+	// If '[article]' is in exclude, exclude all the articles.
 	$excludeArticles = array_search('[article]', $exclude);
 	if ($excludeArticles !== false) unset($exclude[$excludeArticles]);
 
@@ -50,16 +59,19 @@ function getChildrenPages($page, $exclude = [])
  */
 function displayTree($tree, $depth = 0)
 {
-	$count = isset($tree['children']) ? count($tree['children']) : 0;
-
-	$html = "<li class=\"$tree[id]".($count ? ' parent' : '')."\"><a href=\"".url($tree['id'])."\">$tree[title]</a>";
-	if ($count)
+	$html = '';
+	foreach ($tree as $pageId => $thePage)
 	{
-		$html .= "<ul class=\"lvl$depth\">";
-		foreach ($tree['children'] as $pageId => $thePage) $html .= displayTree($thePage, $depth+1);
-		$html .= "</ul>";
+		$count = isset($thePage['children']) ? count($thePage['children']) : 0;
+		$html .= "<li class=\"$thePage[id]".($count ? ' parent' : '')."\"><a href=\"".url($thePage['id'])."\">$thePage[title]</a>";
+		if ($count)
+		{
+			$html .= "<ul class=\"lvl$depth\">";
+			$html .= displayTree($thePage['children'], $depth+1);
+			$html .= "</ul>";
+		}
+		$html .= "</li>";
 	}
-	$html .= "</li>";
 
 	return $html;
 }

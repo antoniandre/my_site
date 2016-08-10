@@ -17,6 +17,7 @@ includeClass('language');
 includeClass('database');
 includeClass('text');
 includeClass('encryption');
+includeClass('article');
 includeFunction('sitemap');
 
 include ROOT.'backstage/libraries/template.inc';
