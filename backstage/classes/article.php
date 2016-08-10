@@ -42,17 +42,17 @@ Class Article
 	 *     [title] => Singapore 2
 	 * )
 	 */
-	public static function getArticle($articleId, $language = null)
+	public static function get($articleId, $language = null)
 	{
-		$articles = self::getArticles(['language' => $language, 'idList' => [$articleId]]);
+		$articles = self::getMultiple(['language' => $language, 'idList' => [$articleId], 'fetchContent' => true]);
 		return count($articles) ? $articles[0] : null;
 	}
 
-	public static function getArticlesByYear($year)
+	public static function getByYear($year)
 	{
-		return self::getArticlesByDateRange($year);
+		return self::getByDateRange($year);
 	}
-	public static function getArticlesByDateRange($dateRange = [null, null])
+	public static function getByDateRange($dateRange = [null, null])
 	{
 		list($start, $end) = array_pad((array)$dateRange, 2, null);
 
@@ -60,10 +60,20 @@ Class Article
 		if (is_numeric($start)) $start = strlen($start) === 4 ? "$start-01-01 00:00" : date('Y-m-d H:i:s', $start);
 		if (is_numeric($end))   $end = strlen($end) === 4 ? "$end-01-01 00:00" : date('Y-m-d H:i:s', $end);
 
-		return self::getArticles(['dateRange' => [$start, $end]]);
+		return self::getMultiple(['dateRange' => [$start, $end]]);
 	}
 
-	public static function getArticles($params = [])
+	/**
+	 * Get the content of an article.
+	 *
+	 * @todo : to develop.
+	 * @param  array  $params [description]
+	 * @return [type]         [description]
+	 */
+	public static function getContent($params = [])
+	{}
+
+	public static function getMultiple($params = [])
 	{
 		$defaults =
 		[
@@ -71,6 +81,10 @@ Class Article
 			'idList'   => [],
 			// 'tags'     => [],// Not ready yet. @TODO: develop tags.
 			'dateRange' => [null, null],// [dateBegin, dateEnd].
+			'fetchContent' => false// By default don't fetch content to lighten the query.
+			// You should not carry all the content of every articles in a var unless you purposely want to display multiple
+			// contents on same page.
+			// To get the content of one article at a time, yoyu can use getContent() method.
 		];
 		$params = array_merge($defaults, $params);
 		if (!$params['dateRange'][1]) $params['dateRange'][1] = 'NOW()';
@@ -78,37 +92,37 @@ Class Article
 		$language = $params['language'] && Language::exists($params['language']) ? $params['language'] : Language::getCurrent();
 
 		$q = $db->query();
-		$q->select('articles',
-				   [$q->colIn('id', 'articles'),
-				    $q->col("content_$language")->as('content'),
-				    $q->colIn('created', 'articles'),
-				    $q->colIn('firstName', 'users')->as('author'),
-				    $q->col('page'),
-				    $q->col('image'),
-				    $q->col('published'),
-				    $q->colIn("url_$language", 'pages')->as('url'),
-				    $q->colIn("title_$language", 'pages')->as('title')])
-			->relate('articles.author', 'users.id')
-			->relate('pages.article', 'articles.id')
-			->relate('articles.category', 'article_categories.id')
-			->orderBy('articles.created', 'desc');
+		$fields = [$q->colIn('id', 'articles'),
+				   $q->colIn('created', 'articles'),
+				   $q->colIn('firstName', 'users')->as('author'),
+				   $q->col('page'),
+				   $q->col('image'),
+				   $q->col('published'),
+				   $q->colIn("url_$language", 'pages')->as('url'),
+				   $q->colIn("title_$language", 'pages')->as('title')];
+		if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
+		$q->select('articles', $fields)
+		  ->relate('articles.author', 'users.id')
+		  ->relate('pages.article', 'articles.id')
+		  ->relate('articles.category', 'article_categories.id')
+		  ->orderBy('articles.created', 'desc');
 
-		// if (is_array($params['idList']) && count($params['idList']))
-		// {
-		// 	$w = $q->where();
-		// 	$w->colIn('id', 'articles')->in(...$params['idList']);
-		// }
+		if (is_array($params['idList']) && count($params['idList']))
+		{
+			$w = $q->where();
+			$w->colIn('id', 'articles')->in(...$params['idList']);
+		}
 		if (is_array($params['dateRange']) && count($params['dateRange']))
 		{
 			if (!isset($w)) $w = $q->where();
+			else $w->and();
 			$w->colIn('created', 'articles')->between(...$params['dateRange']);
-			;
-		}dbg($q->run());
+		}
 
 		return $q->run()->loadObjects();
 	}
 
-	public static function getPrevNextArticles($articleId, $returnHtml = true)
+	public static function getPrevNext($articleId, $returnHtml = true)
 	{
 		$db = Database::getInstance();
 		$language = Language::getCurrent();
@@ -157,7 +171,7 @@ Class Article
 
 			if ($lang !== Language::getCurrent())
 			{
-				$article = getArticle($articleId, $lang);
+				$article = self::get($articleId, $lang);
 				if ($article->content)
 				{
 					$availableTranslations[$lang] = (object)['languageLabel' => Language::getLanguageLabel($lang), 'article' => $article];
