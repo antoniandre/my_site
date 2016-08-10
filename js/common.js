@@ -255,6 +255,7 @@ var // General vars. (g for general)
 			if (d.getElementById(id)) return;
 			js = d.createElement(s);js.id= id;
 			js.src = '//connect.facebook.net/'+lang.replace('-','_')+'/sdk.js';
+			js.async = 'true';
 			fjs.parentNode.insertBefore(js,fjs);
 		}(document, 'script', 'facebook-jssdk'));
 		//=============end of FACEBOOK============//
@@ -310,6 +311,33 @@ var // General vars. (g for general)
 					currFig.css('opacity', 1);
 				})
 			}, parseInt(duration)+parseInt(animDuration));
+		});
+	},
+
+	handleMobileMenu = function()
+	{
+		var mobileMenu = $('#mobileMenu'),
+			toggler = $('.hamburger');
+
+        // SlideDown submenu.
+		mobileMenu.on('click', '.lvl1 > li.parent > a, .lvl1 > li.parent > h4', function(e)
+		{
+		    e.preventDefault();
+		    var submenu = $(this).siblings('ul');
+
+		    mobileMenu.find('.parent ul:visible').not(submenu).not('.home > ul').slideUp(400);
+		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400);
+		}).find('li ul').not('.home > ul').hide();
+
+		$(window).on('click', function(e)
+		{
+		    // Hide the submenu when user clicks anywhere out of the mobile menu.
+		    // (have to check it is not a click inside menu)
+		    if (!$(e.target).is(mobileMenu) && !mobileMenu.find(e.target).length && !$(e.target).is(toggler)
+		        && $('#mobileMenuOpen').is(':checked'))
+		    {
+		        toggler.trigger('click');
+		    }
 		});
 	},
 
@@ -540,22 +568,25 @@ var // General vars. (g for general)
 	{
 		$("[data-original]").each(function()
 		{
-			switch(true)
+			if ($('#homePage').length)
 			{
-				case g.loadScreenWidth < 300:
-					size = 's';
-					break;
-				case g.loadScreenWidth < 550:
-					size = 'm';
-					break;
-				case g.loadScreenWidth < 900:
-					size = 'l';
-					break;
-				case g.loadScreenWidth < 1400:
-					size = 'xl';
-					break;
+				switch(true)
+				{
+					case g.loadScreenWidth < 300:
+						size = 's';
+						break;
+					case g.loadScreenWidth < 550:
+						size = 'm';
+						break;
+					case g.loadScreenWidth < 900:
+						size = 'l';
+						break;
+					case g.loadScreenWidth < 1400:
+						size = 'xl';
+						break;
+				}
+				$(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
 			}
-			$(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
 		});
 		$("[data-original]").lazyload({effect:"fadeIn", threshold:800, load: function(){$(this).addClass('loaded')}});
 	},
@@ -643,6 +674,7 @@ var commonReady = function()
     if ($('.slideshow').length)              handleSlideshow();
 	if ($('.social').length && !localhost)   handleSocials();
     if ($('.comments').length)               handleComments();
+    if (g.screenWidth <= 550)                handleMobileMenu();
 };
 //================================= end of  M A I N ================================//
 //==================================================================================//
