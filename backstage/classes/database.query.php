@@ -156,7 +156,7 @@ Class Query extends DatabaseEntity
 	 * @param boolean $secureInternalData: use to also secure data coming from the PHP. Since all user vars are already secured ($posts, $gets, etc.)
 	 *                                     Do not over secure otherwise the string will get double slashes that won't go off when in db.
 	 * @return The current Query instance.
-	 * Example of use:
+	 * @example
 	 * $q->insert('misc',
 	 *            array('id' => 3,
 	 *                  'key' => 'key3',
@@ -190,13 +190,13 @@ Class Query extends DatabaseEntity
 	 *                                     Do not over secure otherwise the string will get double slashes that won't go off when in db.
 	 * @return The current Query instance.
 	 *
-	 * Example of use:
+	 * @example
 	 * $q->update('misc',
 	 *            array('value' => 'a very longer second value with date: '.date("Y-m-d H:i:s")))
 	 *   ->where('`key`="test2"')
 	 *   ->run();
 	 *
-	 * Example of use:
+	 * @example
 	 * $q->update('picture_likes',
 	 *			  ['likes' => ['increment', 1], 'ip' => serialize($ipList)]);
 	 * $q->where()->col('picture')->eq($pictureSrc);
@@ -216,7 +216,7 @@ Class Query extends DatabaseEntity
 	 * @param string $table: the table name to delete from
 	 * @return The current Query instance.
 	 *
-	 * Example of use:
+	 * @example
 	 * $q->delete('misc')
 	 *   ->where('`id`=5')
 	 *   ->run();
@@ -235,10 +235,22 @@ Class Query extends DatabaseEntity
 	 * @param string $table: the table name to delete from.
 	 * @return string secured field string
 	 *
-	 * Example of use:
+	 * @example
 	 * $q->select('misc', '*')
 	 *   ->where('`id`=3')
 	 *   ->run();
+	 *
+	 * @example
+	 * $q->select('article_tags', $q->count('tag'));
+	 * $w = $q->where()->col('tag')->eq(2)->and()->col('article')->eq(1);
+	 * $count = $q->run()->loadResult();
+	 *
+	 * @example
+	 * $q->select('pages', [
+     *  	$q->concat($q->col('id'), $q->col('page'), ': ', $q->col('url_en'))->as('c'),
+     * 	 	'value',
+     * 	  	$q->count('*')->as('cd')
+     * ]);
 	 */
 	public function select($table, $fields, $secureInternalData = false)
 	{
@@ -492,7 +504,7 @@ Class Query extends DatabaseEntity
 	 * and return all the params in the right order.
 	 * If a param is non-database-entity-object (Query or Where) it is treated as a simple string.
 	 *
-	 * Ex:
+	 * @example
 	 * $q->select('pages', [
      *                         $q->concat($q->col('id'), $q->col('page'), ': ', $q->col('url_en'))->as('c'),
      *                         'value',
@@ -909,7 +921,7 @@ Class Query extends DatabaseEntity
 	 * @return array: the array of objects resulting from the query
 	 *                or an empty array if the query fails (with an error message).
 	 *
-	 * Example of use:
+	 * @example
 	 * $q = $db->query();
      * $pagesFromDB = $q->select('pages', '*')->run()->loadObjects('page');
 	 */
@@ -927,6 +939,48 @@ Class Query extends DatabaseEntity
 				while ($row = $result->fetch_object())
 				{
 				   if ($key) $array[$row->$key] = $row;
+				   else $array[] = $row;
+				}
+				$return = $array;
+			}
+			$result->free();
+			unset($this->info->mysqliResult);
+		}
+
+		$this->info = null;
+		return $return;
+	}
+
+	/**
+	 * Fetch a list of rows into an array from database.
+	 *
+	 * @param  string $key: a key to index the array on if needed.
+	 * @return array: the array of array resulting from the query
+	 *                or an empty array if the query fails (with an error message).
+	 *
+	 * @example
+	 * $q = $db->query();
+     * $pagesFromDB = $q->select('pages', '*')->run()->loadArray('page');
+	 */
+	public function loadArray($key = '')
+	{
+		$return = [];
+
+		if (!$this->info) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
+		elseif (isset($this->info->mysqliResult))
+		{
+			$result = $this->info->mysqliResult;
+			if ($result->num_rows)
+			{
+				$firstRow = $result->fetch_assoc();
+				if ($key && !isset($firstRow->$key)) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the key '$key' is not available from the database query result.");
+
+				$array = array();
+			    if ($key) $array[$firstRow[$key]] = $firstRow;
+			    else $array[] = $firstRow;
+				while ($row = $result->fetch_assoc())
+				{
+				   if ($key) $array[$row[$key]] = $row;
 				   else $array[] = $row;
 				}
 				$return = $array;

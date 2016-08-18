@@ -2,11 +2,16 @@
 /**
  * Design pattern: singleton
  *
- * Example of Where usage:
+ * @example
  * $where= $db->where("column_name1 ='value1'");
  * $where->and("column_name2='value2'")
  *       ->or("column_name3 LIKE 'value3'", $where->or("column_name4<=4"), $where->or("column_name5<=5"), $where->or("column_name6<=6"))
  *       ->and("column_name7='value7'", $where->or("column_name8<=8", $where->and("column_name9='value9'", $where->and("column_name10 IN (1,2,3,4,5)"))));
+ *
+ * @example
+ * $q->select('article_tags', $q->count('tag'));
+ * $w = $q->where()->col('tag')->eq(2)->and()->col('article')->eq(1);
+ * $count = $q->run()->loadResult();
  *
  * Will produce:
  * column_name1 ='value1'
@@ -49,8 +54,8 @@ Class Where extends DatabaseEntity
 	 * This is used to allow a call to a reserved-keyword-method like or() and and()
 	 * whereas you can't define this method.
 	 *
-	 * @param  string $method: the name of the method that was initially called.
-	 * @param  array $args: the parameters to provide to the method that was initially called.
+	 * @param string $method: the name of the method that was initially called.
+	 * @param array $args: the parameters to provide to the method that was initially called.
 	 * @return the current Where instance.
 	 */
     function __call($method, $args)
@@ -87,7 +92,7 @@ Class Where extends DatabaseEntity
 	 * Supposed to be named and() but can't redefine a reserved keyword.
 	 * Secure the mysqli AND command with the given arguments.
 	 *
-	 * @param  mixed func_get_args(): array or string.
+	 * @param mixed func_get_args(): array or string.
 	 * @return Where: the current instance.
 	 *
 	 * Usage:
@@ -114,7 +119,7 @@ Class Where extends DatabaseEntity
 	 * Supposed to be named or() but can't redefine a reserved keyword.
 	 * Secure the mysqli OR command with the given arguments.
 	 *
-	 * @param  mixed func_get_args(): array or string.
+	 * @param mixed func_get_args(): array or string.
 	 * @return Where: the current instance.
 	 *
 	 * Usage:
@@ -140,7 +145,7 @@ Class Where extends DatabaseEntity
 	/**
 	 * Secure the mysqli IN command with the given arguments.
 	 *
-	 * @param  array func_get_args(): array of strings.
+	 * @param array func_get_args(): array of strings.
 	 * @return Where: the current instance.
 	 *
 	 * Usage:
