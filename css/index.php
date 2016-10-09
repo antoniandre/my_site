@@ -1,7 +1,10 @@
 <?php
+// if (!isset($settings)) die('You can\'t access this file directly.');
 //======================= VARS ========================//
 $min = $settings->useMinified ? '.min' : '';
 $css = ["common$min", "form$min"];// CSS files to load.
+
+$useCompress = !IS_LOCAL;// Do not minify on localhost.
 //=====================================================//
 
 
@@ -53,17 +56,33 @@ foreach($css as $k => $filename)
 
 // Preg_replace to replace css 'url(/path)' with 'url(ROOT.'css/path)' except if 'data:' is found.
 $cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:)(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~', 'url("'.$settings->root.'css/$2$3")', $cssFiles);
-
-
-// @TODO: find the right cache for images.
+// @TODO: find the right caching.
 // header("Pragma: public");
 // header("Cache-Control: maxage=$expires");
 // header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
-// header('Content-Type: text/html; charset=utf-8');
-// header('Content-language: '.strtolower($language));
-
 header('Content-type: text/css; charset=utf-8');
-die("$cssOutput");
+die((string)($useCompress ? compress($cssOutput) : $cssOutput));
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
+
+
+function compress($cssOutput)
+{
+    //!\ Don't change the sequence bellow.
+    // 1.
+    $patternComments          = '/\*.*?\*/';// Remove comments.
+    $patternWhiteSpaces       = '[\t\r\n\f\v\e]';// Remove tabs, carret returns, line feeds...
+
+    // 2.
+    $patternSpaceBefore       = ' +(?=[@,(){};!>~])';// Remove all spaces before following characters '@,(){}};!>~'.
+    $patternSpaceAfter        = '(?<=[,(){}:;>~]) +';// Remove all spaces after following characters ',(){}}:;>~'.
+    $patternUselessSemiColumn = ';(?=[};])';// Remove every ';' right before '}' or ';'.
+    $patternDecimal           = '(?<=,|\()0(?=\.)';// Replace ',0.1' with ',.1'.
+
+    return preg_replace(
+    [
+        "~$patternComments|$patternWhiteSpaces~s",
+        "`$patternSpaceBefore|$patternSpaceAfter|$patternUselessSemiColumn|$patternDecimal`",
+    ], '', $cssOutput);
+}
 ?>
