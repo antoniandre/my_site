@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Form Model.
@@ -87,6 +88,9 @@ Class Form
 				case isset($gets->removeFile):
 					$object = $this->removeFile($gets->removeFile);
 					break;
+				case isset($gets->removeImage):
+					$object = $this->removeImage($gets->removeImage);
+					break;
 
 				default:
 					break;
@@ -112,7 +116,40 @@ Class Form
 
 	private function removeFile($fileSrc)
 	{
-		$urlParts = parse_url($fileSrc);
+		$urlParts = parse_url($fileSrc);dbgd($urlParts);
+		// @TODO: Do a file unlink.
+		// unlink(self::uploadsDir.'/'.$urlParts['query']);
+	}
+
+	private function removeImage($imgSrc)
+	{
+		$urlParts = parse_url($imgSrc);
+
+		// Split url like "images/?u=201609/b4ca2b2183a4c6b6436110ef4ec7e670_xl.jpg" into useful parts.
+		preg_match('~^(u|i)=(.*?)([^/]+?)\.(\w+)$~', $urlParts['query'], $matches);
+		list(, $letter, $path, $imageName, $extension) = $matches;
+
+		// Look for a possible file size in picture name. If found, then remove all size images from server.
+		$possibleSizes = ['xs', 's', 'm', 'l', 'xl', 'o'];
+		$removedFiles = 0;
+		if (preg_match('~(.*)_(?:'.implode('|', $possibleSizes).')~', $imageName))
+		{
+			$fileBaseName = $root.($letter == 'u' ? 'uploads' : 'images')."/$path{$imageName}_";
+			foreach ($possibleSizes as $size)
+			{
+				// if (is_file($fileBaseName."$size.$extension"))
+				// if (unlink(self::uploadsDir.'/'.$urlParts['query'])) $removedFiles++;
+				print_r([$fileBaseName."$size.$extension", is_file($fileBaseName."$size.$extension")]);
+			}
+			die;
+		}
+		elseif (unlink(self::uploadsDir.'/'.$urlParts['query']))
+		{
+			echo 'ok !';
+			$removedFiles++;
+		}
+
+
 		// @TODO: Do a file unlink.
 		// unlink(self::uploadsDir.'/'.$urlParts['query']);
 	}
@@ -582,7 +619,10 @@ HTML;
 		 		$tpl->set_var(['level' => (int)$element->options->level, 'text' => $element->options->text, 'class' => isset($element->attributes->class) ? " class=\"{$element->attributes->class}\"" : '']);
 		 		break;
 		 	case 'select':
-		 		$tpl->set_var('the'.ucfirst($element->type).'OptionBlock', '');
+		 		$multiple = isset($element->options->multiple) && $element->options->multiple == true;
+		 		$tpl->set_var(['the'.ucfirst($element->type).'OptionBlock' => '',
+		 					   'ifMultiple' => $multiple ? '[]' : '',
+		 					   'multiple' => $multiple ? ' multiple' : '']);
 		 		$i = 0;
 		 		foreach ($element->options->options as $value => $label)
 		 		{
@@ -626,8 +666,10 @@ HTML;
 		 					   'addImagesToArticle' => text(77),
 							   'discardAll' => text(78)]);
 
+		 		$filterFiles = ['.DS_Store'];
+
 		 		// Append in dropzone box every files found in temporary uploads folder.
-		 		foreach (array_diff(scandir(self::uploadsDirTemp), ['.', '..']) as $fileName)
+		 		foreach (array_diff(scandir(self::uploadsDirTemp), ['.', '..']) as $fileName) if (!in_array($fileName, $filterFiles))
 		 		{
 		 			$tpl->set_var(['fileName' => $fileName,
 								   'filePath' => url("images/?u=temp/$fileName"),
