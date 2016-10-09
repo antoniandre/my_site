@@ -16,6 +16,13 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 	$options[$thePage->page] = $thePage->title->$language;
 }
 
+// fetch existing tags.
+$db = database::getInstance();
+$q = $db->query();
+$tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
+foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
+
+
 $form = new Form();
 $form->addElement('header',
 				  ['class' => 'title'],
@@ -116,13 +123,10 @@ $form->addElement('checkbox',
                   ['name' => 'article[tags]',
                    'tabindex' => 17],
                   ['inline' => true,
-                   'options' => ['vietnam' => 'Vietnam',
-                                 'singapore' => 'Singapore',
-                                 'france' => 'France',
-                                 'thailand' => 'Thailand',
-                                 'malaysia' => 'Malaysia'
-                                ],
-                   'checked' => isset($posts->article->published) && $posts->article->published]);
+                   'options' => $tags_options,
+                   'label' => text('Article tags'),
+                   'multiple' => true
+                  ]);
 $form->addElement('text',
                   ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 18],
                   ['default' => ['images/gallery/___.jpg', true]]);
@@ -202,8 +206,11 @@ function afterValidateForm($result, $form)
 		$pageName = text(($n = $form->getPostedData('page[name]')) ? $n : $form->getPostedData('page[url][en]'),
 						 ['formats' => ['sef']]);
 
+        // PHP file.
 		if ($form->getPostedData('page[type]') === 'php') renamePhpFile($form->getPostedData('page[path]')."/$pageNameInDB", $form->getPostedData('page[path]')."/$pageName");
-		elseif ($form->getPostedData('page[type]') === 'article')
+
+        // Article.
+        elseif ($form->getPostedData('page[type]') === 'article')
 		{
 			$articleId = $q->loadResult();
 
@@ -227,8 +234,20 @@ function afterValidateForm($result, $form)
 			$w = $q->where()->col('id')->eq($articleId);
 			$q->run();
 			$affectedRows = $q->info()->affectedRows;
+
+            // Save article tags.
+            // @todo: finish dev.
+            foreach ($tags as $id => $tag)
+            {
+                $q = $db->query();
+                $q->update('article_tags', ['article' => $articleId,
+                                            'tag' => $tag]);
+                $w = $q->where()->col('id')->eq($articleId);
+                $q->run();
+            }
 		}
 
+        // In both cases PHP file and article, save a page entry in database.
 		$q = $db->query();
 		$q->update('pages', ['page' => $pageName,
 	                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',

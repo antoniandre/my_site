@@ -17,6 +17,23 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 	$options[$thePage->page] = $thePage->title->$language;
 }
 
+// fetch existing tags.
+$db = database::getInstance();
+$q = $db->query();
+$tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
+foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
+
+// SELECT id, name, textEn, textFr, GROUP_CONCAT(DISTINCT article) AS articles FROM `tags` as t left join article_tags on t.id = tag group by id.
+$tags = $q->select('tags',
+                   [
+                        $q->col('id'),
+                        $q->col('name'),
+                        $q->col("text$language")->as('text'),
+                        $q->groupConcatDistinct('article'->as->('articles')
+                    ]
+                   )->relateLeft('article_tags')->on('id=tag')->groupBy('id')->run()->loadObjects('id');
+
+
 $form = new Form();
 $form->addElement('wrapper',
 				  ['class' => 'panes'],
@@ -86,8 +103,6 @@ $form->addElement('textarea',
 $form->addElement('select',
                   ['name' => 'page[parent]', 'tabindex' => 12],
                   ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home']);
-
-
 $form->addElement('wrapper',
 				  ['class' => 'newArticle pane'],
 				  ['numberElements' => 8, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
@@ -96,7 +111,7 @@ $form->addElement('header',
 				  ['level' => 2, 'text' => 'Create a new article']);
 $form->addElement('wrapper',
 				  ['class' => 'inner'],
-				  ['numberElements' => 6]);
+				  ['numberElements' => 7]);
 $form->addElement('paragraph',
 				  ['class' => 'intro'],
 				  ['text' => text(1)]);
@@ -125,8 +140,14 @@ $form->addElement('select',
 $form->addElement('text',
                   ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 16],
                   ['default' => ['images/gallery/___.jpg', true]]);
+$form->addElement('select',
+                  ['name' => 'article[tags]', 'tabindex' => 17],
+                  ['options' => $tags_options, 'label' => text('Article tags'), 'multiple' => true]);
+$form->addElement('textarea',
+                  ['name' => 'article[newTags]', 'placeholder' => text('Some coma separated new keywords.'), 'cols' => 30, 'rows' => 5, 'tabindex' => 18],
+                  []);
 $form->addElement('checkbox',
-                  ['name' => 'article[published]', 'tabindex' => 17],
+                  ['name' => 'article[published]', 'tabindex' => 19],
                   ['inline' => true,
                    'options' => ['published' => 'published'],
                    'checked' => isset($posts->article->published) && $posts->article->published]);
@@ -173,55 +194,26 @@ function validateForm1($result, $form)
 	}
 	else
 	{
-		// Article creation.
-		if ($postingArticle = $form->getPostedData('page[type]') === 'article')
-		{
-			$q = $db->query();
-			$contentEn = preg_replace('~(?<=src=\\\")(?:\.\.\/)*\/?(uploads[^"]+|images[^"]+)(?=\\\")~i', '$1', $form->getPostedData('article[content][en]', true));
-			$contentFr = preg_replace('~(?<=src=\\\")(?:\.\.\/)*\/?(uploads[^"]+|images[^"]+)(?=\\\")~i', '$1', $form->getPostedData('article[content][fr]', true));
-			$q->insert('articles', ['content_en' => $contentEn,
-	                                'content_fr' => $contentFr,
-	                                'author' => User::getInstance()->getId(),
-	                                'category' => (int)$form->getPostedData('article[category]'),
-	                                'image' => $form->getPostedData('article[image]'),
-	                                'published' => (string)$form->getPostedData('article[published]')]);
-			$q->run();
-			$articleId = $q->info()->insertId;
-
-			if (!$articleId) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
-		}
-
 		// PHP file creation.
-		elseif ($form->getPostedData('page[type]') === 'php')
+		if ($form->getPostedData('page[type]') === 'php')
 		{
 			$fileCreated = createPhpFile($pageName, $form->getPostedData('page[path]'));
 			if (!$fileCreated) new Message('A problem occured while creating the PHP file. Please check you have sufficent privileges and try again.', 'error', 'error', 'content');
 		}
 
+        // Article creation.
+        elseif ($postingArticle = $form->getPostedData('page[type]') === 'article') $articleId = saveArticleInDB($form);
+
+        // In both cases if no error, save the new page in DB.
 		// Store a new page entry in DB only if previous steps were successful.
 		if (($postingArticle && $articleId) || $fileCreated)
 		{
-			$q = $db->query();
-			$q->insert('pages', ['page' => $pageName,
-		                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',
-		                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
-		                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
-		                         'title_en' => $form->getPostedData('page[title][en]'),
-		                         'title_fr' => $form->getPostedData('page[title][fr]'),
-		                         'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
-		                         'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
-		                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
-		                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
-		                         'parent' => $form->getPostedData('page[parent]'),
-		                         'article' => isset($articleId) ? $articleId : null]);
-			$q->run();
-			if (!$q->info()->affectedRows) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
+            $pageId = savePageInDB($form, $pageName, $articleId);
 
 			// If everything went fine.
-			else
+			if ($pageId)
 			{
-				$pages = getPagesFromDB();
-				$GLOBALS['pages'] = $pages;// Update the $pages global var.
+                $savedTags = saveTagsInDB();// Array of inserted ids.
 
                 // Before redirecting to the 'edit-a-page' edition script, postpone a message to say everything went fine.
                 new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content', true);
@@ -263,6 +255,88 @@ function createPhpFile($fileName, $path)
 	file_put_contents(ROOT."backstage/templates/$fileName.html", '{content}');
 
 	return is_file(ROOT."backstage/templates/$fileName.html");
+}
+
+function saveArticleInDB($form)
+{
+    $articleId = null;
+    $contentEn = preg_replace('~(?<=src=\\\")(?:\.\.\/)*\/?(uploads[^"]+|images[^"]+)(?=\\\")~i', '$1', $form->getPostedData('article[content][en]', true));
+    $contentFr = preg_replace('~(?<=src=\\\")(?:\.\.\/)*\/?(uploads[^"]+|images[^"]+)(?=\\\")~i', '$1', $form->getPostedData('article[content][fr]', true));
+
+    $db = database::getInstance();
+    $q = $db->query();
+    $q->insert('articles', ['content_en' => $contentEn,
+                            'content_fr' => $contentFr,
+                            'author' => User::getInstance()->getId(),
+                            'category' => (int)$form->getPostedData('article[category]'),
+                            'image' => $form->getPostedData('article[image]'),
+                            'published' => (string)$form->getPostedData('article[published]')]);
+    $q->run();
+    $articleId = $q->info()->insertId;
+
+    if (!$articleId) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
+
+    return $articleId;
+}
+
+function savePageInDB($form, $pageName, $articleId)
+{
+    $pageId = null;
+
+    $db = database::getInstance();
+    $q = $db->query();
+    $q->insert('pages', ['page' => $pageName,
+                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']])                                         : '',
+                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
+                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
+                         'title_en' => $form->getPostedData('page[title][en]'),
+                         'title_fr' => $form->getPostedData('page[title][fr]'),
+                         'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
+                         'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
+                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
+                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
+                         'parent' => $form->getPostedData('page[parent]'),
+                         'article' => isset($articleId) ? $articleId : null]);
+    $q->run();
+    if (!$q->info()->affectedRows) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
+    else $pageId = $q->info()->insertId;
+
+    return $pageId;
+}
+
+function saveTagsInDB($form, $articleId)
+{
+    $tagIdList = [];
+
+    /* Create a new tag:
+    // @todo: finish implementing.
+    $q = $db->query();
+    $q->insert('article_tags', ['article' => isset($articleId) ? $articleId : null,
+                                'tag' => $form->getPostedData('article[tags]')]);
+    $q->run();
+    if (!$q->info()->affectedRows) new Message('The tag could not be associated to this article. Please try again.', 'error', 'error', 'content');*/
+
+    // Add an existing tag.
+    $db = database::getInstance();
+    $q = $db->query();
+    foreach ((array)$form->getPostedData('article[tags]') as $tagId)
+    {
+        // before inserting row check if not already in database.
+        $q->select('article_tags', $q->count('tag'));
+        $w = $q->where()->col('tag')->eq($tagId)->and()->col('article')->eq($articleId);
+        $existing = $q->run()->loadResult();
+
+        if (!$q->info()->affectedRows) new Message('A problem occured while saving the article tags in database. Please try again.', 'error', 'error', 'content');
+
+        if (!$existing)
+        {
+            $q->insert('article_tags', ['article' => $articleId, 'tag' => $tagId], true);
+            $q->run();
+            $tagIdList[] = $q->info()->insertId;
+        }
+    }
+
+    return $tagIdList;
 }
 //========================================== end of FUNCTIONS ==========================================//
 //======================================================================================================//

@@ -171,10 +171,11 @@ Class Page
 		{
 			// First get the path without query string.
 			// $_SERVER['REDIRECT_URL'] Not set when rewrite engine is off.
-			$path = str_replace($settings->root, '', $_SERVER['REDIRECT_URL']);
+			$path = $_SERVER['REDIRECT_URL'];
+			if ($settings->root && $settings->root !== '/') $path = str_replace($settings->root, '', $path);
 
 			// Remove the potential uneeded preceding slash.
-			if ($path{0} === '/') $path = substr($path, 1);
+			if ($path{0} === '/') $path = trim($path, '/');
 
 			if (!$path) $page = getPageByProperty('id', 'home', $this->language);
 			elseif (preg_match('~^('.implode('|', $allowedLanguages).')/?~', $path, $match))
@@ -182,7 +183,7 @@ Class Page
 				$this->language = $match[1];
 				$remainingUrl = str_replace(array("$this->language/", '.html'), '', $path);
 				// Detect if nothing is after the language in the path
-				if ($path === "$this->language/" || $path === $this->language) $page= getPageByProperty('id', 'home', $this->language);
+				if ($path === "$this->language/" || $path === $this->language) $page = getPageByProperty('id', 'home', $this->language);
 				elseif (strrpos($path, '.html') !== false) $page = getPageByProperty('url', $remainingUrl, $this->language);
 				elseif (array_key_exists($remainingUrl, $aliases)) $page = getPageByProperty('id', $aliases[$remainingUrl], $this->language);
 			}
