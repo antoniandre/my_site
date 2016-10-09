@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `misc` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `key` varchar(255) NOT NULL COMMENT 'The key',
   `value` text NOT NULL,
   PRIMARY KEY (`id`)
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `pages` (
   `metaKey_fr` text NOT NULL COMMENT 'The page meta keywords Fr',
   `parent` varchar(255) NOT NULL DEFAULT 'home' COMMENT 'The parent real page name in site folders, for the breadcrumbs',
   `aliases` varchar(255) NOT NULL COMMENT 'Coma separated list of possible page aliases',
-  `article` int(11) DEFAULT NULL COMMENT 'Article id if any',
+  `article` int(11) unsigned DEFAULT NULL COMMENT 'Article id if any',
   `icon` varchar(255) DEFAULT NULL COMMENT 'An icon to prepend to the page title (provide a glyph class)',
   PRIMARY KEY (`page`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -87,7 +87,7 @@ INSERT INTO `pages` (`page`, `path`, `url_en`, `url_fr`, `title_en`, `title_fr`,
 --
 
 CREATE TABLE `texts` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `text_en` varchar(255) NOT NULL,
   `text_fr` varchar(255) NOT NULL,
   `context` varchar(255) NOT NULL DEFAULT 'general',
@@ -177,12 +177,12 @@ INSERT INTO `texts` (`id`, `text_en`, `text_fr`, `context`) VALUES
 --
 
 CREATE TABLE `articles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Article id',
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Article id',
   `content_en` longtext NOT NULL COMMENT 'Article content in english',
   `content_fr` longtext NOT NULL COMMENT 'Article content in french',
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Article creation timestamp',
-  `author` int(11) NOT NULL COMMENT 'Author user id',
-  `category` int(11) NOT NULL COMMENT 'Article category id',
+  `author` int(11) unsigned NOT NULL COMMENT 'Author user id',
+  `category` int(11) unsigned NOT NULL COMMENT 'Article category id',
   `image` varchar(255) NOT NULL COMMENT 'Article representative image for sharing and home page display',
   `published` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Boolean published or not'
   PRIMARY KEY (`id`)
@@ -220,7 +220,7 @@ MODIFY `id` int(10) unsigned NOT NULL,AUTO_INCREMENT=3;
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `login` varchar(255) NOT NULL COMMENT 'Case-insensitive user login used for logging in',
   `password` varchar(255) NOT NULL COMMENT 'Case-sensitive user password used for logging in',
   `firstName` varchar(255) NOT NULL COMMENT 'User real first name',
