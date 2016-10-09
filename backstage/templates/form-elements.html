@@ -63,7 +63,7 @@
 
 <!-- BEGIN selectBlock -->
 <span class="{validation}{state}">
-	<select name="{formId}{name}" id="{formId}{id}opt{opt}" class="text {class}">
+	<select name="{formId}{name}{ifMultiple}" id="{formId}{id}opt{opt}" class="text {class}"{multiple}{attr}>
 		<option value=""> - </option>
 		<!-- BEGIN selectOptionBlock -->
 		<option value="{value}"{selected}>{label}</option>
