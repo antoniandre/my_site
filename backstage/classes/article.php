@@ -66,7 +66,7 @@ Class Article
 	/**
 	 * Get the content of an article.
 	 *
-	 * @todo : to develop.
+	 * @todo: to develop.
 	 * @param  array  $params [description]
 	 * @return [type]         [description]
 	 */
