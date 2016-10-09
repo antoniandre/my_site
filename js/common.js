@@ -14,6 +14,7 @@ var // General vars. (g for general)
 		lang: l,// Contains the current page language.
 		scripts: scripts,// Contains an array of available scripts and for each, the loaded state and the need of a dedicated css.
 		loadScreenWidth: $(window).width(),// The width of the screen on page load.
+		loadScreenHeight: $(window).height(),// The height of the screen on page load.
 		screenWidth: 0// The width of the screen at any moment.
 	},
 	// Css3 capabilities. (s for support)
@@ -332,8 +333,9 @@ var // General vars. (g for general)
 		$(window).on('click', function(e)
 		{
 		    // Hide the submenu when user clicks anywhere out of the mobile menu.
-		    // (have to check it is not a click inside menu)
-		    if (!$(e.target).is(mobileMenu) && !mobileMenu.find(e.target).length && !$(e.target).is(toggler)
+		    // (have to check it is not a click inside menu or toggler)
+		    if (!$(e.target).is(mobileMenu) && !mobileMenu.find(e.target).length
+		    	&& !$(e.target).is(toggler) && !$(toggler).find(e.target).length
 		        && $('#mobileMenuOpen').is(':checked'))
 		    {
 		        toggler.trigger('click');
@@ -343,14 +345,18 @@ var // General vars. (g for general)
 
 	scrollHandler = function()
 	{
-		var bar = $('#stickyBar'),
+		var self = this,
+			bar = $('#stickyBar'),
 			barThreshold = null,
+			barInitialOffsetTop = bar.parent().offset().top,
+			barSticky = false,
 			page = $('#page'),
 			footer = $('#footer'),
-            documentHeight = $(document).outerHeight(),
-			winHeight = $(window).height(),
 			parallaxObj = [],
-			self = this,
+
+			// Define the window dimension vars outside the loop for faster results. BUT UPDATE ON RESIZE EVENT.
+            documentHeight = $(document).outerHeight(),
+			winHeight = window.screen.availHeight || $(window).height(),// For mobiles (IOS) to prevent parallax jumps due to system bars.
 			// window.pageYOffset undefined in IE8 (http://stackoverflow.com/questions/16618785/ie8-alternative-to-window-scrolly)
             // documentScroll = $(window).documentScroll(),
             documentScroll = window.pageYOffset/*IE9+*/ || document.documentElement.scrollTop;// Cross-browser.
@@ -442,12 +448,17 @@ var // General vars. (g for general)
 
 		this.init = function()
 		{
+			// $('#contentWrapper .content').append("<p class='scrolled' style='position:fixed;top:0;background: #fff;'/>");
 			$(window).on('scroll', function()
 			{
 				//---------------------------- parallax ----------------------------//
                 if (!parallaxObj.length) self.fillArray();
 
 				documentScroll = window.pageYOffset/*IE9+*/ || document.documentElement.scrollTop;// Cross-browser.
+
+				// For mobile elastic scroll - do not calculate parallax outside bounds.
+				// Upper than top check not needed with current parallax.
+                if (/*documentScroll < 0 || */($(document).height() - documentScroll - winHeight) < 0) return false;
 
 				$(parallaxObj).each(function(i, el)
                 {
@@ -533,23 +544,24 @@ var // General vars. (g for general)
 				//----------------------------------------------------------------//
 
 				//-------------------------- Sticky bar --------------------------//
-				var offsetTop = parseInt(bar.offset().top - documentScroll);
-				cl(bar.offset().top, documentScroll, bar.offset().top - documentScroll)
-
-				if (offsetTop <= 0 && !bar.hasClass('sticky'))
+				$('.scrolled').append(".");
+				if (!barSticky && barInitialOffsetTop <= documentScroll)// Check boolean faster than check element class.
 				{
-					// Calculate it only once.
-					if (barThreshold === null) barThreshold = Math.min(documentScroll, bar.offset().top);
+					barSticky = true;
 					bar.addClass('sticky');
 				}
-				else if (/*offsetTop > 0 && */documentScroll <= barThreshold && bar.hasClass('sticky')) bar.removeClass('sticky');
+				else if (barSticky && barInitialOffsetTop > documentScroll)
+				{
+					barSticky = false;
+					bar.removeClass('sticky');
+				}
 				//----------------------------------------------------------------//
 			})
 			.on('resize', function()
 			{
-				barThreshold = null;// Force recalculation.
+				barInitialOffsetTop = bar.parent().offset().top;// Force recalculation.
 	            documentHeight = $(document).outerHeight();
-				winHeight = $(window).height();
+				winHeight = window.screen.availHeight || $(window).height();
 				$(window).trigger('scroll', this);
 			});
 		}();
@@ -568,6 +580,7 @@ var // General vars. (g for general)
 	{
 		$("[data-original]").each(function()
 		{
+			/* @todo: handle smaller image sizes for mobile.
 			if ($('#homePage').length)
 			{
 				switch(true)
@@ -586,7 +599,7 @@ var // General vars. (g for general)
 						break;
 				}
 				$(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
-			}
+			}*/
 		});
 		$("[data-original]").lazyload({effect:"fadeIn", threshold:800, load: function(){$(this).addClass('loaded')}});
 	},
@@ -661,6 +674,9 @@ String.prototype.isLatin = function(){return this==this.toLatinChars()};
 //==================================================================================//
 var commonReady = function()
 {
+    $('header .bg').css('height', g.loadScreenHeight);
+    $('#footer .bg').css('height', $('#footer .bg').css('height'));
+
 	handleOldBrowsers();
 	initBasics();
 	initForm();
