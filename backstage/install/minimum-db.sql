@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `misc` (
 
 CREATE TABLE IF NOT EXISTS `pages` (
   `page` varchar(80) NOT NULL COMMENT 'The real page name in site folders',
-  `path` varchar(255) NOT NULL DEFAULT 'pages/' COMMENT 'The page path in site folders',
+  `path` varchar(255) NOT NULL DEFAULT 'pages/' COMMENT 'The page path in site folders from site root with trailing /. E.g. backstage/pages/.',
   `url_en` varchar(255) NOT NULL DEFAULT 'a url' COMMENT 'The URL to access the page when rewrite engine is on',
   `url_fr` varchar(255) NOT NULL COMMENT 'The URL to access the page when rewrite engine is on',
   `title_en` varchar(255) NOT NULL COMMENT 'The page title',
