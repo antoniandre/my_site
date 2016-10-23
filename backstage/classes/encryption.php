@@ -35,9 +35,13 @@ class Encryption
 		return self::$instance;
 	}
 
-	/*
-		if secure the string is encoded in a way it cannot be decrypted ever again.
-	*/
+	/**
+	 * if secure the string is encoded in a way it cannot be decrypted ever again.
+
+	 * @param  string  $string the string to encrypt.
+	 * @param  boolean $secure whether to create a decryptable or undecryptable hash.
+	 * @return string: the encrypted string.
+	 */
 	public static function encrypt($string, $secure = false)
 	{
 		// BCRYPT encoding. As you can parameter the cost, it is that many times longer to crack so better than md5.
