@@ -49,8 +49,8 @@ class Encryption
 	/**
 	 * Decrypt the encrypted string if not secure.
 	 *
-	 * @param  [type] $string [description]
-	 * @return [type]         [description]
+	 * @param  string $string: the string to decrypt.
+	 * @return string: the decrypted string.
 	 */
 	public static function decrypt($string)
 	{
@@ -58,11 +58,11 @@ class Encryption
 	}
 
 	/**
-	 * verify in case of secure encryption only.
+	 * Verify in case of secure encryption only.
 	 *
-	 * @param  [type] $clearStr   [description]
-	 * @param  [type] $cryptedStr [description]
-	 * @return [type]             [description]
+	 * @param  string $clearStr:  The clear string to compare against encrypted and endecryptable hash.
+	 * @param  string $cryptedStr: a 60 chars hash created with password_hash() function. (Should start with $2y$).
+	 * @return boolean: true if matching, false otherwise.
 	 */
 	public static function verify($clearStr, $cryptedStr)
 	{
