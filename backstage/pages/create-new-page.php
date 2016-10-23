@@ -23,15 +23,16 @@ $q = $db->query();
 $tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
 foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
+// @TODO: new request:
 // SELECT id, name, textEn, textFr, GROUP_CONCAT(DISTINCT article) AS articles FROM `tags` as t left join article_tags on t.id = tag group by id.
-$tags = $q->select('tags',
+/*$tags = $q->select('tags',
                    [
                         $q->col('id'),
                         $q->col('name'),
                         $q->col("text$language")->as('text'),
                         $q->groupConcatDistinct('article'->as->('articles')
                     ]
-                   )->relateLeft('article_tags')->on('id=tag')->groupBy('id')->run()->loadObjects('id');
+                   )->relateLeft('article_tags')->on('id=tag')->groupBy('id')->run()->loadObjects('id');*/
 
 
 $form = new Form();

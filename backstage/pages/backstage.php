@@ -9,6 +9,13 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
+// Get texts form.
+$form = new Form(['id' => 'getTexts']);
+$form->addButton('submit',
+                 text('Fetch the texts from the live site'),
+                 ['class' => 'i-cloud-download', 'name' => 'getTexts', 'value' => 1]);
+$form->validate('getTexts');
+
 $tpl = new Template();
 $tpl->set_file("$page->page-page", "templates/$page->page.html");
 $tpl->set_var(['h2' => text(70),
@@ -22,22 +29,13 @@ $tpl->set_var(['h2' => text(70),
                'toDoListText' => getPageByProperty('page', 'todo-list')->title->$language,
                'manageDatabaseUrl' => url('database-manager'),
                'manageDatabaseText' => getPageByProperty('page', 'database-manager')->title->$language,
-               'fetchTextsFromLiveSiteUrl' => url('fetch-texts-from-live-site'),
-               'fetchTextsFromLiveSiteText' => getPageByProperty('page', 'fetch-texts-from-live-site')->title->$language,
+               'fetchTextsFromLiveSiteButton' => $form->render(),
                'sendArticleToLiveSiteUrl' => url('send-article-to-live-site'),
                'sendArticleToLiveSiteText' => getPageByProperty('page', 'send-article-to-live-site')->title->$language]);
 $content = $tpl->parse('display', "$page->page-page");
 
-// Get texts.
-$form = new Form(['id' => 'getTexts']);
-$form->addButton('submit',
-                 text('Fetch the texts from the live site'),
-                 ['class' => 'i-cloud-download', 'name' => 'getTexts', 'value' => 1]);
-$form->validate('getTexts');
 
-$content .= $form->render();
-
-// Send article.
+// Send article Form.
 $form2 = new Form(['id' => 'sendArticle']);
 
 $pages = getPagesFromDB();
