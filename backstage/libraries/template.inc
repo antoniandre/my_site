@@ -426,10 +426,10 @@ class Template
  /******************************************************************************
   * This functions clears the value of a variable.
   *
-  * It may be called with either a varname as a string or an array with the 
+  * It may be called with either a varname as a string or an array with the
   * values being the varnames to be cleared.
   *
-  * The function sets the value of the variable in the $varkeys and $varvals 
+  * The function sets the value of the variable in the $varkeys and $varvals
   * hashes to "". It is not necessary for a variable to exist in these hashes
   * before calling this function.
   *
@@ -467,7 +467,7 @@ class Template
  /******************************************************************************
   * This functions unsets a variable completely.
   *
-  * It may be called with either a varname as a string or an array with the 
+  * It may be called with either a varname as a string or an array with the
   * values being the varnames to be cleared.
   *
   * The function removes the variable from the $varkeys and $varvals hashes.
@@ -636,7 +636,7 @@ class Template
     if ($this->debug & 4) {
       echo "<p><b>parse:</b> completed</p>\n";
     }
-  
+
     //return $this->get_var($target);
   return $this->finish($this->get_var($target));
   }
@@ -824,7 +824,7 @@ class Template
     }
 
     if ($this->star_comments) {
-      $str= preg_replace('/\{\*.*\*\}/i', '', $str);
+      $str= preg_replace('/\{\*.*?\*\}/si', '', $str);
     }
 
     return $str;
@@ -886,7 +886,7 @@ class Template
     if ($this->debug & 4) {
       echo "<p><b>filename:</b> filename= $filename</p>\n";
     }
-    if (substr($filename, 0, 1) != "/" 
+    if (substr($filename, 0, 1) != "/"
        && substr($filename, 0, 1) != "\\"
        && substr($filename, 1, 2) != ":\\"
        && substr($filename, 1, 2) != ":/"
