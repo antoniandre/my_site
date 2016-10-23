@@ -4,6 +4,18 @@
  * Form Model.
  *
  * Contains necessary methods to generate a form, display it, validate fields.
+ *
+ * Simple example of use:
+ *    $newsletter = new Form(['class' => 'newsletter']);
+ *    $newsletter->addElement('email',
+ *    		                ['name' => 'newsletter', 'value' => '', 'placeholder' => text(80)],// Your email address.
+ *    		                ['validation' => 'required', 'label' => text(81)]);// Subscribe to the newsletter.
+ *    $newsletter->addButton('validate', text(85));// Button label: OK.
+ *    $newsletter->validate
+ *    (
+ *    	function($result, $form){...}
+ *    );
+ *    echo $newsletter->render();
  */
 Class Form
 {
@@ -50,7 +62,7 @@ Class Form
 	 */
 	public function __construct($options = [])
 	{
-		$this->id = self::$idCounter++;
+		$this->id = isset($options['id']) ? $options['id'] : ('form'.(self::$idCounter++));
 		$this->method = isset($options['method']) ? $options['method'] : 'POST';
 		$this->action = isset($options['action']) ? $options['action'] : url('SELF');
 		$this->class = isset($options['class']) ? $options['class'] : null;
@@ -60,7 +72,7 @@ Class Form
 	}
 
 	/**
-	 * handle all form-related ajax calls.
+	 * handle all the built-in form-related tasks executed from ajax calls.
 	 *
 	 * @return void.
 	 */
@@ -421,21 +433,32 @@ HTML;
 	{
 		if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
 
-		$button = (object)['class' => $type, 'label' => $label, 'options' => (object)$options];
+		$defaultClass = $type;
+		$button = new StdClass();
+
 		switch ($type)
 		{
-		 	case 'validate':
-		 		$button->type = 'submit';
-		 		$button->name = 'submit';
-		 		break;
-		 	case 'cancel':
-		 		$button->type = 'reset';
-		 		break;
-		 	// We do not want an unknown button to be appended.
-		 	default:
-				return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is unknown.', 'WRONG DATA', true);
-		 		break;
+			case 'submit':
+				$button->type = $type;
+				$button->name =  isset($options['name']) ? $options['name'] : 'submit';
+				break;
+			case 'validate':
+				$button->type = 'submit';
+				$button->name = 'submit';
+				break;
+			case 'cancel':
+				$button->type = 'reset';
+				break;
+			// We do not want an unknown button to be appended.
+			default:
+				return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is nknown.', 'WRONG DATA', true);
+				break;
 		}
+
+		$button->class = isset($options['class']) ? $options['class'] : $defaultClass;
+		if (isset($options['value'])) $button->value = $options['value'];
+		$button->label = $label;
+		$button->options = (object)$options;
 
 		$this->buttons[] = $button;
 	}
@@ -471,7 +494,7 @@ HTML;
 		$tpl->set_block('radioBlock', 'radioOptionBlock', 'theRadioOptionBlock');
 		$tpl->set_block('checkboxBlock', 'checkboxOptionBlock', 'theCheckboxOptionBlock');
 
-		$tpl->set_var(['formId' => "form$this->id",
+		$tpl->set_var(['formId' => $this->id,
 					   'method' => $this->method,
 					   'action' => $this->action,
 					   'formClass' => $this->class ? " class=\"$this->class\"" : '',
@@ -517,7 +540,7 @@ HTML;
 				}
 			}
 
-			// In each element loop multiple wrappers can close at the same time (nested).
+			// In each element loop multiple wrappers can possibly close at the same time (nested).
 			$tpl->set_var('wrapperEnd', str_repeat('</div>', $closingWrappers));
 
 			// If the element is a wrapper then open its div tag.
@@ -556,7 +579,7 @@ HTML;
 			$tpl->set_var(['btnText' => $button->label,
 						   'btnClass' => $button->class,
 						   'btnType' => $button->type,
-						   'btnName' => isset($button->name) && $button->name ? " name=\"form{$this->id}[$button->name]\"" : '',
+						   'btnName' => isset($button->name) && $button->name ? " name=\"{$this->id}[$button->name]\"" : '',
 						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '',
 						   'toggle' => $this->getToggle($button)]);
 			$tpl->parse('theButtonBlock', 'buttonBlock', true);
@@ -607,7 +630,8 @@ HTML;
 				       'state' => isset($element->error) && $element->error ? ' invalid' : (isset($element->userdata) ? ' valid' : ''),// Validation state.
 				       'attr' => $attrHtml,
 				       // $element->userdata is an object if the element is a checkbox or multiple select.
-				       'value' => isset($element->userdata) && !is_object($element->userdata) ? stripslashes($element->userdata)
+				       'value' => isset($element->userdata) && !is_object($element->userdata) && !is_array($element->userdata) ?
+				       			  stripslashes($element->userdata)
 				       			  : (isset($element->options->default) ? $element->options->default : '')]);
 
 		switch ($element->type)
@@ -654,7 +678,7 @@ HTML;
 					$tpl->set_var(['value' => $value,
 								   'ifArray' => $multiple ? '[]' : '',
 								   'br' => $inline ? '' : '<br />',
-								   'label' => $label ? "<label for=\"form$this->id{$element->id}opt$i\">$label</label>" : '',
+								   'label' => $label ? "<label f$this->id{$element->id}opt$i\">$label</label>" : '',
 								   'opt' => $i,
 								   'checked' => $isChecked ? 'checked="checked"' : '']);
 		 			$tpl->parse('the'.ucfirst($element->type).'OptionBlock', $element->type.'OptionBlock', true);
@@ -709,6 +733,8 @@ HTML;
 
 	/**
 	 * getPostedData check if there is any post for the current form and return the posts object or null if unset.
+	 * Example of use:
+	 *     $form->getPostedData('getTexts');// You can also use this in your callback function.
 	 *
 	 * @param string $fieldName: one field name you want to retrieve the posted data. Leave empty to get all posted data.
 	 * @param bool $acceptHtml: set tot true if you really want to unblock html contents.
@@ -718,18 +744,18 @@ HTML;
 	{
 		$posts = $acceptHtml ? Userdata::secureVars($_POST, true, true) : Userdata::get('post');
 
-		if (!$posts || !isset($posts->{"form$this->id"})) return null;
+		if (!$posts || !isset($posts->{$this->id})) return null;
 
 		$return = null;
 
-		if (!$elementName) $return = $posts->{"form$this->id"};
+		if (!$elementName) $return = $posts->{$this->id};
 		else
 		{
 			$element = $this->getElementByName($elementName);
 			if (isset($element->userdata)) $return = $element->userdata;
 			else
 			{
-				$tmpPath = $_POST["form$this->id"];
+				$tmpPath = $_POST[$this->id];
 				foreach (explode('[', str_replace(']', '', $elementName)) as $bit)
 				{
 					$tmpPath = isset($tmpPath[$bit]) ? $tmpPath[$bit] : null;
@@ -846,6 +872,14 @@ HTML;
 	 * validate function: first check if there is any post for the current form, if not simply return false
 	 * otherwise check each user post and save it into the appropriate form element object.
 	 * Used to - and convenient to - check ALL the fields!
+	 * @param function $callback: a callback function to execute once the form is submitted and passed the default validation.
+	 *                            You can provide this function directly as an anonymous function, or the name of an existing
+	 *                            function as a string.
+	 *                            E.g: $form->validate('afterValidate'); or $form->validate(function(){...});
+	 *                            This function will be passed 2 parameters:
+	 *                            	$return: the object as shown in @return bellow.
+	 *                            	$this: the current form Object.
+	 *                            So you can declare the callback function like so: function callback($info, $form){...}.
 	 *
 	 * @return StdClass object / null: {fillable:$countFillableElements, filled:$countFilledElements, invalid:$countInvalidElements}
 	 */
@@ -908,7 +942,7 @@ HTML;
 			// if upload element, check uploaded file types.
 			elseif ($element->type === 'upload')
 			{
-				if (is_object($files = Userdata::secureVars($_FILES))) $files = $files->{"form$this->id"};
+				if (is_object($files = Userdata::secureVars($_FILES))) $files = $files->{$this->id};
 
 				if (!isset($element->options->accept)) $element->options->accept = ['*'];
 				foreach ((array)$element->options->accept as $l => &$accept)
@@ -1180,7 +1214,7 @@ HTML;
 			list($toggle, $condition) = explode('(', trim($element->options->toggle, ')'));
 			$toggle = substr($toggle, 0, -2);
 			list($leftHand, $rightHand) = explode('=', $condition);
-			$leftHand = "form{$this->id}".$this->convertName2subname($leftHand);
+			$leftHand = "{$this->id}".$this->convertName2subname($leftHand);
 			$toggleEffect = $toggle && isset($element->options->toggleEffect) ? " data-toggle-effect=\"{$element->options->toggleEffect}\"" : '';
 			$toggle = " data-toggle=\"$toggle\" data-toggle-cond=\"$leftHand=$rightHand\"$toggleEffect";
 		}
