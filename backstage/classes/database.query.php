@@ -283,8 +283,8 @@ Class Query extends DatabaseEntity
 	{
 		$this->secureInternalData = $secureInternalData;
 		// Check the key-value pairs to update in db from the $pairs param.
-		if (!is_array($pairs)) return $this->abortQuery('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The values to $this->currentQueryType must be provided in an indexed array. E.g. array('col_name' => 'New value').");
-		elseif (!count($pairs)) return $this->abortQuery('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): Please set at least one value to $this->currentQueryType.");
+		if (!is_array($pairs)) return $this->abort('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The values to $this->currentQueryType must be provided in an indexed array. E.g. array('col_name' => 'New value').");
+		elseif (!count($pairs)) return $this->abort('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): Please set at least one value to $this->currentQueryType.");
 		else
 		{
 			// Store in temp array while looping in case of failure (don't store uncomplete array in class attribute).
@@ -293,7 +293,7 @@ Class Query extends DatabaseEntity
 			// Now check each pair ['dbColName' => 'value', ...].
 			foreach ($pairs as $dbColName => $value)
 			{
-				if (is_numeric($dbColName) && in_array($this->currentQueryType, array('update', 'insert', 'replace'))) return $this->abortQuery('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): Missing column name for the pair: $dbColName => $value.");
+				if (is_numeric($dbColName) && in_array($this->currentQueryType, array('update', 'insert', 'replace'))) return $this->abort('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): Missing column name for the pair: $dbColName => $value.");
 				elseif (is_numeric($value) || is_bool($value)) $cleanedPairs[$dbColName] = $value;
 				elseif (is_string($value))
 				{
