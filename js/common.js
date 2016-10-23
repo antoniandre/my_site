@@ -326,8 +326,8 @@ var // General vars. (g for general)
 		    e.preventDefault();
 		    var submenu = $(this).siblings('ul');
 
-		    mobileMenu.find('.parent ul:visible').not(submenu).not('.home > ul').slideUp(400);
-		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400);
+		    mobileMenu.find('.parent ul:visible').not(submenu).not('.home > ul').slideUp(400, 'easeOutQuad');
+		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400, 'easeOutQuad');
 		}).find('li ul').not('.home > ul').hide();
 
 		$(window).on('click', function(e)
@@ -448,7 +448,6 @@ var // General vars. (g for general)
 
 		this.init = function()
 		{
-			// $('#contentWrapper .content').append("<p class='scrolled' style='position:fixed;top:0;background: #fff;'/>");
 			$(window).on('scroll', function()
 			{
 				//---------------------------- parallax ----------------------------//
@@ -544,7 +543,6 @@ var // General vars. (g for general)
 				//----------------------------------------------------------------//
 
 				//-------------------------- Sticky bar --------------------------//
-				$('.scrolled').append(".");
 				if (!barSticky && barInitialOffsetTop <= documentScroll)// Check boolean faster than check element class.
 				{
 					barSticky = true;
@@ -563,6 +561,8 @@ var // General vars. (g for general)
 	            documentHeight = $(document).outerHeight();
 				winHeight = window.screen.availHeight || $(window).height();
 				$(window).trigger('scroll', this);
+
+			    $('header .bg').css('height', winHeight);
 			});
 		}();
 	},
@@ -682,7 +682,7 @@ var commonReady = function()
 	initForm();
 	new scrollHandler();
 	// resizeHandler();
-	// new imagePreloader(['vietnam-map.png', 'visa-approved.png', 'logo.jpg']);
+	// new imagePreloader(['vietnam-map.png', 'logo.jpg']);
 
     if ($('#lightbox').length)               handleLightbox();
     if ($('#cookieNotice').length)           handleCookieNotice();
