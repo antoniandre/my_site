@@ -616,6 +616,20 @@ Class Query extends DatabaseEntity
 		return $this;
 	}
 
+	// @todo: finish this.
+	public function groupBy($column)
+	{
+		// Do sth.
+		return $this;
+	}
+
+	// @todo: finish this.
+	public function groupConcat($column, $direction = 'ASC')
+	{
+		// Do sth.
+		return $this;
+	}
+
 	/**
 	 * limit.
 	 *
