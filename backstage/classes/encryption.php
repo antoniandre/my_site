@@ -14,33 +14,59 @@
 
 class Encryption
 {
-	private static $prefixSalt = 'disadb--12345678';
-	private static $suffixSalt = 'yeah';
+	private static $instance = null;
+	private $passwordSalt = '$@lTy-prefix';
 
 	/**
-	 * Class constructor
+	 * Class constructor.
 	 */
 	public function __construct()
 	{
 	}
 
+	/**
+	 * Get the only instance of this class.
+	 *
+	 * @return Encryption object: the only instance of this class.
+	 */
+	public static function getInstance()
+	{
+		if (!isset(self::$instance)) self::$instance = new self;
+		return self::$instance;
+	}
+
 	/*
 		if secure the string is encoded in a way it cannot be decrypted ever again.
 	*/
-	public static function encrypt($string, $secure = 0)
+	public static function encrypt($string, $secure = false)
 	{
-		return  $secure ? md5($this->prefixSalt.$string.$this->suffixSalt)
-					    : mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $this->prefixSalt, $string, MCRYPT_MODE_ECB);
+		// BCRYPT encoding. As you can parameter the cost, it is that many times longer to crack so better than md5.
+		// BCRYPT will always be 60 characters.
+		return  $secure ? password_hash($string, PASSWORD_BCRYPT, ['cost' => 10])
+					    : mcrypt_encrypt(MCRYPT_RIJNDAEL_256, self::getInstance()->passwordSalt, $string, MCRYPT_MODE_ECB);
 	}
 
+	/**
+	 * Decrypt the encrypted string if not secure.
+	 *
+	 * @param  [type] $string [description]
+	 * @return [type]         [description]
+	 */
 	public static function decrypt($string)
 	{
-		return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $this->prefixSalt, $string, MCRYPT_MODE_ECB);
+		return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, self::getInstance()->passwordSalt, $string, MCRYPT_MODE_ECB);
 	}
 
-	public static function checkValidity($clearStr, $cryptedStr)
+	/**
+	 * verify in case of secure encryption only.
+	 *
+	 * @param  [type] $clearStr   [description]
+	 * @param  [type] $cryptedStr [description]
+	 * @return [type]             [description]
+	 */
+	public static function verify($clearStr, $cryptedStr)
 	{
-		return encrypt($clearStr, 1) == $cryptedStr;
+		return password_verify($clearStr, $cryptedStr);
 	}
 }
 ?>
