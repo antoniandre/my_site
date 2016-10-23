@@ -27,7 +27,7 @@ includeClass('user');
 
 //======================================================================================================//
 //=============================================== MAIN =================================================//
-ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ? 'ob_gzhandler' : null);
+ob_start(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ? 'ob_gzhandler' : null);
 
 // First of all, set the error handler:
 // First use of the Error class triggers the singleton instanciation and sets the error handler.
@@ -65,6 +65,25 @@ function includeFunction($function)
 {
     if (!include ROOT."backstage/functions/$function.php")
         Error::add("The function '$function' was not found in '".ROOT."backstage/functions/$function.php'.", 'NOT FOUND');
+}
+
+/**
+ * Shortcut function to simply include a php web service.
+ *
+ * @param string $ws: the php web service to include.
+ * @return void.
+ */
+function includeWebservice($ws)
+{
+    if (!include ROOT."backstage/webservices/$ws.php")
+        Error::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+}
+function includeOnceWebservice($ws)
+{
+    $ok = include_once ROOT."backstage/webservices/$ws.php";
+    if (!$ok)
+        Error::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+    return $ok;
 }
 
 /**
