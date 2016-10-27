@@ -120,18 +120,16 @@ class Userdata
     }
     public static function getWithHtml($dataSource = 'get')
     {
-        switch ($dataSource)
-        {
-             case 'post':
-                 $src = $_POST;
-                 break;
+        $self = self::getInstance();
+        $return = null;
 
-             case 'get':
-             default:
-                 $src = $_GET;
-                 break;
+        if (in_array(strtolower($dataSource), self::knownSources))
+        {
+            // Transform post in $_POST, get in $_GET, etc.
+            $return = self::secureVars(${'_'.strtoupper($dataSource)}, true, true);
         }
-        return self::secureVars($src, true, true);
+
+        return $return;
     }
 
 
