@@ -798,12 +798,12 @@ Class Query extends DatabaseEntity
 		 	case 'column':// ['column' => (string)]
 		 		if (is_string($value[1]))// This is the column name.
 		 		{
-		 			$value= "`{$value[1]}`";
+		 			$value = "`{$value[1]}`";
 		 		}
 		 		else
 		 		{
 		 			Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$value[1]\".");
-		 			$error= 1;
+		 			$error = 1;
 				}
 		 		break;
 		 	case 'concat':// ['concat' => (array)[mixed_values_to_concat, ...]]
@@ -820,7 +820,7 @@ Class Query extends DatabaseEntity
 					 		else
 					 		{
 								Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$v[1]\".");
-								$error= 1;
+								$error = 1;
 								break 2;
 					 		}
 					 	}
