@@ -118,6 +118,21 @@ class Userdata
     {
         return in_array(strtolower($dataSource), self::knownSources) ? self::getInstance()->$dataSource : null;
     }
+    public static function getWithHtml($dataSource = 'get')
+    {
+        switch ($dataSource)
+        {
+             case 'post':
+                 $src = $_POST;
+                 break;
+
+             case 'get':
+             default:
+                 $src = $_GET;
+                 break;
+        }
+        return self::secureVars($src, true, true);
+    }
 
 
     /**
