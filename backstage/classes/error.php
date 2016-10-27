@@ -197,6 +197,17 @@ Class Error
 
 		error_log($output, 3, ROOT.$settings->errorLogFile);
 	}
+	public static function logTheLast()
+	{
+		$settings = Settings::get();
+		// Extract the last error from the stack.
+		$error = self::getInstance()->stack[count(self::getInstance()->stack)-1];
+
+		$output = date('Y-m-d H:i:s')."\n"
+				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\n\n";
+
+		error_log($output, 3, ROOT.$settings->errorLogFile);
+	}
 
 	/**
 	 * Get function.
