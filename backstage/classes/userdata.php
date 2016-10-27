@@ -120,6 +120,9 @@ class Userdata
     }
     public static function getWithHtml($dataSource = 'get')
     {
+        //!\ Important even for reading.
+        global ${'_'.strtoupper($dataSource)};
+
         $self = self::getInstance();
         $return = null;
 
@@ -191,7 +194,7 @@ class Userdata
 
     public static function _unset($dataSource, $key)
     {
-        // We need to edit super global variable.
+        //!\ We need to edit super global variable. Important even for reading.
         global ${'_'.strtoupper($dataSource)};
 
         $self = self::getInstance();
