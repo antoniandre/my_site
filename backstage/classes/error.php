@@ -200,6 +200,7 @@ Class Error
 	public static function logTheLast()
 	{
 		$settings = Settings::get();
+
 		// Extract the last error from the stack.
 		$error = self::getInstance()->stack[count(self::getInstance()->stack)-1];
 
@@ -207,6 +208,27 @@ Class Error
 				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\n\n";
 
 		error_log($output, 3, ROOT.$settings->errorLogFile);
+	}
+	public static function logAndDie($logMessage, $dieMessage)
+	{
+		$settings = Settings::get();
+		$self = self::getInstance();
+
+		$trace = debug_backtrace();
+		$error = new StdClass();
+		$error->type = 'USER CUSTOM ERROR';
+		$error->file = isset($trace[0]['file']) ? $self->pathFromSiteRoot($trace[0]['file']) : '';
+		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
+		$error->text = $logMessage;
+
+		$output = date('Y-m-d H:i:s')."\n"
+				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\nBacktrace:\n"
+				 // Array splice to limit backtrace to last 2 files.
+				 .print_r(array_splice($trace, 0, 2), 1)."\n";
+
+		error_log($output, 3, ROOT.$settings->errorLogFile);
+
+		die($dieMessage);
 	}
 
 	/**
