@@ -258,6 +258,10 @@ Class Query extends DatabaseEntity
 		$this->setTable($table);
 
 		if ($fields === '*') $this->tempPieces = array('*');
+		elseif (!is_array($fields))
+		{
+			return $this->abort('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The fields you want to select must be provided in an indexed array. E.g. array('col_name' => 'New value'). Only '*' can be accepted as a string.");
+		}
 		else $this->tempPieces[] = implode(', ', $this->gatherArgs($fields));
 
 		return $this;
@@ -383,6 +387,7 @@ Class Query extends DatabaseEntity
 					break;
 			}
 
+			// The abort() method will set $this->error to true.
 			if (!$this->error)
 			{
 				// Add the WHERE clause to the query if any and reset class attributes to null.
@@ -873,7 +878,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function numRows()
 	{
-		return $this->info()->affected_rows;
+		return $this->info()->affectedRows;
 	}
 
 	/**
