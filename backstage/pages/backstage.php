@@ -31,7 +31,7 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 }
 
 $form2->addElement('select',
-                  ['name' => 'page[selection]'],
+                  ['name' => 'article'],
                   ['label' => text('Choose an article to send to the live site'), 'options' => $options, 'rowClass' => 'clear', 'validation' => 'required']);
 $form2->addButton('submit',
                   text('Send the article'),
@@ -52,8 +52,8 @@ $tpl->set_var(['h2' => text(70),
                'toDoListText' => getPageByProperty('page', 'todo-list')->title->$language,
                'manageDatabaseUrl' => url('database-manager'),
                'manageDatabaseText' => getPageByProperty('page', 'database-manager')->title->$language,
-               'fetchTextsFromLiveButton' => $form->render(),
-               'sendArticleToLive' => $form2->render()]);
+               'fetchTextsFromLiveButton' => IS_LOCAL ? $form->render() : '',
+               'sendArticleToLive' => IS_LOCAL ? $form2->render() : '']);
 $content = $tpl->parse('display', "$page->page-page");
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
@@ -65,8 +65,7 @@ function getTexts($info, $form)
     if ($form->getPostedData('getTexts') && IS_LOCAL)
     {
         includeClass('webservice');
-        $ws = new Webservice();
-        $ws->consume('get-texts-from-live');
+        new Webservice('get-texts-from-live');
     }
 }
 function sendArticle($info, $form)
@@ -74,7 +73,7 @@ function sendArticle($info, $form)
     if ($form->getPostedData('sendArticle') && IS_LOCAL)
     {
         includeClass('webservice');
-        $ws = new Webservice('send-article-to-live');
+        new Webservice('send-article-to-live');
     }
 }
 ?>
