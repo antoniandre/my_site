@@ -397,7 +397,7 @@ Class Page
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
 					   'breadcrumbs' => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',
 					   'goDownLink' => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"goDown i-chevron-d\"></a>" : '',
-					   'social' => $this->social ? '<div class="social"></div><br class="clear"/>' : '',
+					   'social' => $this->social ? '<div class="social clearfix"></div>' : '',
 					   'contactUrl' => url(getPageByProperty('id', 'contact', $language)->page.'.php'),
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,
 					   'classEn' => $language == 'en' ? ' active' : '',
