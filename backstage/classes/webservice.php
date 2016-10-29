@@ -52,6 +52,13 @@ class Webservice
 		return $this;
 	}
 
+    /**
+     * Check that the password received with the webservice request is valid.
+     * If the passsword is invalid don't do the expected action and ignore the call as if it was a standard page visit.
+     * You don't want to tell people with bad intentions that the webservice exists but the hash is incorrect.
+     *
+     * @return boolean: true if correct, false otherwise.
+     */
 	public function checkPass()
 	{
 		parse_str($_SERVER['QUERY_STRING'], $queryParts);
@@ -108,7 +115,12 @@ class Webservice
 	}
 
 
-	// Emmit the code if token is matching.
+	/**
+     * Emmit the code from live site if token is matching.
+     * Then die a message to be returned to the caller - on localhost.
+     *
+     * @return void.
+     */
 	public function runDistant()
 	{
 		$posts = Userdata::getWithHtml('post');//!\ Be careful what you do!
