@@ -10,6 +10,7 @@ Class Error
 	private static $instance = null;
 	private $stack;
 
+
 	/**
 	 * Class constructor.
 	 */
@@ -18,6 +19,7 @@ Class Error
     	$this->stack = [];
     	$this->errorHandler();
 	}
+
 
 	/**
 	 * Get the only instance of this class.
@@ -30,6 +32,7 @@ Class Error
 		return self::$instance;
 	}
 
+
 	/**
 	 * Get the current number of errors.
 	 *
@@ -39,6 +42,7 @@ Class Error
 	{
 		return count(self::getInstance()->stack);
 	}
+
 
 	/**
 	 * PHP error handler.
@@ -78,6 +82,7 @@ Class Error
     	});
 	}
 
+
 	/**
 	 * Set a custom user-triggered error.
 	 *
@@ -98,6 +103,7 @@ Class Error
 
 		return self::getInstance();
 	}
+
 
 	/**
 	 * Show function.
@@ -177,6 +183,7 @@ Class Error
 		return $hidden ? "<!-- $output -->" : $output;
 	}
 
+
 	/**
 	 * Log function.
 	 * Writes in the error log file any error that was detected during execution of the script.
@@ -197,18 +204,37 @@ Class Error
 
 		error_log($output, 3, ROOT.$settings->errorLogFile);
 	}
+
+
+    /**
+     * Log the last error that was added to the stack using Error::add().
+     *
+     * @return Error object: the only instance of this class.
+     */
 	public static function logTheLast()
 	{
 		$settings = Settings::get();
+        $self = self::getInstance();
 
 		// Extract the last error from the stack.
-		$error = self::getInstance()->stack[count(self::getInstance()->stack)-1];
+		$error = $self->stack[count($self->stack)-1];
 
 		$output = date('Y-m-d H:i:s')."\n"
 				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\n\n";
 
 		error_log($output, 3, ROOT.$settings->errorLogFile);
+
+        return $self;
 	}
+
+
+    /**
+     * Log the given message without appending to the stack (since we want the script to die) and die with the given message.
+     *
+     * @param string $logMessage: The message to log.
+     * @param string $dieMessage: The only message to display before dying.
+     * @return void.
+     */
 	public static function logAndDie($logMessage, $dieMessage)
 	{
 		$settings = Settings::get();
@@ -231,6 +257,7 @@ Class Error
 		die($dieMessage);
 	}
 
+
 	/**
 	 * Get function.
 	 * Returns the error if any error was detected during execution of the script.
@@ -249,6 +276,7 @@ Class Error
 		return $output;
 	}
 
+
 	/**
 	 * Replace the long absolute path with a shorter path relative to the site root.
 	 *
@@ -259,6 +287,7 @@ Class Error
 	{
 		return str_replace([ROOT, dirname(dirname(__DIR__)).'/'], '', $path);
 	}
+
 
 	/**
 	 * Private clone method to prevent cloning the instance of the Singleton.
