@@ -70,14 +70,19 @@ function compress($cssOutput)
 {
     //!\ Don't change the sequence bellow.
     // 1.
-    $patternComments          = '/\*.*?\*/';// Remove comments.
-    $patternWhiteSpaces       = '[\t\r\n\f\v\e]';// Remove tabs, carret returns, line feeds...
+    $patternComments               = '/\*.*?\*/';// Remove comments.
+    $patternWhiteSpaces            = '[\t\r\n\f\v\e]';// Remove tabs, carret returns, line feeds...
 
     // 2.
-    $patternSpaceBefore       = ' +(?=[@,(){};!>~])';// Remove all spaces before following characters '@,(){}};!>~'.
-    $patternSpaceAfter        = '(?<=[,(){}:;>~]) +';// Remove all spaces after following characters ',(){}}:;>~'.
-    $patternUselessSemiColumn = ';(?=[};])';// Remove every ';' right before '}' or ';'.
-    $patternDecimal           = '(?<=,|\()0(?=\.)';// Replace ',0.1' with ',.1'.
+    // $patternSpaceBefore            = ' +(?=[@,(){};!>~])';// Remove all spaces before following characters '@,(){}};!>~'.
+    $patternSpaceBefore            = ' +(?=[@,{};!>~])';// Remove all spaces before following characters '@,{}};!>~'.
+    $patternSpaceB4BracketIfNotAnd = '(?<!and) +(?=[(])';// Remove all spaces before '(' only if previous word is different than 'and'.
+                                                         // Yes! It seems that the media query is not understood like "@media screen
+                                                         // and(max-width: 550px)... Lame."
+
+    $patternSpaceAfter             = '(?<=[,(){}:;>~]) +';// Remove all spaces after following characters ',(){}}:;>~'.
+    $patternUselessSemiColumn      = ';(?=[};])';// Remove every ';' right before '}' or ';'.
+    $patternDecimal                = '(?<=,|\()0(?=\.)';// Replace ',0.1' with ',.1'.
 
     return preg_replace(
     [
