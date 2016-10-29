@@ -677,7 +677,7 @@ HTML;
 					$tpl->set_var(['value' => $value,
 								   'ifArray' => $multiple ? '[]' : '',
 								   'br' => $inline ? '' : '<br />',
-								   'label' => $label ? "<label f$this->id{$element->id}opt$i\">$label</label>" : '',
+								   'label' => $label ? "<label for=\"$this->id{$element->id}opt$i\">$label</label>" : '',
 								   'opt' => $i,
 								   'checked' => $isChecked ? 'checked="checked"' : '']);
 		 			$tpl->parse('the'.ucfirst($element->type).'OptionBlock', $element->type.'OptionBlock', true);
