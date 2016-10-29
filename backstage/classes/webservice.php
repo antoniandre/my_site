@@ -1,6 +1,33 @@
 <?php
 /**
  * Webservice class.
+ * How to use:
+ * 1 - create a file in webservices/ folder with a name that will be the webservice id
+ * 2 - write 3 functions to cover all the steps of the webservice call: distantCode($data), beforeConsume(), afterConsume($data).
+ * 3 - include the webservice class and instanciate it with your webservice id (name of the file)
+ *
+ * Example of use:
+ *    includeClass('webservice');
+ *    new Webservice('send-article-to-live');
+ *    function distantCode($data)
+ *    {
+ *        // do something with the given received $data sent from localhost.
+ *    }
+ *
+ *    function beforeConsume()
+ *    {
+ *        $data = prepareData();
+ *        return [$data, 'post'];
+ *    }
+ *
+ *    function afterConsume($data)
+ *    {
+ *        $messageType = 'info';
+ *        if (strpos($data, 'SUCCESS') === 0) $messageType = 'success';
+ *        if (strpos($data, 'ERROR') === 0) $messageType = 'error';
+ *
+ *        new Message('Distant page said:'.$data, $messageType, $messageType, 'header', true);
+ *    }
  */
 
 class Webservice
@@ -36,48 +63,14 @@ class Webservice
 	}
 
 	/**
-	 * Consume =
+	 * Consume action equals to:
 	 * 1 - connect to distant (passing data or not)
 	 * 2 - run code on distant (providing that the hash is correct)
 	 * 3 - fetch the return of distant onto local
-	 * @param  [type] $ws       [description]
-	 * @param  [type] $jsonData [description]
-	 * @param  [type] $method   [description]
+     *
+	 * @param string $wsId: The webservice id you want to run.
 	 * @return [type]           [description]
 	 */
-	/*public function consume($ws, $jsonData = null, $method = null)
-	{
-		if ($token && $ws = $this->checkPass($token))
-		{
-			$posts = Userdata::get();
-
-		    $settings = Settings::get();
-		    $encToken = Encryption::encrypt($this->exchangePassword, true);
-
-		    // create curl resource.
-		    $ch = curl_init();
-
-		    // set url
-		    curl_setopt($ch, CURLOPT_URL, $settings->siteUrl."/en/?ws=".base64_encode(urlencode("$ws~~$encToken")));
-
-		    if ($data && $method === 'post')
-		    {
-		    	curl_setopt($ch,CURLOPT_POST, 1);
-		    	curl_setopt($ch,CURLOPT_POSTFIELDS, 'data='.urlencode($jsonData));
-		    }
-
-		    //return the transfer as a string.
-		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		    // $output contains the output string.
-		    $output = curl_exec($ch);
-
-		    // close curl resource to free up system resources
-		    curl_close($ch);
-
-			if (includeOnceWebservice($ws)) afterConsume($output);
-		}
-	}*/
 	public function consume($wsID)
 	{
 		// Include the dedicated file and run the beforeConsume() function.
@@ -120,8 +113,10 @@ class Webservice
 	{
 		$posts = Userdata::getWithHtml('post');//!\ Be careful what you do!
 		$data = isset($posts->data) ? json_decode(stripslashes(urldecode($posts->data))) : null;
+        $returnMessage = 'No return message provided by the webservice.';
 
-		if (($wsID = $this->checkPass()) && includeOnceWebservice($wsID)) distantCode($data);
+		if (($wsID = $this->checkPass()) && includeOnceWebservice($wsID)) $returnMessage = (string)distantCode($data);
+        die($returnMessage);
 	}
 }
 ?>
