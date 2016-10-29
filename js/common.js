@@ -263,18 +263,14 @@ var // General vars. (g for general)
 
 		if (!$('.IE7').length)
 		{
-			$('.social').append('<div id="g-plusone" class="wrapper"/>');
-			var po = document.createElement('g:plusone');
-			po.id = 'gplusone';
-			var wrapper = document.getElementById('g-plusone');
-			wrapper.appendChild(po);
-			document.getElementById('gplusone').setAttribute('size','medium');
-			document.getElementById('gplusone').setAttribute('dataHref',location);
+			$('.social').append(
+            '<div id="g-plusone" class="wrapper">\
+                <g:plusone align="right" size="medium" data-href="'+location+'"></g:plusone>\
+            </div>');
 
 			var gp = document.createElement('script');
 			gp.type = 'text/javascript';
-			gp.async = true;
-			gp.src = 'https://apis.google.com/js/plusone.js';
+			gp.src = 'https://apis.google.com/js/platform.js';
 			gp.text = 'window.___gcfg = {lang: \''+lang+'\'}';
 			var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(gp, s);
 		}
