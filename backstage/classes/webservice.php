@@ -6,8 +6,8 @@
 class Webservice
 {
 	private static $instance = null;
-	// private $distantUrl = $settings->siteUrl;
-	private $distantUrl = 'http://travel.dev';
+	private $distantUrl = '';
+	// private $distantUrl = 'http://travel.dev';
 	private $exchangePassword = 'be$tKeyword∑ver-Yop!';
 
 
@@ -16,6 +16,9 @@ class Webservice
 	 */
 	public function __construct($wsID = null)
 	{
+		$settings = Settings::get();
+		$this->distantUrl = $settings->siteUrl;
+
 		if (strpos($_SERVER['QUERY_STRING'], 'ws=') !== false) $this->runDistant();
 		elseif ($wsID) $this->consume($wsID);
 
