@@ -455,7 +455,8 @@ HTML;
 		}
 
 		$button->class = isset($options['class']) ? $options['class'] : $defaultClass;
-		if (isset($options['value'])) $button->value = $options['value'];
+        if (isset($options['value'])) $button->value = $options['value'];
+		if (isset($options['title'])) $button->title = $options['title'];
 		$button->label = $label;
 		$button->options = (object)$options;
 
@@ -579,7 +580,8 @@ HTML;
 						   'btnClass' => $button->class,
 						   'btnType' => $button->type,
 						   'btnName' => isset($button->name) && $button->name ? " name=\"{$this->id}[$button->name]\"" : '',
-						   'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '',
+                           'btnValue' => isset($button->value) && $button->value ? " value=\"$button->value\"" : '',
+						   'btnTitle' => isset($button->title) && $button->title ? " title=\"$button->title\"" : '',
 						   'toggle' => $this->getToggle($button)]);
 			$tpl->parse('theButtonBlock', 'buttonBlock', true);
 		}

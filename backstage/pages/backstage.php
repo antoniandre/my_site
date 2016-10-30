@@ -9,7 +9,6 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-
 // Get texts form.
 //-------------------------------------------------------------------------------//
 $form = new Form(['id' => 'getTexts']);
@@ -35,7 +34,7 @@ $form2->addElement('select',
                   ['label' => text('Choose an article to send to the live site'), 'options' => $options, 'rowClass' => 'clear', 'validation' => 'required']);
 $form2->addButton('submit',
                   text('Send the article'),
-                  ['class' => 'i-cloud-upload', 'name' => 'sendArticle', 'value' => 1]);
+                  ['class' => 'i-cloud-upload', 'name' => 'sendArticle', 'value' => 1, 'title' => text('Don\'t forget to upload the pictures!')]);
 $form2->validate('sendArticle');
 //-------------------------------------------------------------------------------//
 
@@ -60,6 +59,15 @@ $content = $tpl->parse('display', "$page->page-page");
 
 
 
+//======================================================================================================//
+//========================================== FUNCTIONS =================================================//
+/**
+ * Get the texts directly from the live site database.
+ *
+ * @param  Object $info: information on field validity returned by the Form class.
+ * @param  Object $form: the current Form instance.
+ * @return [void.
+ */
 function getTexts($info, $form)
 {
     if ($form->getPostedData('getTexts') && IS_LOCAL)
@@ -68,6 +76,15 @@ function getTexts($info, $form)
         new Webservice('get-texts-from-live');
     }
 }
+
+
+/**
+ * Send a localhost article to the live site.
+ *
+ * @param  Object $info: information on field validity returned by the Form class.
+ * @param  Object $form: the current Form instance.
+ * @return [void.
+ */
 function sendArticle($info, $form)
 {
     if ($form->getPostedData('sendArticle') && IS_LOCAL)
@@ -76,4 +93,6 @@ function sendArticle($info, $form)
         new Webservice('send-article-to-live');
     }
 }
+//====================================== END of FUNCTIONS ==============================================//
+//======================================================================================================//
 ?>
