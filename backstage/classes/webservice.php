@@ -83,7 +83,16 @@ class Webservice
 		// Include the dedicated file and run the beforeConsume() function.
 		if (includeWebservice($wsID))
 		{
-			list($data, $method) = beforeConsume();
+            $data = null;
+            $method = 'get';
+
+            // The beforeConsume() function may not be needed/defined.
+            // But if it exists it has to return an array of [$data, $method]. If not ignore.
+            if (is_callable('beforeConsume'))
+            {
+                $array = beforeConsume();
+                if (is_array($array)) list($data, $method) = $array;
+            }
 
 		    $settings = Settings::get();
 		    $encToken = Encryption::encrypt($this->exchangePassword, true);
