@@ -11,11 +11,17 @@
 		<!-- END rowBlock -->
 		{wrapperEnd}
 		<!-- END wrapperBlock -->
-		<div class="buttons clear"{toggle}>
-			<!-- BEGIN buttonBlock -->
-			<button class="{btnClass}" type="{btnType}"{btnName}{btnValue}{btnTitle}>{btnText}</button>
-			<!-- END buttonBlock -->
-		</div>
+        <div class="buttons clear"{toggle}>
+            <!-- BEGIN buttonBlock -->
+            <button class="{btnClass}" type="{btnType}"{btnName}{btnValue}{btnTitle}>{btnText}</button>
+            <!-- END buttonBlock -->
+        </div>
+        <!-- BEGIN robotCheck -->
+        <div class="robotCheck clear">
+            <span>{robotCheckText}</span>
+            <label for="robotCheck{formId}" class="i-check" data-yes="{yes}" data-no="{no}"></label>
+        </div>
+        <!-- END robotCheck -->
 		<br class="clear" />
 	</form>
 </div>

@@ -56,6 +56,7 @@ Class Utility
 		                  ['name' => 'email', 'placeholder' => text('Email : restera invisible sur le site')],
 		                  ['validation' => 'required']);*/
 
+        $form->addRobotCheck(text(95));
 		$form->addButton('validate', text(18));
 		$form->validate(function($result, $form)
 		{
@@ -79,7 +80,7 @@ Class Utility
 				new Message(nl2br(text(92)), 'info', 'info', 'header');
 				$form->unsetPostedData('comment', false);
 			}
-			else
+			elseif ($allowed = false)// Disable comments.
 			{
 				$q->insert('users', ['login' => $form->getPostedData('firstName'),
 									 'firstName' => $form->getPostedData('firstName'),
@@ -115,6 +116,7 @@ Class Utility
 				}
 				else new Message(text(84), 'error', 'error', 'header');// There was a pb.
 			}
+            new Message(text('Comments disabled due to abuse.'), 'error', 'error', 'header');
 
 			return $return;
 		});

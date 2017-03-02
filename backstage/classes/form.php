@@ -47,6 +47,7 @@ Class Form
 
 	private $wrappers = [];
 	private $buttons = [];
+    private $robotCheck = false;
 	private $validElements = [];
 
 
@@ -418,51 +419,67 @@ HTML;
 		}
 	}
 
+    /**
+     * addButton function.
+     * Add a button to the form.
+     *
+     * @param string $type: The type of the button to add.
+     *                      Possible buttons: 'validate', 'cancel'
+     * @param string $label: The label of the button.
+     * @param array $options: more options for the button. Like javascript toggle.
+     * @return void.
+     */
+    public function addButton($type, $label, $options = [])
+    {
+        if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
+
+        $defaultClass = $type;
+        $button = new StdClass();
+
+        switch ($type)
+        {
+            case 'submit':
+                $button->type = $type;
+                $button->name =  isset($options['name']) ? $options['name'] : 'submit';
+                break;
+            case 'validate':
+                $button->type = 'submit';
+                $button->name = 'submit';
+                break;
+            case 'cancel':
+                $button->type = 'reset';
+                break;
+            // We do not want an unknown button to be appended.
+            default:
+                return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is nknown.', 'WRONG DATA', true);
+                break;
+        }
+
+        $button->class = isset($options['class']) ? $options['class'] : $defaultClass;
+        if (isset($options['value'])) $button->value = $options['value'];
+        if (isset($options['title'])) $button->title = $options['title'];
+        $button->label = $label;
+        $button->options = (object)$options;
+
+        $this->buttons[] = $button;
+    }
+
 	/**
-	 * addButton function.
-	 * Add a button to the form.
+	 * addRobotCheck function.
+	 * Add a Robot Check to the form.
+     * If activated, the form will refuse to submit unless user unchecks the "I'm a robot" checkbox.
+     * If no robot check the form will submit every valid data.
 	 *
-	 * @param string $type: The type of the button to add.
-	 *                      Possible buttons: 'validate', 'cancel'
-	 * @param string $label: The label of the button.
-	 * @param array $options: more options for the button. Like javascript toggle.
+	 * @param string $label: The label to give to the Robot Check.
 	 * @return void.
 	 */
-	public function addButton($type, $label, $options = [])
+	public function addRobotCheck($label = '')
 	{
-		if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
+		if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the Robot check you want to add to the form.', 'MISSING DATA', true);
 
-		$defaultClass = $type;
-		$button = new StdClass();
-
-		switch ($type)
-		{
-			case 'submit':
-				$button->type = $type;
-				$button->name =  isset($options['name']) ? $options['name'] : 'submit';
-				break;
-			case 'validate':
-				$button->type = 'submit';
-				$button->name = 'submit';
-				break;
-			case 'cancel':
-				$button->type = 'reset';
-				break;
-			// We do not want an unknown button to be appended.
-			default:
-				return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is nknown.', 'WRONG DATA', true);
-				break;
-		}
-
-		$button->class = isset($options['class']) ? $options['class'] : $defaultClass;
-        if (isset($options['value'])) $button->value = $options['value'];
-		if (isset($options['title'])) $button->title = $options['title'];
-		$button->label = $label;
-		$button->options = (object)$options;
-
-		$this->buttons[] = $button;
+		$this->robotCheck = new StdClass();
+        $this->robotCheck->label = $label;
 	}
-
 
 	/**
 	 * render function.
@@ -488,7 +505,8 @@ HTML;
 			$tpl->set_block('form-element-tpl', $existingElement.'Block', 'the'.ucfirst($existingElement).'Block');
 		}
 		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
-		$tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
+		$tpl->set_block('form-tpl', 'robotCheck', 'theRobotCheck');
+        $tpl->set_block('form-tpl', 'buttonBlock', 'theButtonBlock');
 		$tpl->set_block('selectBlock', 'selectOptionBlock', 'theSelectOptionBlock');
 		$tpl->set_block('uploadBlock', 'uploadItemBlock', 'theUploadItemBlock');
 		$tpl->set_block('radioBlock', 'radioOptionBlock', 'theRadioOptionBlock');
@@ -572,6 +590,16 @@ HTML;
 			$tpl->parse('theWrapperBlock', 'wrapperBlock',  true);
 		}
 		//======================================================================//
+
+        //======================== ROBOT CHECK RENDERING =======================//
+        if ($this->robotCheck)
+        {
+            $tpl->set_var(['robotCheckText' => $this->robotCheck->label,
+                           'yes' => text(97),
+                           'no' => text(98)]);
+            $tpl->parse('theRobotCheck', 'robotCheck', true);
+        }
+        //======================================================================//
 
 		//========================== BUTTONS RENDERING =========================//
 		foreach ($this->buttons as $k => $button)
@@ -888,8 +916,15 @@ HTML;
 	{
 		$gets = Userdata::get();
 
-		// If no posted data do not go further.
-		if (!$this->getPostedData() && !Userdata::isAjax() && !isset($gets->upload)) return false;
+        // If no posted data do not go further.
+        if (!$this->getPostedData() && !Userdata::isAjax() && !isset($gets->upload)) return false;
+
+		// Prevent submission if robot check is enabled and user did not unckeck the 'i'm a robot' checkbox.
+        if ($this->robotCheck && $this->getPostedData('robotCheck') !== 'clear')
+        {
+            new Message(text(96), 'error', 'error', 'header');
+            return false;
+        }
 
 		// Init few vars to keep track of the validation result.
 		$countFillableElements = 0;
@@ -904,6 +939,7 @@ HTML;
 			// Split name like form1[text][en] into ['form1','text','en'] to check if user post is set.
 			$elementNameParts = explode('[', str_replace(']', '', $element->attributes->name));
 
+            // $this->getPostedData with last param true to accept html. Only for wysiwyg.
 			if ($element->type === 'wysiwyg') $userDataFromPath = $this->getPostedData($element->attributes->name, true);
 			else
 			{
