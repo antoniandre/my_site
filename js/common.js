@@ -576,28 +576,38 @@ var // General vars. (g for general)
 	{
 		$("[data-original]").each(function()
 		{
-			/* @todo: handle smaller image sizes for mobile.
-			if ($('#homePage').length)
+            var sizes =['xs', 's', 'm', 'l', 'xl'];
+
+			// Handle smaller image sizes for mobiles and tablets.
+			switch(true)
 			{
-				switch(true)
-				{
-					case g.loadScreenWidth < 300:
-						size = 's';
-						break;
-					case g.loadScreenWidth < 550:
-						size = 'm';
-						break;
-					case g.loadScreenWidth < 900:
-						size = 'l';
-						break;
-					case g.loadScreenWidth < 1400:
-						size = 'xl';
-						break;
-				}
-				$(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
-			}*/
+				case g.loadScreenWidth < 350:
+					size = 's';
+					break;
+				case g.loadScreenWidth < 600:
+					size = 'm';
+					break;
+				case g.loadScreenWidth < 900:
+					size = 'l';
+					break;
+				case g.loadScreenWidth < 1400:
+					size = 'xl';
+					break;
+			}
+
+            var figure = $(this).parents('figure');
+            if (figure.length)
+            {
+                // Find the current size or default to 'm'.
+                var currSize = ((figure.attr('class')||'').match(/size_(\w+)/)||[,'m'])[1],
+                    // Only apply the new size to the img src if the breakpoint size is strictly smaller than the initial one.
+                    applyNewSrc = sizes.indexOf(size) < sizes.indexOf(currSize);
+                if (applyNewSrc) $(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
+                console.log(currSize, applyNewSrc);
+            }
+			else $(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
 		});
-		$("[data-original]").lazyload({effect:"fadeIn", threshold:800, load: function(){$(this).addClass('loaded')}});
+		$("[data-original]").lazyload({effect:"fadeIn", threshold:800, load:function(){$(this).addClass('loaded')}});
 	},
 
 	toLatinChars =
