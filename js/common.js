@@ -326,7 +326,7 @@ var // General vars. (g for general)
 		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400, 'easeOutQuad');
 		}).find('li ul').not('.home > ul').hide();
 
-		$(window).on('click', function(e)
+		$('#all').on('click', function(e)
 		{
 		    // Hide the submenu when user clicks anywhere out of the mobile menu.
 		    // (have to check it is not a click inside menu or toggler)
@@ -336,6 +336,7 @@ var // General vars. (g for general)
 		    {
 		        toggler.trigger('click');
 		    }
+		    console.log(e.type)
 		});
 	},
 
@@ -572,6 +573,36 @@ var // General vars. (g for general)
 		}).trigger('init');
 	},
 
+	touchHandler = function(event)
+	{
+	    var touch = event.hasOwnProperty('changedTouches') ? event.changedTouches[0] : event.originalEvent.changedTouches[0];
+
+	    var simulatedEvent = document.createEvent("MouseEvent");
+	        simulatedEvent.initMouseEvent({
+	        touchstart: "mousedown",
+	        touchmove: "mousemove",
+	        touchend: "mouseup"
+	    }[event.type], true, true, window, 1,
+	        touch.screenX, touch.screenY,
+	        touch.clientX, touch.clientY, false,
+	        false, false, false, 0, null);
+
+	    touch.target.dispatchEvent(simulatedEvent);
+
+	    event.preventDefault();
+	},
+
+	/**
+	 * Lazy load images (<img> or background images) and serve them when its fully loaded.
+	 * Also detect the browser width and serve the image (if a size is found in image name)
+	 * to a matching size among (xs, s, m, l, xl, xxl) to gain loading time.
+	 *
+	 *                              /!\  WARNING!  /!\
+	 * The cache must be allowed with the directive Header set Cache-Control "max-age=[age in sec], public, must-revalidate"
+	 * Otherwise each image will be loaded twice!
+	 *
+	 * @return void.
+	 */
 	lazyload = function()
 	{
 		$("[data-original]").each(function()
@@ -584,14 +615,19 @@ var // General vars. (g for general)
 				case g.loadScreenWidth < 350:
 					size = 's';
 					break;
-				case g.loadScreenWidth < 600:
+				case g.loadScreenWidth < 800:
 					size = 'm';
 					break;
-				case g.loadScreenWidth < 900:
+				case g.loadScreenWidth < 1300:
 					size = 'l';
 					break;
-				case g.loadScreenWidth < 1400:
+				case g.loadScreenWidth < 1500:
 					size = 'xl';
+					break;
+				// This size can only by served from 1450+ width screens.
+				// The max size you can give to an image is xl (1600px), but if the screen is too wide it will recut to xxl (2000px).
+				case g.loadScreenWidth >= 1500:
+					size = 'xxl';
 					break;
 			}
 
@@ -680,6 +716,7 @@ String.prototype.isLatin = function(){return this==this.toLatinChars()};
 //==================================================================================//
 var commonReady = function()
 {
+
     $('header .bg').css('height', g.loadScreenHeight);
     $('#footer .bg').css('height', $('#footer .bg').css('height'));
 
