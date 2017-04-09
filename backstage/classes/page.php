@@ -5,6 +5,7 @@
  *
  * @todo: turn it to Multiton and add method getCurrent().
  */
+use travel\Error as Error;
 Class Page
 {
 	private static $instance = null;
@@ -200,11 +201,11 @@ Class Page
 		}
 		if (!$page) $page = getPageByProperty('id', 'notFound', $this->language);
 		$this->page = $page->page;
-		$this->url = $page->url;
+		$this->url = isset($page->url) ? $page->url : '';
 		$this->path = $page->path;
-		$this->title = $page->title;
-		$this->metaKeywords = $page->metaKey;
-		$this->metaDescription = $page->metaDesc;
+		$this->title = isset($page->title) ? $page->title : '';
+		$this->metaKeywords = isset($page->metaKey) ? $page->metaKey : '';
+		$this->metaDescription = isset($page->metaDesc) ? $page->metaDesc : '';
 		$this->icon = $page->icon;
 		$this->id = $page->id;
 		$this->parent = $page->parent;

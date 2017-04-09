@@ -197,7 +197,7 @@ class User
 	 * Then check the session.
 	 *
 	 * @return boolean: true if user is admin, false otherwise.
-	 * @todo Complete the code.
+	 * @todo Complete the code. For now only check by IP.
 	 */
 	public function isAdmin()
 	{
@@ -205,10 +205,11 @@ class User
 
 		// First check if the user ip is recognized as an admin IP.
 		if (in_array($this->getIp(), $settings->adminIpList)) return true;
+        else return false;
 
 		// Then check the session.
 		// @todo: check the session.
-		return $this->id == 1;
+		// return $this->id == 1;
 		// $settings = Settings::get();
 		// return $this->login.$this->id== $settings->webMasterLogin.'1'?1:0;
 	}

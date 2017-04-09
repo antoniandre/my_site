@@ -71,8 +71,8 @@ function getPagesFromDB()
             // if recognised language.
             if (preg_match('~^([-_a-zA-Z0-9]+)_([a-z]{2})$~', $attr, $matches) && array_key_exists($matches[2], Language::allowedLanguages))
             {
-                if (!isset($pages[$k]->$matches[1])) $pages[$k]->$matches[1] = new StdClass();
-                $pages[$k]->$matches[1]->$matches[2] = $val;
+                if (!isset($pages[$k]->{$matches[1]})) $pages[$k]->{$matches[1]} = new StdClass();
+                $pages[$k]->{$matches[1]}->{$matches[2]} = $val;
                 unset($pages[$k]->{"$matches[1]_$matches[2]"});
             }
         }

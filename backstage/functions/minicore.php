@@ -14,6 +14,9 @@ define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
 
 
 //======================= INCLUDES ====================//
+// Error class name is reserved for PHP since PHP 7.0. Place our custom Error class in a
+// namespace to keep using as is.
+use travel\Error as Error;
 includeClass('error');
 includeClass('settings');
 includeClass('userdata');

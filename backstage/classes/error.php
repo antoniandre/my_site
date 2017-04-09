@@ -1,4 +1,8 @@
 <?php
+// Error class name is reserved for PHP since PHP 7.0. Place our custom Error class in a
+// namespace to keep using as is.
+namespace travel;
+
 /**
  * Error model.
  * Design pattern: singleton.
@@ -66,8 +70,7 @@ Class Error
     	set_error_handler(function($errno = 0, $errstr = '', $errfile = '', $errline = 0)
     	{
 			if (!(error_reporting() & $errno)) return;// Don't display error if no error number
-
-			$error = new StdClass();
+			$error = new \StdClass();
 			$error->number = $errno;
 		    if ($error->number == E_USER_ERROR) $error->type = 'ERROR';
 		    elseif ($error->number == E_WARNING) $error->type = 'WARNING';
@@ -92,7 +95,7 @@ Class Error
 	public static function add($errorMessage, $errorType = 'USER CUSTOM', $backtrace = false)
 	{
 		$trace = debug_backtrace();
-		$error = new StdClass();
+		$error = new \StdClass();
 		$error->number = null;
 		$error->type = "$errorType ERROR";
 		$error->file = isset($trace[0]['file']) ? self::getInstance()->pathFromSiteRoot($trace[0]['file']) : '';
@@ -193,7 +196,7 @@ Class Error
 	 */
 	public static function log()
 	{
-		$settings = Settings::get();
+		$settings = \Settings::get();
 
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach (self::getInstance()->stack as $i => $error)
@@ -213,7 +216,7 @@ Class Error
      */
 	public static function logTheLast()
 	{
-		$settings = Settings::get();
+		$settings = \Settings::get();
         $self = self::getInstance();
 
 		// Extract the last error from the stack.
@@ -237,11 +240,11 @@ Class Error
      */
 	public static function logAndDie($logMessage, $dieMessage)
 	{
-		$settings = Settings::get();
+		$settings = \Settings::get();
 		$self = self::getInstance();
 
 		$trace = debug_backtrace();
-		$error = new StdClass();
+		$error = new \StdClass();
 		$error->type = 'USER CUSTOM ERROR';
 		$error->file = isset($trace[0]['file']) ? $self->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
