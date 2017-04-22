@@ -322,8 +322,13 @@ var // General vars. (g for general)
 		    e.preventDefault();
 		    var submenu = $(this).siblings('ul');
 
-		    mobileMenu.find('.parent ul:visible').not(submenu).not('.home > ul').slideUp(400, 'easeOutQuad');
-		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400, 'easeOutQuad');
+		    mobileMenu
+                .find('.parent ul:visible')
+                .not(submenu).not('.home > ul').slideUp(400, 'easeOutQuad')
+                .parents('.parent').removeClass('open');
+		    submenu.stop(true, true)[submenu.is(':visible') ? 'slideUp' : 'slideDown'](400, 'easeOutQuad')
+            .parents('.parent').toggleClass('open');
+
 		}).find('li ul').not('.home > ul').hide();
 
 		$('#all').on('click', function(e)

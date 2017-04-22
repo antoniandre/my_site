@@ -38,7 +38,7 @@ foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 $form = new Form();
 $form->addElement('wrapper',
 				  ['class' => 'panes'],
-				  ['numberElements' => 29]);
+				  ['numberElements' => 30]);
 $form->addElement('wrapper',
 				  ['class' => 'newPage pane'],
 				  ['numberElements' => 19]);
@@ -106,13 +106,13 @@ $form->addElement('select',
                   ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home']);
 $form->addElement('wrapper',
 				  ['class' => 'newArticle pane'],
-				  ['numberElements' => 8, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
+				  ['numberElements' => 9, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
 $form->addElement('header',
 				  ['class' => 'title'],
 				  ['level' => 2, 'text' => 'Create a new article']);
 $form->addElement('wrapper',
 				  ['class' => 'inner'],
-				  ['numberElements' => 7]);
+				  ['numberElements' => 8]);
 $form->addElement('paragraph',
 				  ['class' => 'intro'],
 				  ['text' => text(1)]);
@@ -145,8 +145,8 @@ $form->addElement('select',
                   ['name' => 'article[tags]', 'tabindex' => 17],
                   ['options' => $tags_options, 'label' => text('Article tags'), 'multiple' => true]);
 $form->addElement('textarea',
-                  ['name' => 'article[newTags]', 'placeholder' => text('Some coma separated new keywords.'), 'cols' => 30, 'rows' => 5, 'tabindex' => 18],
-                  []);
+                  ['name' => 'article[newTags]', 'placeholder' => text('Any new tag.'), 'cols' => 30, 'rows' => 5, 'tabindex' => 18],
+                  ['label' => text('Article tags')]);
 $form->addElement('checkbox',
                   ['name' => 'article[published]', 'tabindex' => 19],
                   ['inline' => true,
