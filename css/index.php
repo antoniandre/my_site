@@ -1,6 +1,15 @@
 <?php
-// if (!isset($settings)) die('You can\'t access this file directly.');
+/**
+ * This file is not accessible directly, it is included from functions/core.php.
+ * The classes and vars Settings, Userdata, $page are defined in functions/core.php.
+ * The folder css/ and its content are not accessible from the site.
+ */
+
 //======================= VARS ========================//
+if (!class_exists('Userdata') || !class_exists('Settings')) die('You can\'t access this file directly.');
+$gets = Userdata::get();
+$settings = Settings::get();
+
 $min = $settings->useMinified ? '.min' : '';
 $css = ["common$min", "form$min"];// CSS files to load.
 
@@ -14,9 +23,6 @@ $useCompress = !IS_LOCAL;// Do not minify on localhost.
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$gets = Userdata::get();
-$settings = Settings::get();
-
 // $onlyCss & $extraCss can both be array or string. E.g: 'o[]=css1&o[]=css2' or 'o=css'.
 $onlyCss = isset($gets->o) ? $gets->o : '';
 $extraCss = isset($gets->e) ? $gets->e : '';
@@ -41,7 +47,7 @@ else
 	if ($page->isBackstage()) $css[] = 'backstage.common';
 	elseif ($page->isArticle()) $css[] = 'article';
 
-	$css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;
+    $css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;
 }
 
 // Now add each css file in the output string if the file exists.
