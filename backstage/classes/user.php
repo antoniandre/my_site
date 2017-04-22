@@ -204,7 +204,7 @@ class User
 		$settings = Settings::get();
 
 		// First check if the user ip is recognized as an admin IP.
-		if (in_array($this->getIp(), $settings->adminIpList)) return true;
+		if (in_array($this->getIp(), $settings->adminIpList) || IS_LOCAL) return true;
         else return false;
 
 		// Then check the session.
