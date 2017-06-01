@@ -153,41 +153,58 @@ function url($url, $data = [], $fullUrl = false)
 {
     global $page;
     $settings = Settings::get();
-    $gets = Userdata::get();
-    $language = isset($data['language']) && Language::exists($data['language']) ? $data['language'] : Language::getCurrent();
+    $gets     = Userdata::get();
+    $language = isset($data['language']) && Language::exists($data['language']) ? $data['language']
+                                                                                : Language::getCurrent();
     unset($data['language']);
     $root = $fullUrl ? "$settings->siteUrl/" : $settings->root;
 
     // As $page is global, create another var $matchedPage to not overwrite $page.
     $matchedPage = $page;
 
-    // First get URL vars and store in $urlData.
-    $urlParts = parse_url($url);
-    $queryString = isset($urlParts['query'])? $urlParts['query'] : '';
-    $urlData = [];// Useful if !$queryString.
+    // First separate the URL into semantic pieces and create the $urlObj object.
+    $urlParts    = parse_url($url);
 
-    // Put every url var in $urlData array and convert $data string into indexed array:
-    // A string like 'js=1&article=1' becomes ['js' => 1, 'article' => 1].
-    if ($queryString) parse_str($queryString, $urlData);
+    $urlObj =
+    [
+        'scheme'   => null,
+        'host'     => null,
+        'port'     => null,
+        'path'     => null,
+        'query'    => null,
+        'fragment' => null
+    ];
+    $urlObj = (object)array_merge($urlObj, $urlParts);
+
+    //------------------------- query string ------------------------//
+    // Convert a given query string into indexed array.
+    // E.g. 'js=1&article=1' becomes ['js' => 1, 'article' => 1].
     if (is_string($data)) parse_str($data, $data);
 
-    // Merge arrays to reinject data provided in parameter in the $data array.
-    // Note: array_merge overwrites $urlData with $data in case of common key.
-    $data = array_merge($urlData, $data);
+    if ($urlObj->query)
+    {
+        // Convert query string into indexed array.
+        parse_str($urlObj->query, $urlData);
+
+        // Merge arrays to reinject data provided in parameter in the $data array.
+        // Note: array_merge overwrites $urlData with $data in case of common key.
+        $data = array_merge($urlData, $data);
+    }
+    //---------------------------------------------------------------//
+
 
     //-------------------------- full url ---------------------------//
-    $pos = strpos($url, 'http://');
-    if ($pos !== false && !$pos)// Found at the beginning.
+    if ($urlObj->scheme)
     {
-        $urlPath = $urlParts['path'];
+        $urlPath = "$urlObj->scheme://$urlObj->host/" . ($urlObj->port ? ":$urlObj->port" : '')
+                 . ($urlObj->path ? "/$urlObj->path" : '');
     }
     //---------------------------------------------------------------//
 
     //---------------------------- images ---------------------------//
-    $pos = strpos($url, 'images/');
-    if ($pos === 0)// Found at the beginning.
+    if (strpos($urlObj->path, 'images/') === 0)// Found at the beginning.
     {
-        $urlPath = $root.$urlParts['path'];
+        $urlPath = $root.$urlObj->path;
     }
     //---------------------------------------------------------------//
 
@@ -196,12 +213,11 @@ function url($url, $data = [], $fullUrl = false)
     {
         $urlPath = $root;
         if (!isset($data['lang'])) $data['lang'] = $language;
-        if (strtolower($urlParts['path']) == 'self') $data['page'] = $matchedPage->page;
+        if (strtolower($urlObj->path) === 'self') $data['page'] = $matchedPage->page;
         else
         {
-            $basename = str_replace('.php', '', $url);
-            // Access to the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
-            $matchedPage = getPageByProperty('page', $basename, $language);
+            // Get the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
+            $matchedPage = getPageByProperty('page', str_replace('.php', '', $urlObj->path), $language);
             $data['page'] = $matchedPage->page;
         }
     }
@@ -210,20 +226,20 @@ function url($url, $data = [], $fullUrl = false)
     //----------------------- Rewrite Engine ON ---------------------//
     elseif ($settings->rewriteEngine)
     {
-        if (strtolower($urlParts['path']) == 'self') $urlPath = "$root$language/{$matchedPage->url->$language}.html";
-        else
-        {
-            $basename = str_replace('.php', '', $url);
-            // Access the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
-            $matchedPage = getPageByProperty('page', $basename, $language);
-        }
+        if (strtolower($urlObj->path) == 'self') $urlPath = "$root$language/{$matchedPage->url->$language}.html";
+
+        // Get the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
+        else $matchedPage = getPageByProperty('page', str_replace('.php', '', $urlObj->path), $language);
+
         list($matchedPage->url->$language, $seoData) = seo($matchedPage->url->$language, $data, $language);
         $data = array_merge($seoData, $data);
         $urlPath = "$root$language/{$matchedPage->url->$language}.html";
     }
     //---------------------------------------------------------------//
 
-    return $urlPath.(count($data)? '?'.http_build_query($data/*, '', '&amp;'*/) : '');
+    return $urlPath
+          . (count($data)? '?'.http_build_query($data/*, '', '&amp;'*/) : '')
+          . ($urlObj->fragment ? "#$urlObj->fragment" : '');
 }
 
 /**
