@@ -124,7 +124,7 @@ abstract Class DatabaseEntity
 	 * Gather function args: if args are instanceOf Query, they are treated previously and
 	 * appended to the $this->fields attribute. So This function get the treated args from this array
 	 * and return all the params in the right order.
-	 * If a param is non-database-entity-object (Query or Where) it is treated as a simple string.
+	 * If a param is non-database-entity-object (non Query nor Where) it is treated as a simple string.
 	 *
 	 * Ex:
 	 * $q->select('pages', [
