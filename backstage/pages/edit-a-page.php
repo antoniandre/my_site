@@ -22,8 +22,9 @@ $q = $db->query();
 $tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
 foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
-
+// Create new form.
 $form = new Form();
+
 $form->addElement('header',
 				  ['class' => 'title'],
 				  ['level' => 2, 'text' => 'Select a page to edit', 'rowClass' => 'inline']);
@@ -75,16 +76,16 @@ $form->addElement('header',
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
                   ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 6, 'class' => 'pageTitle'],
-                  ['validation' => 'required']);
+                  ['validation' => 'required', 'label' => text(6)]);
 $form->addElement('text',
                   ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 8, 'class' => 'pageUrl'],
-                  ['validation' => 'required']);
+                  ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 10],
-                  []);
+                  ['label' => text(7)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content of the current page.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 12],
-                  []);
+                  ['label' => text(8)]);
 
 $form->addElement('select',
                   ['name' => 'page[parent]'],
@@ -103,16 +104,14 @@ $form->addElement('wysiwyg',
                    'cols' => 50,
                    'rows' => 30,
                    'tabindex' => 14],
-                  ['label' => textf(20, 'En'),
-                   'validation' => 'requiredIf(page[type]=article)']);
+                  ['label' => textf(20, 'En')]);
 $form->addElement('wysiwyg',
                   ['name' => 'article[content][fr]',
                    'placeholder' => text('Some coma separated words describing the content of the current page.'),
                    'cols' => 50,
                    'rows' => 30,
                    'tabindex' => 15],
-                  ['label' => textf(20, 'Fr'),
-                   'validation' => 'requiredIf(page[type]=article)']);
+                  ['label' => textf(20, 'Fr')]);
 $form->addElement('select',
                   ['name' => 'article[category]'],
                   ['options' => [1 => 'system', 2 => 'travel'],
@@ -135,7 +134,7 @@ $form->addElement('checkbox',
                    'tabindex' => 19],
                   ['inline' => true,
                    'options' => ['1' => 'Published'],
-                   'checked' => isset($posts->article->published) && $posts->article->published]);
+                   'default' => isset($posts->article->published) && $posts->article->published]);
 /*$form->addElement('paragraph',
                   ['class' => 'viewArticle'],
                   ['text' => text('View the article here <a href="'.url($posts->page->url->{$language}).'" target="_blank">'.$posts->page->url->{$language}.'</a>.'),
@@ -160,6 +159,11 @@ handleAjax(function()
         return $form->validate('afterValidateForm');
     }
 });
+
+// Append '#' to the form action attribute in case of editing article and posted successfully.
+// if ($form->getPostedData('page[type]') === 'article' && ($articleName = $form->getPostedData('page[nameInDB]')))
+// $form->addOption(['hash' => "load/$articleName"]);
+$form->addOption(['dontClearForm' => true]);
 
 $form->validate('afterValidateForm');
 
@@ -230,21 +234,27 @@ function afterValidateForm($result, $form)
 	                                'author' => User::getInstance()->getId(),
 	                                'category' => (int)$form->getPostedData('article[category]'),
 	                                'image' => $form->getPostedData('article[image]'),
-	                                'published' => (bool)$form->getPostedData('article[published]')]);
+	                                'published' => (int)$form->getPostedData('article[published]')]);
 			$w = $q->where()->col('id')->eq($articleId);
 			$q->run();
 			$affectedRows = $q->info()->affectedRows;
 
-            // Save article tags.
-            // @todo: finish dev.
-            foreach ($tags as $id => $tag)
+            //--------------------- Save article tags ---------------------//
+            // First delete all the article tags from DB.
+            $q = $db->query()
+                    ->delete('article_tags');
+            $w = $q->where()->col('article')->eq($articleId);
+            $q->run();
+
+            // Now for each tag create a new entry in the article_tags database table.
+            $tags = $form->getPostedData('article[tags]');
+            if ($tags) foreach ($tags as $tag)
             {
-                $q = $db->query();
-                $q->update('article_tags', ['article' => $articleId,
-                                            'tag' => $tag]);
-                $w = $q->where()->col('id')->eq($articleId);
-                $q->run();
+                $q = $db->query()
+                        ->insert('article_tags', ['article' => $articleId, 'tag' => $tag])
+                        ->run();
             }
+            //-------------------------------------------------------------//
 		}
 
         // In both cases PHP file and article, save a page entry in database.
@@ -275,7 +285,8 @@ function afterValidateForm($result, $form)
 		else new Message(68, 'info', 'info', 'content');
 	}
 
-	return $return;
+    // Keep showing the current form edition with user data even after successful submission.
+	return false;
 }
 
 function renamePhpFile($oldName, $newName)
@@ -321,7 +332,16 @@ function fetchPage($page, $form)
 		$array['article[content][fr]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_fr);
 		$array['article[image]'] = $article->image;
 		$array['article[created]'] = $article->created;
-		$array['article[author]'] = $article->author;
+        $array['article[author]'] = $article->author;
+
+        $db = Database::getInstance();
+        $q = $db->query();
+        // $q->select('article_tags', [$q->col('id'), $q->col("text$language")->as('text')])
+        $q->select('article_tags', [$q->col('tag')])
+          ->relate('tags.id', 'article_tags.tag', true);
+        $w = $q->where()->col('article')->eq(39);
+        $tags = array_keys($q->run()->loadObjects('tag'));
+		$array['article[tags]'] = $tags;
 	}
 
 	$form->injectValues($array);

@@ -44,7 +44,7 @@ $form->addElement('wrapper',
 				  ['numberElements' => 19]);
 $form->addElement('header',
 				  ['class' => 'title'],
-				  ['level' => 2, 'text' => 'Create a new page']);
+				  ['level' => 2, 'text' => text('Create a new page')]);
 $form->addElement('wrapper',
 				  ['class' => 'inner'],
 				  ['numberElements' => 17]);
@@ -53,7 +53,7 @@ $form->addElement('paragraph',
 				  ['text' => text(1)]);
 $form->addElement('radio',
                   ['name' => 'page[type]', 'tabindex' => 1],
-                  ['validation' => 'required', 'inline' => true, 'options' => ['php' => 'PHP', 'article' => 'Article'], 'label' => text(14)]);
+                  ['validation' => 'required', 'inline' => true, 'options' => ['php' => text('PHP'), 'article' => text('Article')], 'label' => text(14)]);
 $form->addElement('text',
                   ['name' => 'page[name]', 'placeholder' => text(10), 'tabindex' => 2],
                   ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(9)]);
@@ -88,16 +88,16 @@ $form->addElement('header',
 				  ['level' => 3, 'text' => 'Fr']);
 $form->addElement('text',
                   ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 5, 'class' => 'pageTitle'],
-                  ['validation' => 'required']);
+                  ['validation' => 'required', 'label' => text(6)]);
 $form->addElement('text',
                   ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7, 'class' => 'pageUrl'],
-                  ['validation' => 'required']);
+                  ['validation' => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
-                  ['default' => $settings->defaultMetaDesc['fr']]);
+                  ['default' => $settings->defaultMetaDesc['fr'], 'label' => text(7)]);
 $form->addElement('textarea',
                   ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 11],
-                  ['default' => $settings->defaultMetaKey['fr']]);
+                  ['default' => $settings->defaultMetaKey['fr'], 'label' => text(8)]);
 
 
 
@@ -109,7 +109,7 @@ $form->addElement('wrapper',
 				  ['numberElements' => 9, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
 $form->addElement('header',
 				  ['class' => 'title'],
-				  ['level' => 2, 'text' => 'Create a new article']);
+				  ['level' => 2, 'text' => text('Create a new article')]);
 $form->addElement('wrapper',
 				  ['class' => 'inner'],
 				  ['numberElements' => 8]);
@@ -125,25 +125,27 @@ $form->addElement('wysiwyg',
                    'cols' => 50,
                    'rows' => 30,
                    'tabindex' => 13],
-                  ['label' => textf(20, 'En'),
-                   'validation' => 'requiredIf(page[type]=article)']);
+                  ['label' => textf(20, 'En')]);
 $form->addElement('wysiwyg',
                   ['name' => 'article[content][fr]',
                    'placeholder' => text('The article content in French.'),
                    'cols' => 50,
                    'rows' => 30,
                    'tabindex' => 14],
-                  ['label' => textf(20, 'Fr'),
-                   'validation' => 'requiredIf(page[type]=article)']);
+                  ['label' => textf(20, 'Fr')]);
 $form->addElement('select',
                   ['name' => 'article[category]', 'tabindex' => 15],
                   ['validation' => 'requiredIf(page[type]=article)', 'options' => [1 => 'system', 2 => 'travel'], 'value' => 2, 'label' => text('Article category'), 'default' => 2]);
 $form->addElement('text',
                   ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 16],
                   ['default' => ['images/gallery/___.jpg', true]]);
-$form->addElement('select',
-                  ['name' => 'article[tags]', 'tabindex' => 17],
-                  ['options' => $tags_options, 'label' => text('Article tags'), 'multiple' => true]);
+$form->addElement('checkbox',
+                  ['name' => 'article[tags]',
+                   'tabindex' => 17],
+                  ['inline' => false,
+                   'options' => $tags_options,
+                   'label' => text('Article tags'),
+                   'multiple' => true]);
 $form->addElement('textarea',
                   ['name' => 'article[newTags]', 'placeholder' => text('Any new tag.'), 'cols' => 30, 'rows' => 5, 'tabindex' => 18],
                   ['label' => text('Article tags')]);
@@ -170,8 +172,8 @@ $content = $form->render();
  * validate called internally by the form validate() method if the form has no error.
  *
  * @param StdClass Object $result: the result of the validation process provided by the form validate() method.
- * @param Form Object $form: the current $form object, if you need
- * @return void
+ * @param Form Object $form: the current $form object, if you need.
+ * @return Boolean.
  */
 function validateForm1($result, $form)
 {
@@ -216,14 +218,23 @@ function validateForm1($result, $form)
 			{
                 $savedTags = saveTagsInDB();// Array of inserted ids.
 
-                // Before redirecting to the 'edit-a-page' edition script, postpone a message to say everything went fine.
-                new Message(nl2br(textf(23, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content', true);
+                // Display a success message.
+                new Message
+                (
+                    nl2br(textf(
+                        23,
+                        $pageName,
+                        url($pageName),
+                        stripslashes($form->getPostedData('page[title]['.$language.']')),
+                        url("edit-a-page.php#load/$pageName"),
+                        stripslashes($form->getPostedData('page[title]['.$language.']'))
+                    )),
+                    'valid',
+                    'success',
+                    'content'
+                );
 
-                // Now redirect to the edition script. Everything after that will never be executed (due to exit).
-                // @TODO: find a way to redirect to edit-a-page.php script (independent of language) + hash part.
-                redirectTo('edit-a-page.html#load/'.$pageName);
-
-                // $return = true;
+                $return = true;// To clear form fields.
             }
         }
     }
@@ -276,6 +287,26 @@ function saveArticleInDB($form)
     $articleId = $q->info()->insertId;
 
     if (!$articleId) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
+
+    else
+    {
+        //--------------------- Save article tags ---------------------//
+        // First delete all the article tags from DB.
+        $q = $db->query()
+                ->delete('article_tags');
+        $w = $q->where()->col('article')->eq($articleId);
+        $q->run();
+
+        // Now for each tag create a new entry in the article_tags database table.
+        $tags = $form->getPostedData('article[tags]');
+        if ($tags) foreach ($tags as $tag)
+        {
+            $q = $db->query()
+                    ->insert('article_tags', ['article' => $articleId, 'tag' => $tag])
+                    ->run();
+        }
+        //-------------------------------------------------------------//
+    }
 
     return $articleId;
 }

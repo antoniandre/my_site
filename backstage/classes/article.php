@@ -23,7 +23,7 @@ Class Article
 	}
 
 	/**
-	 * Get an article by its id in a given language or current language by default.
+	 * Get 1 article by its id in a given language or current language by default.
 	 *
 	 * @param int $articleId: the id of the article you want to fetch.
 	 * @param string $language: the language you want the article content to be displayed in default to current language.
@@ -44,8 +44,15 @@ Class Article
 	 */
 	public static function get($articleId, $language = null)
 	{
-		$articles = self::getMultiple(['language' => $language, 'idList' => [$articleId], 'fetchContent' => true]);
-		return count($articles) ? $articles[0] : null;
+        $params =
+        [
+            'language'     => $language,
+            'idList'       => [$articleId],
+            'fetchTags'    => true,
+            'fetchContent' => true
+        ];
+		$articles = self::getMultiple($params);
+		return count($articles) ? $articles[$articleId] : null;
 	}
 
 	public static function getByYear($year)
@@ -66,25 +73,118 @@ Class Article
 	/**
 	 * Get the content of an article.
 	 *
-	 * @todo: to develop.
-	 * @param  array  $params [description]
-	 * @return [type]         [description]
+	 * @todo test this method.
+     * @param int $articleId: the id of the article you want to fetch.
+	 * @param  array  $language:
+	 * @return string: the article content in the given/current language.
 	 */
-	public static function getContent($params = [])
-	{}
+	public static function getContent($articleId, $language = null)
+	{
+        $db = Database::getInstance();
+        $language = $language && Language::exists($language) ? $language : Language::getCurrent();
 
+        $q = $db->query();
+        $q->select('articles', $q->col("content_$language")->as('content'));
+        $w = $q->where();
+        $w->col('id')->eq($articleId);
+
+        return $q->run()->loadObject();
+    }
+
+    /**
+     * Fetching tags and content is optional so the query can be as light as possible.
+     * You can also optionally fetch articles by date range.
+     *
+     * @param  array  $params [description]
+     * @return [type]         [description]
+     */
+    /*public static function getMultiple($params = [])
+    {
+        $defaults =
+        [
+            'limit'        => 0,
+            'language'     => Language::getCurrent(),
+            'idList'       => [],
+            'dateRange'    => [null, null],// [dateBegin, dateEnd].
+            'tags'         => [],// @todo: develop filter articles by tags.
+            'fetchTags'    => false,
+            'fetchContent' => false// By default don't fetch content to lighten the query.
+            // You should not carry all the content of every articles in a var unless you purposely want to display multiple
+            // contents on same page.
+            // Use getContent() method to get the content of one article at a time.
+        ];
+        $params = array_merge($defaults, $params);
+        if (!$params['dateRange'][1]) $params['dateRange'][1] = 'NOW()';
+        $db = Database::getInstance();
+        $language = $params['language'] && Language::exists($params['language']) ? $params['language'] : Language::getCurrent();
+
+        $q = $db->query();
+        $fields = [$q->colIn('id', 'articles'),
+                   $q->colIn('created', 'articles'),
+                   $q->colIn('firstName', 'users')->as('author'),
+                   $q->col('page'),
+                   $q->col('image'),
+                   $q->col('published'),
+                   $q->colIn("url_$language", 'pages')->as('url'),
+                   $q->colIn("title_$language", 'pages')->as('title')];
+
+        // If content fetching.
+        if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
+
+        // If tags fetching.
+        if ($params['fetchTags'])
+        {
+            $fields[] = $q->groupConcat($q->colIn('tag', 'article_tags'))->as('tagIds');
+            $fields[] = $q->groupConcat($q->colIn('name', 'tags'))->as('tagNames');
+        }
+
+        $q->select('articles', $fields)
+          ->relate('articles.author', 'users.id')
+          ->relate('pages.article', 'articles.id');
+
+        // If tags fetching.
+        if ($params['fetchTags'])
+        {
+            $q->relate('article_tags.article', 'articles.id', true);
+            $q->relate('tags.id', 'article_tags.tag', true);
+        }
+
+        $q->relate('articles.category', 'article_categories.id')
+          ->orderBy('articles.created', 'desc');
+
+        if (is_array($params['idList']) && count($params['idList']))
+        {
+            $w = $q->where();
+            $w->colIn('id', 'articles')->in(...$params['idList']);
+        }
+
+        // If date range provided and at least one of the end is set.
+        if (is_array($params['dateRange']) && count($params['dateRange'])
+            && $params['dateRange'][0] && $params['dateRange'][1])
+        {
+            if (!isset($w)) $w = $q->where();
+            else $w->and();
+            $w->colIn('created', 'articles')->between(...$params['dateRange']);
+        }
+
+        if ($params['limit']) $q->limit(4);
+        dbgd($q->run());
+        return $q->run()->loadObjects();
+    }*/
 	public static function getMultiple($params = [])
 	{
 		$defaults =
 		[
-			'language' => Language::getCurrent(),
-			'idList'   => [],
-			// 'tags'     => [],// Not ready yet. @TODO: develop tags.
-			'dateRange' => [null, null],// [dateBegin, dateEnd].
+            'limit'        => 0,
+			'language'     => Language::getCurrent(),
+			'idList'       => [],
+            'dateRange'    => [null, null],// [dateBegin, dateEnd].
+            'tags'         => [],// @todo: develop filter articles by tags.
+			'fetchTags'    => false,
 			'fetchContent' => false// By default don't fetch content to lighten the query.
 			// You should not carry all the content of every articles in a var unless you purposely want to display multiple
 			// contents on same page.
-			// To get the content of one article at a time, yoyu can use getContent() method.
+			// Use getContent() method to get the content of one article at a time.
 		];
 		$params = array_merge($defaults, $params);
 		if (!$params['dateRange'][1]) $params['dateRange'][1] = 'NOW()';
@@ -97,14 +197,17 @@ Class Article
 				   $q->colIn('firstName', 'users')->as('author'),
 				   $q->col('page'),
 				   $q->col('image'),
-				   $q->col('published'),
+                   $q->col('published'),
 				   $q->colIn("url_$language", 'pages')->as('url'),
 				   $q->colIn("title_$language", 'pages')->as('title')];
-		if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
-		$q->select('articles', $fields)
+
+        // If content fetching.
+        if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
+
+        $q->select('articles', $fields)
 		  ->relate('articles.author', 'users.id')
-		  ->relate('pages.article', 'articles.id')
-		  ->relate('articles.category', 'article_categories.id')
+          ->relate('pages.article', 'articles.id')
+          ->relate('articles.category', 'article_categories.id')
 		  ->orderBy('articles.created', 'desc');
 
 		if (is_array($params['idList']) && count($params['idList']))
@@ -112,14 +215,57 @@ Class Article
 			$w = $q->where();
 			$w->colIn('id', 'articles')->in(...$params['idList']);
 		}
-		if (is_array($params['dateRange']) && count($params['dateRange']))
+
+        // If date range provided and at least one of the end is set.
+		if (is_array($params['dateRange']) && count($params['dateRange'])
+            && $params['dateRange'][0] && $params['dateRange'][1])
 		{
 			if (!isset($w)) $w = $q->where();
 			else $w->and();
 			$w->colIn('created', 'articles')->between(...$params['dateRange']);
 		}
 
-		return $q->run()->loadObjects();
+        if ($params['limit']) $q->limit(4);
+
+        // Index articles list by id.
+        $articles = $q->run()->loadObjects('id');
+
+        // If tags fetching.
+        if ($params['fetchTags'])
+        {
+            $tags = self::getTags(array_keys($articles));
+
+            foreach ($tags as $k => $tag)
+            {
+                if (!isset($articles[$tag->article]->tags)) $articles[$tag->article]->tags = [];
+                $articles[$tag->article]->tags[$tag->id] = $tag;
+            }
+        }
+
+		return $articles;
+    }
+
+    public static function getTags($idList = [])
+    {
+        $language = Language::getCurrent();
+        $db       = Database::getInstance();
+        $q        = $db->query();
+
+        $fields = [$q->colIn('id', 'tags'),
+                   $q->colIn('article', 'article_tags'),
+                   $q->colIn('name', 'tags'),
+                   $q->colIn("text$language", 'tags')];
+
+        $q->select('article_tags', $fields)
+          ->relate('tags.id', 'article_tags.tag');
+
+        if (is_array($idList) && count($idList))
+        {
+            $w = $q->where();
+            $w->colIn('article', 'article_tags')->in(...$idList);
+        }
+
+        return $q->run()->loadObjects();
 	}
 
 	public static function getPrevNext($articleId, $returnHtml = true)

@@ -39,15 +39,16 @@ Class Form
 	public $class;// Custom class.
 	public $captcha;// Captcha presence.
 	private $enctype;// Add enctype="multipart/form-data" to the form tag if an upload element is found.
-	private $elements = [];
+	private $dontClearForm;// If set to true the form will not clear the userdata after a successful submission.
+    private $elements = [];
 
 	// Store the elements indexes, indexed by element name, for conveniance and performances.
 	// Only store indexes and not directly element object for the element to be up to date at any time.
 	private $elementIndexesByName = [];
 
-	private $wrappers = [];
-	private $buttons = [];
-    private $robotCheck = false;
+	private $wrappers      = [];
+	private $buttons       = [];
+    private $robotCheck    = false;
 	private $validElements = [];
 
 
@@ -60,15 +61,25 @@ Class Form
 	 *							action => (string) the script path.
 	 *							class => (string) a possible class to apply on the form.
 	 */
-	public function __construct($options = [])
-	{
-		$this->id = isset($options['id']) ? $options['id'] : ('form'.(self::$idCounter++));
-		$this->method = isset($options['method']) ? $options['method'] : 'POST';
-		$this->action = isset($options['action']) ? $options['action'] : url('SELF');
-		$this->class = isset($options['class']) ? $options['class'] : null;
-		$this->enctype = false;
+    public function __construct($options = [])
+    {
+        $this->id            = isset($options['id']) ? $options['id'] : ('form'.(self::$idCounter++));
+        $this->method        = isset($options['method']) ? $options['method'] : 'POST';
+        $this->action        = isset($options['action']) ? $options['action'] : url('SELF');
+        $this->hash          = isset($options['hash']) ? $options['hash'] : null;
+        $this->class         = isset($options['class']) ? $options['class'] : null;
+        $this->enctype       = false;
+        $this->dontClearForm = false;
 
-		if (Userdata::isAjax()) $this->handleAjax();
+        if (Userdata::isAjax()) $this->handleAjax();
+    }
+
+    public function addOption($options = [])
+	{
+        foreach ($options as $optName => $optValue)
+        {
+            $this->$optName = $optValue;
+        }
 	}
 
 	/**
@@ -210,7 +221,7 @@ Class Form
 			foreach ($fileNames as $fileName)
 			{
 				// If file is an image, move it to definitive uploads folder and rename file for security.
-				if (in_array($imageExtension = pathinfo($fileName, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif']))
+				if (in_array($imageExtension = pathinfo(strtolower($fileName), PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif']))
 				{
 					$imagesFound++;
 					$imagesToProcess[] = $fileName;
@@ -343,33 +354,33 @@ HTML;
 
 		// Error if no element type provided.
 		if (!is_string($type))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
 
 		// Error if provided element type does not exist.
 		elseif (!in_array($type, self::existingElements))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
 
 		// Error if no attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& (!is_array($attributes) || !count($attributes)))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
 
 		// Error if no name attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& !isset($attributes['name']))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif ($type === 'wrapper' && !isset($options->numberElements))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif (($type === 'header' || $type === 'paragraph') && !isset($options->text))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif (($type === 'header') && !isset($options->level))
-			Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
+			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
 
 		// Elements for which attributes are not required:
 		else
@@ -431,7 +442,7 @@ HTML;
      */
     public function addButton($type, $label, $options = [])
     {
-        if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
+        if (!$label) return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the button you want to add to the form.', 'MISSING DATA', true);
 
         $defaultClass = $type;
         $button = new StdClass();
@@ -451,7 +462,7 @@ HTML;
                 break;
             // We do not want an unknown button to be appended.
             default:
-                return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is nknown.', 'WRONG DATA', true);
+                return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The type of the button you want to add to the form is nknown.', 'WRONG DATA', true);
                 break;
         }
 
@@ -475,7 +486,7 @@ HTML;
 	 */
 	public function addRobotCheck($label = '')
 	{
-		if (!$label) return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the Robot check you want to add to the form.', 'MISSING DATA', true);
+		if (!$label) return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide a label for the Robot check you want to add to the form.', 'MISSING DATA', true);
 
 		$this->robotCheck = new StdClass();
         $this->robotCheck->label = $label;
@@ -513,6 +524,7 @@ HTML;
 		$tpl->set_block('checkboxBlock', 'checkboxOptionBlock', 'theCheckboxOptionBlock');
 
 		$tpl->set_var(['formId' => $this->id,
+                       'hash' => $this->hash === null ? "#$this->id" : ($this->hash ? "#$this->hash" : ''),
 					   'method' => $this->method,
 					   'action' => $this->action,
 					   'formClass' => $this->class ? " class=\"$this->class\"" : '',
@@ -645,10 +657,11 @@ HTML;
 			}
 		}
 
-		if (isset($element->options->default) && is_array($element->options->default))
-		{
+        if (isset($element->options->default) && is_array($element->options->default))
+        {
 			$element->options->ignoreDefaultOnSubmit = (bool)$element->options->default[1];
 			$element->options->default = $element->options->default[0];
+            // Here should keep a whole array of defaults.
 		}
 
 		$tpl->set_var(['name' => $element->name,
@@ -870,30 +883,30 @@ HTML;
 	public function modifyElementAttributes($elementName, $newAttributesArray)
 	{
 		if (!$elementName)
-			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
+			return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
 
 		$this->modifyElements([$elementName => $newAttributesArray], 'attributes');
 	}
 	public function modifyElementOptions($elementName, $newOptionsArray)
 	{
 		if (!$elementName)
-			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
+			return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the name of the element you want to modify.', 'MISSING DATA', true);
 
 		$this->modifyElements([$elementName => $newOptionsArray], 'options');
 	}
 	public function modifyElements($arrayOfElements = [], $what)
 	{
 		if (!count((array)$arrayOfElements))
-			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide an indexed array of at least 1 element to modify [\'elementName\' => [modifiedArray]].', 'WRONG DATA', true);
+			return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide an indexed array of at least 1 element to modify [\'elementName\' => [modifiedArray]].', 'WRONG DATA', true);
 
 		if (!$what)
-			return Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must explicit the element array you want to modify: attributes or options.', 'WRONG DATA', true);
+			return Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must explicit the element array you want to modify: attributes or options.', 'WRONG DATA', true);
 
 		foreach ((array)$arrayOfElements as $elementName => $newArray)
 		{
 			$element = $this->getElementByName($elementName);
 			$element->$what = (object)array_merge((array)$element->$what, (array)$newArray);
-			dbg((array)$element->$what);
+			// dbg((array)$element->$what);
 		}
 	}
 
@@ -928,8 +941,8 @@ HTML;
 
 		// Init few vars to keep track of the validation result.
 		$countFillableElements = 0;
-		$countFilledElements = 0;
-		$countInvalidElements = 0;
+		$countFilledElements   = 0;
+		$countInvalidElements  = 0;
 
 		// Loop through all the element that have a set name (html attr).
 		foreach ($this->elements as $k => &$element) if (isset($element->attributes->name))
@@ -979,98 +992,116 @@ HTML;
 			// if upload element, check uploaded file types.
 			elseif ($element->type === 'upload')
 			{
-				if (is_object($files = Userdata::secureVars($_FILES))) $files = $files->{$this->id};
+				$files = is_object($files = Userdata::secureVars($_FILES)) ? $files->{$this->id} : null;
 
-				if (!isset($element->options->accept)) $element->options->accept = ['*'];
-				foreach ((array)$element->options->accept as $l => &$accept)
-				{
-					$accept = strtolower($accept);
-					switch($accept)
-					{
-						case '':
-						case '*':
-							$accept = '*';
-							break;
-						case 'jpeg':
-						case 'jpg':
-							$accept = 'image/jpeg';
-							break;
-						case 'png':
-						case 'gif':
-						case "image/$accept":
-							$accept = "image/$accept";
-							break;
-						default:
-							Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
-							unset($element->options->accept[$l]->accept[$l]);
-							break;
-					}
-				}
+                if (!$files)
+                {
+                    $element->files = [];
+                    $element->userdata = '';
+                    $isValid = isset($element->options->validation) ? $this->checkElementValidations($element) : true;
+                    $element->error = !$isValid;
 
-				// Look at the $element->attributes->name into the $_FILES var to find the upload mime type of each uploaded file.
-				// $files->type looks like:
-				// [type] => stdClass Object
-				// (
-				//    [article] => stdClass Object
-				//    (
-				//        [upload] => stdClass Object
-				//        (
-				//            [0] => image/jpeg
-				//            [1] => image/jpeg
-				//            [2] => image/jpeg
-				//        )
-				//    )
-				// )
-				$fileTypesTmpPath = $files->type;
-				$fileNamesTmpPath = $files->name;
-				$fileTmpNamesTmpPath = $files->tmp_name;
-				$fileErrorTmpPath = $files->error;
-				$element->message = '';
+                    if (!$isValid) $countInvalidElements++;
 
-				// Converting files array to object.
-				foreach (explode('[', str_replace(']', '', $element->attributes->name)) as $bit) if ($bit)
-				{
-					$fileTypesTmpPath = $fileTypesTmpPath->$bit;
-					$fileNamesTmpPath = $fileNamesTmpPath->$bit;
-					$fileTmpNamesTmpPath = $fileTmpNamesTmpPath->$bit;
-					$fileErrorTmpPath = $fileErrorTmpPath->$bit;
-				}
-				foreach ($fileErrorTmpPath as $key => $error)
-				{
-					$name = $fileNamesTmpPath[$key];// E.g. 'picture1.jpg'.
-					$tmpName = $fileTmpNamesTmpPath[$key];// Temporary name given by PHP while transfert.
-					$mimeType = $fileTypesTmpPath[$key];// E.g. 'image/jpg'.
+                    // Save only valid elements in a private array for easier later access!
+                    else $this->validElements[] = $element->attributes->name;
+                }
+                else
+                {
+                    $element->files = (array)$files;
+                    $element->userdata = implode(',', $element->files);
 
-					// Skip empty files.
-					if (!$tmpName) continue;
+    				if (!isset($element->options->accept)) $element->options->accept = ['*'];
+    				foreach ((array)$element->options->accept as $l => &$accept)
+    				{
+    					$accept = strtolower($accept);
+    					switch($accept)
+    					{
+    						case '':
+    						case '*':
+    							$accept = '*';
+    							break;
+    						case 'jpeg':
+    						case 'jpg':
+    							$accept = 'image/jpeg';
+    							break;
+    						case 'png':
+    						case 'gif':
+    						case "image/$accept":
+    							$accept = "image/$accept";
+    							break;
+    						default:
+    							Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): The upload file type you want to accept was not recognized and ignored: "'.$accept.'".', 'WRONG DATA', true);
+    							unset($element->options->accept[$l]->accept[$l]);
+    							break;
+    					}
+    				}
 
-					// If upload error is detected.
-				    if ($error != UPLOAD_ERR_OK)
-				    {
-						$element->error = 1;
-						$element->message = "Upload error. [$error] on file \"$name\".";
-						$countInvalidElements++;
-						break;
-				    }
+    				// Look at the $element->attributes->name into the $_FILES var to find the upload mime type of each uploaded file.
+    				// $files->type looks like:
+    				// [type] => stdClass Object
+    				// (
+    				//    [article] => stdClass Object
+    				//    (
+    				//        [upload] => stdClass Object
+    				//        (
+    				//            [0] => image/jpeg
+    				//            [1] => image/jpeg
+    				//            [2] => image/jpeg
+    				//        )
+    				//    )
+    				// )
+    				$fileTypesTmpPath = $files->type;
+    				$fileNamesTmpPath = $files->name;
+    				$fileTmpNamesTmpPath = $files->tmp_name;
+    				$fileErrorTmpPath = $files->error;
+    				$element->message = '';
 
-					// If not allowed file mime type.
-					elseif (!in_array($mimeType, $element->options->accept) && !in_array('*', $element->options->accept))
-					{
-						$element->error = 1;
-						$element->message = 'Unaccepted upload file type.';
-						$countInvalidElements++;
-						break;
-					}
+    				// Converting files array to object.
+    				foreach (explode('[', str_replace(']', '', $element->attributes->name)) as $bit) if ($bit)
+    				{
+    					$fileTypesTmpPath = $fileTypesTmpPath->$bit;
+    					$fileNamesTmpPath = $fileNamesTmpPath->$bit;
+    					$fileTmpNamesTmpPath = $fileTmpNamesTmpPath->$bit;
+    					$fileErrorTmpPath = $fileErrorTmpPath->$bit;
+    				}
+    				foreach ($fileErrorTmpPath as $key => $error)
+    				{
+    					$name = $fileNamesTmpPath[$key];// E.g. 'picture1.jpg'.
+    					$tmpName = $fileTmpNamesTmpPath[$key];// Temporary name given by PHP while transfert.
+    					$mimeType = $fileTypesTmpPath[$key];// E.g. 'image/jpg'.
 
-					// If upload is correct, move it into uploads directory.
-					else
-					{
-						$safeName = md5(date('YmdHis')).basename($name);
-						if (move_uploaded_file($tmpName, self::uploadsDirTemp.basename($name)))
-							$element->message .= "The file \"$name\" is valid, and was successfully uploaded.\n";
-						else echo "Could not move uploaded file \"$tmpName\" to \"".self::uploadsDirTemp.basename($name)."\".";
-					}
-				}
+    					// Skip empty files.
+    					if (!$tmpName) continue;
+
+    					// If upload error is detected.
+    				    if ($error != UPLOAD_ERR_OK)
+    				    {
+    						$element->error = 1;
+    						$element->message = "Upload error. [$error] on file \"$name\".";
+    						$countInvalidElements++;
+    						break;
+    				    }
+
+    					// If not allowed file mime type.
+    					elseif (!in_array($mimeType, $element->options->accept) && !in_array('*', $element->options->accept))
+    					{
+    						$element->error = 1;
+    						$element->message = 'Unaccepted upload file type.';
+    						$countInvalidElements++;
+    						break;
+    					}
+
+    					// If upload is correct, move it into uploads directory.
+    					else
+    					{
+    						$safeName = md5(date('YmdHis')).basename($name);
+    						if (move_uploaded_file($tmpName, self::uploadsDirTemp.basename($name)))
+    							$element->message .= "The file \"$name\" is valid, and was successfully uploaded.\n";
+    						else echo "Could not move uploaded file \"$tmpName\" to \"".self::uploadsDirTemp.basename($name)."\".";
+    					}
+    				}
+                }
 			}
 
 			// if post is unset (like it might happen for select, checkbox or multiple select and radio elmts).
@@ -1093,15 +1124,17 @@ HTML;
 		// If all the posts are valid.
 		if (!$countInvalidElements)
 		{
-			$grantClearing = true;
+            // By default clear form if successfull submission. Don't if prevented from $dontClearForm var.
+            $grantClearing = !$this->dontClearForm;
 
 			// Call a potential validate function if it is set in calling file.
+            // Overrides the $grantClearing variable.
 			if ($callback && is_string($callback))
 			{
 				if (is_callable($callback)) $grantClearing = $callback($return, $this);
 				else
 				{
-					Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
+					Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
 					return null;
 				}
 			}
