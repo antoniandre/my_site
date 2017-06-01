@@ -53,7 +53,7 @@ Class Database
 
 		if ($this->mysqli->connect_errno)
 		{
-			Error::add("Database connection failed: {$this->mysqli->connect_error}.", 'MYSQLI');
+			Cerror::add("Database connection failed: {$this->mysqli->connect_error}.", 'MYSQLI');
 			die(self::connectionError);
 		}
 		else
@@ -214,7 +214,7 @@ Class Database
 				// Make sure there is only one Primary key.
 				if ($primary)
 				{
-					Error::add(ucfirst(__FUNCTION__)." function: You cannot create a table with multiple primary keys (\"$primary\", \"{$columnSettings[2]}\").", 'MYSQLI');
+					Cerror::add(ucfirst(__FUNCTION__)." function: You cannot create a table with multiple primary keys (\"$primary\", \"{$columnSettings[2]}\").", 'MYSQLI');
 					return;
 				}
 				$primary = $column;
@@ -260,7 +260,7 @@ Class Database
 	 */
 	public function setError($function, $query)
 	{
-		Error::add(ucfirst($function)." function: {$this->mysqli->error}\n  SQL = \"$query\".", 'MYSQLI');
+		Cerror::add(ucfirst($function)." function: {$this->mysqli->error}\n  SQL = \"$query\".", 'MYSQLI');
 
 		return false;
 	}

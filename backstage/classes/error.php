@@ -1,15 +1,12 @@
 <?php
-// Error class name is reserved for PHP since PHP 7.0. Place our custom Error class in a
-// namespace to keep using as is.
-namespace travel;
-
 /**
  * Error model.
+ * Named Cerror (for Custom error), as the Built-in PHP Error class has been introduced as of PHP7.
  * Design pattern: singleton.
  *
  * @dependencies: Settings.
  */
-Class Error
+Class Cerror
 {
 	private static $instance = null;
 	private $stack;
@@ -70,7 +67,7 @@ Class Error
     	set_error_handler(function($errno = 0, $errstr = '', $errfile = '', $errline = 0)
     	{
 			if (!(error_reporting() & $errno)) return;// Don't display error if no error number
-			$error = new \StdClass();
+			$error = new StdClass();
 			$error->number = $errno;
 		    if ($error->number == E_USER_ERROR) $error->type = 'ERROR';
 		    elseif ($error->number == E_WARNING) $error->type = 'WARNING';
@@ -95,7 +92,7 @@ Class Error
 	public static function add($errorMessage, $errorType = 'USER CUSTOM', $backtrace = false)
 	{
 		$trace = debug_backtrace();
-		$error = new \StdClass();
+		$error = new StdClass();
 		$error->number = null;
 		$error->type = "$errorType ERROR";
 		$error->file = isset($trace[0]['file']) ? self::getInstance()->pathFromSiteRoot($trace[0]['file']) : '';
@@ -210,7 +207,7 @@ Class Error
 
 
     /**
-     * Log the last error that was added to the stack using Error::add().
+     * Log the last error that was added to the stack using Cerror::add().
      *
      * @return Error object: the only instance of this class.
      */
@@ -244,7 +241,7 @@ Class Error
 		$self = self::getInstance();
 
 		$trace = debug_backtrace();
-		$error = new \StdClass();
+		$error = new StdClass();
 		$error->type = 'USER CUSTOM ERROR';
 		$error->file = isset($trace[0]['file']) ? $self->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';

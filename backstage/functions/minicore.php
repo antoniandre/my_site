@@ -17,6 +17,7 @@ define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
 // Error class name is reserved for PHP since PHP 7.0. Place our custom Error class in a
 // namespace to keep using as is.
 use travel\Error as Error;
+
 includeClass('error');
 includeClass('settings');
 includeClass('userdata');
@@ -34,7 +35,7 @@ ob_start(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && substr_count($_SERVER['HTTP_
 
 // First of all, set the error handler:
 // First use of the Error class triggers the singleton instanciation and sets the error handler.
-$error = Error::getInstance();
+$error = Cerror::getInstance();
 
 // By default, the secured vars are converted to objects and they do not allow HTML.
 UserData::getInstance();
@@ -56,7 +57,7 @@ function includeClass($class)
 {
     $ok = include ROOT."backstage/classes/$class.php";
     if (!$ok)
-        Error::add("The class '$class' was not found in '".ROOT."backstage/classes/$class.php'.", 'NOT FOUND');
+        Cerror::add("The class '$class' was not found in '".ROOT."backstage/classes/$class.php'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -71,7 +72,7 @@ function includeFunction($function)
 {
     $ok = include ROOT."backstage/functions/$function.php";
     if (!$ok)
-        Error::add("The function '$function' was not found in '".ROOT."backstage/functions/$function.php'.", 'NOT FOUND');
+        Cerror::add("The function '$function' was not found in '".ROOT."backstage/functions/$function.php'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -86,7 +87,7 @@ function includeWebservice($ws)
 {
     $ok = include ROOT."backstage/webservices/$ws.php";
     if (!$ok)
-        Error::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+        Cerror::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -94,7 +95,7 @@ function includeOnceWebservice($ws)
 {
     $ok = include_once ROOT."backstage/webservices/$ws.php";
     if (!$ok)
-        Error::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+        Cerror::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -130,7 +131,7 @@ function handleAjax($callback)
             $object = (object)$object;// Cast an acceptable indexed array to object.
             header('Content-Type: application/json;charset=utf-8');
 
-            if (Error::getCount()) $object->message .= "\n\nPHP SAID:\n" . Error::get();
+            if (Cerror::getCount()) $object->message .= "\n\nPHP SAID:\n" . Cerror::get();
             die(json_encode($object));
         }
     }

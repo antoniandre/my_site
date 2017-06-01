@@ -170,7 +170,7 @@ class Userdata
 
     public static function setSession($key, $value, $overwrite = true)
     {
-        if (!$key) return Error::add('You must provide a $key in order to register the $value in session.');
+        if (!$key) return Cerror::add('You must provide a $key in order to register the $value in session.');
 
         $self = self::getInstance();
         if (!$self->session) $self->session = new StdClass();
@@ -245,7 +245,7 @@ class Userdata
         // First check the data source.
         if (!in_array($dataSource, self::knownSources))
         {
-            Error::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
+            Cerror::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
             return false;
         }
 
@@ -279,7 +279,7 @@ class Userdata
     {
         if (!in_array($dataSource, self::knownSources))
         {
-            Error::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
+            Cerror::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
             return;
         }
         $return = null;

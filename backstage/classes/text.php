@@ -6,7 +6,7 @@
 Class Text
 {
 	const NOT_FOUND = 'NOT_FOUND_IN_DB';
- 
+
 	// An array of contexts in which are stored "ID => String" pairs.
 	// (Context = place of a text in the site E.g. 'general', 'sitemap')
 	// That array is extended each time a new text is requested from an ID.
@@ -36,10 +36,10 @@ Class Text
 	{
 		// If only using new Text($string).
 		if ($mixed && is_string($mixed)) $this->tempStrings[] = (object)[Language::getInstance()->getCurrent() => $mixed];
-		
+
 		// If only using new Text($text_id).
 		elseif ($mixed && is_numeric($mixed)) $this->getTextFromId($mixed);
-		
+
 		// If using new Text((array)$parameters).
 		elseif ($mixed && is_array($mixed) && (isset($mixed['id']) || isset($mixed['contexts'])))
 		{
@@ -166,7 +166,7 @@ Class Text
 				// Remove unwanted information from the final array.
 				unset($text->context, $text->id);
 			}
-			else Error::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
+			else Cerror::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
 
 			$this->tempStrings[$id] = $text;
 		}
@@ -309,7 +309,7 @@ Class Text
 
 								// Remove preceding and trailing dashes after the previous cleanup.
 								$str = rtrim(trim($str));
-								
+
 								// Finally replace spaces with dashes and lower the case.
 								$str = strtolower(str_replace(' ', '-', $str));
 							}

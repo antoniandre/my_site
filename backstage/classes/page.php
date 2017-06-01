@@ -5,7 +5,6 @@
  *
  * @todo: turn it to Multiton and add method getCurrent().
  */
-use travel\Error as Error;
 Class Page
 {
 	private static $instance = null;
@@ -111,7 +110,7 @@ Class Page
 	 */
 	public function setHeaderContent($html, $zone = 'bottom')
 	{
-		if (!in_array($zone, ['top', 'bottom'])) Error::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given zone \"$zone\" does not exist. Choose among 'top' or 'bottom'.", 'WRONG DATA', true);
+		if (!in_array($zone, ['top', 'bottom'])) Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given zone \"$zone\" does not exist. Choose among 'top' or 'bottom'.", 'WRONG DATA', true);
 		else $this->{$zone.'ZoneContent'} = $html;
 	}
 
@@ -403,7 +402,7 @@ Class Page
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,
 					   'classEn' => $language == 'en' ? ' active' : '',
 					   'classFr' => $language == 'fr' ? ' active' : '',
-					   'error' => Error::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Error::show()."</div>" : '',
+					   'error' => Cerror::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Cerror::show()."</div>" : '',
 					   'debug' => Debug::getInstance()->getCount() && $showErrors ? "<div id=\"debug\"><p><span class=\"i-bug\"></span> DEBUG </p>".Debug::getInstance()->show()."</div>" : '',
 					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"headerMessage\">$headerMessage</div>" : '',
 					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"contentMessage\">$contentMessage</div>" : '',
@@ -427,7 +426,7 @@ Class Page
 		if ($this->h1 === null) $tpl->set_var('theH1Block', '');
 		else $tpl->parse('theH1Block', 'h1Block', true);
 
-		if (Error::getCount()) Error::log();
+		if (Cerror::getCount()) Cerror::log();
 		if (Debug::getInstance()->getCount()) Debug::getInstance()->log();
 
 		return $tpl->parse('display', 'page-tpl');
@@ -461,7 +460,7 @@ Class Page
 			array_unshift($this->breadcrumbs, $matchedPage);
 
 			// Prevent an infinite loop if there is an error (too deep).
-			if ($maxDepth && count($this->breadcrumbs) >= $maxDepth) Error::add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
+			if ($maxDepth && count($this->breadcrumbs) >= $maxDepth) Cerror::add("The breadcrumbs has ".count($this->breadcrumbs)." pages.");
 
 			if ($matchedPage->parent) $this->calculateBreadcrumbs($matchedPage);
 		}

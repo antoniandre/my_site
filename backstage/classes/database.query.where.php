@@ -74,7 +74,7 @@ Class Where extends DatabaseEntity
         	default:
 	        	break;
         }
-		if (!method_exists($this, $method)) Error::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
+		if (!method_exists($this, $method)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
         else return call_user_func_array(array(self::$instance, $method), $args);
     }
 
