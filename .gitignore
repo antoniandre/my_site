@@ -29,4 +29,5 @@ uploads/temp/*
 !uploads/temp/
 !uploads/index.php
 cache/
+vendor/
 backstage/logs/*.log
