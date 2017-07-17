@@ -1,28 +1,31 @@
-<h2>This is the home page!</h2>
+<div class="latest-articles block {view}-view">
+    <!-- BEGIN latestArticlesBlock -->
+    {* List style article block with no image. *}
+    <h2 class="title">{latestArticlesTitle}</h2>
+    <ul class="glyph">
+        <!-- BEGIN articleBlock -->
+        <li>
+            <a href="{articleLink}">{articleTitle}</a> {articleTags}<br>
+            <span class="details">{publishedByOn}</span><br>
+        </li>
+        <!-- END articleBlock -->
+    </ul>
+    <!-- END latestArticlesBlock -->
 
-<!-- BEGIN latestArticlesBlock -->
-<div class="latestArticles block">
-	<h2 class="title">{latestArticlesTitle}</h2>
-	<ul class="glyph">
-		<!-- BEGIN articleBlock -->
-		<li><a href="{articleLink}">{articleTitle}</a> <span class="details">{publishedByOn}</span></li>
-		<!-- END articleBlock -->
-	</ul>
-</div>
-<!-- END latestArticlesBlock -->
-<!-- BEGIN latestArticlesBlockImages -->
-
-<h2 class="title">{latestArticlesTitle}</h2>
-<div class="latestArticles block">
-<!-- BEGIN articleBlockImages -->
-	<div class="image {imgClass}">
-			<a href="{articleLink}" class="i-zoom">
-				<span class="title">{articleTitle}</span>
-				<span class="details">{publishedByOn}</span>
-				<span class="bg" style="background:url('{articleImgSrc}') center;background-size:cover"></span>
-			</a>
+    {* Article block with images. *}
+    <!-- BEGIN latestArticlesBlockImages -->
+    <h2 class="title">{latestArticlesTitle}</h2>
+    <!-- BEGIN articleBlockImages -->
+    <div class="image {imgClass}{hidden}">
+        <a href="{articleLink}" class="i-zoom"{comingSoon}>
+            <span class="title">{articleTitle}</span>
+            <span class="details">{publishedByOn}</span>
+            {articleTags}
+            <span class="bg" data-original="{articleImgSrc}"></span>
+        </a>
 	</div>
-<!-- END articleBlockImages -->
+    <!-- END articleBlockImages -->
+    {loadMoreButton}
+    <!-- END latestArticlesBlockImages -->
 </div>
-<!-- END latestArticlesBlockImages -->
 <br class="clear" />

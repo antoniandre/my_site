@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 380 420" height="100%">
+    <linearGradient id="grad" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#fcdc89" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#fab847" stop-opacity="1"/>
+    </linearGradient>
+    <path d="m380.69523,-1.19613l-160.53595,0c-5.21503,0 -10.34314,0.60842 -15.29742,1.65143c-12.42915,1.56451 -24.51063,6.86645 -34.07152,16.34042l-151.93115,152.01807c-22.85921,22.77229 -22.85921,59.62516 0,82.39745l151.93115,151.93115c9.56088,9.56088 21.64237,14.86283 34.07152,16.42734c4.95428,1.04301 10.08239,1.56451 15.29742,1.56451l160.53595,0m-158.01535,-124.46534c-47.89134,0 -86.65638,-38.76504 -86.65638,-86.65638c0,-47.89134 38.85196,-86.7433 86.7433,-86.7433c47.89134,0 86.65638,38.85196 86.65638,86.65638c0,47.97826 -38.85196,86.7433 -86.7433,86.7433zm158.01535,-297.86503l0,422.41728" fill="url(#grad)" style="stroke-width: 0em" stroke="#efb652"/>
+</svg>

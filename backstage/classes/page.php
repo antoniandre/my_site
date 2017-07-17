@@ -381,7 +381,6 @@ Class Page
 					   'logoSrc' => url('images/?i='.$settings->logoSrc),
 					   'headerImgSrc' => url('images/?i=home-slides/sailing_xl.jpg'),
 					   'footerImgSrc' => url('images/?i=sunset_l.jpg'),
-					   'pageWatermarkSrc' => url('images/?i=vietnam-map.png'),
 					   'backToHomeText' => text(45),
 					   'homeUrl' => url(getPageByProperty('id', 'home', $language)->page.'.php'),
 					   'homeText' => getPageByProperty('id', 'home', $language)->title->$language,
@@ -440,6 +439,7 @@ Class Page
 	public function setBreadcrumbsVisiblity($bool)
 	{
 		$this->showBreadcrumbs = $bool;
+		return $this;
 	}
 
 	/**

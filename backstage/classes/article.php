@@ -37,7 +37,7 @@ Class Article
 	 *     [author] => Antoni
 	 *     [page] => singapore-2
 	 *     [image] => images/gallery/2015-11-14_15.54.01_m.jpg
-	 *     [published] => 1
+	 *     [status] => published
 	 *     [url] => singapore-2
 	 *     [title] => Singapore 2
 	 * )
@@ -92,94 +92,23 @@ Class Article
     }
 
     /**
+	 * Get the articles from database.
      * Fetching tags and content is optional so the query can be as light as possible.
      * You can also optionally fetch articles by date range.
      *
-     * @param  array  $params [description]
-     * @return [type]         [description]
+     * @params Array $params: see $defaults inside function.
+	 * @return Array: an array of objects.
      */
-    /*public static function getMultiple($params = [])
-    {
-        $defaults =
-        [
-            'limit'        => 0,
-            'language'     => Language::getCurrent(),
-            'idList'       => [],
-            'dateRange'    => [null, null],// [dateBegin, dateEnd].
-            'tags'         => [],// @todo: develop filter articles by tags.
-            'fetchTags'    => false,
-            'fetchContent' => false// By default don't fetch content to lighten the query.
-            // You should not carry all the content of every articles in a var unless you purposely want to display multiple
-            // contents on same page.
-            // Use getContent() method to get the content of one article at a time.
-        ];
-        $params = array_merge($defaults, $params);
-        if (!$params['dateRange'][1]) $params['dateRange'][1] = 'NOW()';
-        $db = Database::getInstance();
-        $language = $params['language'] && Language::exists($params['language']) ? $params['language'] : Language::getCurrent();
-
-        $q = $db->query();
-        $fields = [$q->colIn('id', 'articles'),
-                   $q->colIn('created', 'articles'),
-                   $q->colIn('firstName', 'users')->as('author'),
-                   $q->col('page'),
-                   $q->col('image'),
-                   $q->col('published'),
-                   $q->colIn("url_$language", 'pages')->as('url'),
-                   $q->colIn("title_$language", 'pages')->as('title')];
-
-        // If content fetching.
-        if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
-
-        // If tags fetching.
-        if ($params['fetchTags'])
-        {
-            $fields[] = $q->groupConcat($q->colIn('tag', 'article_tags'))->as('tagIds');
-            $fields[] = $q->groupConcat($q->colIn('name', 'tags'))->as('tagNames');
-        }
-
-        $q->select('articles', $fields)
-          ->relate('articles.author', 'users.id')
-          ->relate('pages.article', 'articles.id');
-
-        // If tags fetching.
-        if ($params['fetchTags'])
-        {
-            $q->relate('article_tags.article', 'articles.id', true);
-            $q->relate('tags.id', 'article_tags.tag', true);
-        }
-
-        $q->relate('articles.category', 'article_categories.id')
-          ->orderBy('articles.created', 'desc');
-
-        if (is_array($params['idList']) && count($params['idList']))
-        {
-            $w = $q->where();
-            $w->colIn('id', 'articles')->in(...$params['idList']);
-        }
-
-        // If date range provided and at least one of the end is set.
-        if (is_array($params['dateRange']) && count($params['dateRange'])
-            && $params['dateRange'][0] && $params['dateRange'][1])
-        {
-            if (!isset($w)) $w = $q->where();
-            else $w->and();
-            $w->colIn('created', 'articles')->between(...$params['dateRange']);
-        }
-
-        if ($params['limit']) $q->limit(4);
-        dbgd($q->run());
-        return $q->run()->loadObjects();
-    }*/
 	public static function getMultiple($params = [])
 	{
 		$defaults =
 		[
-            'limit'        => 0,
+            'limit'        => 0,// Limit of articles to fetch can be a simple number or array of [from, to].
 			'language'     => Language::getCurrent(),
 			'idList'       => [],
             'dateRange'    => [null, null],// [dateBegin, dateEnd].
             'tags'         => [],// @todo: develop filter articles by tags.
+			'fetchStatus'  => 'published',// Only fetch articles if in the list of status. Provide value or array of strings.
 			'fetchTags'    => false,
 			'fetchContent' => false// By default don't fetch content to lighten the query.
 			// You should not carry all the content of every articles in a var unless you purposely want to display multiple
@@ -197,7 +126,7 @@ Class Article
 				   $q->colIn('firstName', 'users')->as('author'),
 				   $q->col('page'),
 				   $q->col('image'),
-                   $q->col('published'),
+                   $q->col('status'),
 				   $q->colIn("url_$language", 'pages')->as('url'),
 				   $q->colIn("title_$language", 'pages')->as('title')];
 
@@ -210,28 +139,40 @@ Class Article
           ->relate('articles.category', 'article_categories.id')
 		  ->orderBy('articles.created', 'desc');
 
+		$w = $q->where(1);
+
+		// If a list of article ids is provided.
 		if (is_array($params['idList']) && count($params['idList']))
 		{
-			$w = $q->where();
-			$w->colIn('id', 'articles')->in(...$params['idList']);
+			$w->and($w->colIn('id', 'articles')->in(...$params['idList']));
+		}
+
+		$params['fetchStatus'] = (array)$params['fetchStatus'];
+		if (count($params['fetchStatus']) && $params['fetchStatus'][0])
+		{
+			$w->and($w->col('status')->in(...$params['fetchStatus']));
 		}
 
         // If date range provided and at least one of the end is set.
 		if (is_array($params['dateRange']) && count($params['dateRange'])
             && $params['dateRange'][0] && $params['dateRange'][1])
 		{
-			if (!isset($w)) $w = $q->where();
-			else $w->and();
-			$w->colIn('created', 'articles')->between(...$params['dateRange']);
+			$w->and($w->colIn('created', 'articles')->between(...$params['dateRange']));
 		}
 
-        if ($params['limit']) $q->limit(4);
+        if ($params['limit'])
+		{
+			// if (is_array($params['limit'])) $q->limit($params['limit']);
+			// First convert $params['limit'] to an array (can be one or 2 items),
+			// then extract the values into args.
+			$q->limit(...(array)$params['limit']);
+		}
 
         // Index articles list by id.
         $articles = $q->run()->loadObjects('id');
 
-        // If tags fetching.
-        if ($params['fetchTags'])
+        // If tags fetching. First check $articles is not empty array if no match.
+        if (count($articles) && $params['fetchTags'])
         {
             $tags = self::getTags(array_keys($articles));
 
@@ -282,8 +223,7 @@ Class Article
 			->orderBy('articles.created', 'desc')
 			->where()
 				->colIn('name', 'article_categories')->eq('travel')
-		  		->and()->col('published')->eq(1)
-		  		->and()->col('published')->dif(0);
+		  		->and()->col('status')->eq('published');
 
 		$articles = $q->run()->loadObjects();
 

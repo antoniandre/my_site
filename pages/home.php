@@ -19,36 +19,33 @@ $tpl->set_block("$page->page-page", 'latestArticlesBlockImages', 'theLatestArtic
 $tpl->set_block('latestArticlesBlockImages', 'articleBlockImages', 'theArticleBlockImages');
 $tpl->set_var('ROOT', $settings->root);
 
-// renderArticles() needs the template to be already set.
-handleAjax(function()
-{
-	$articles = getArticles(10);
-	return ["html" => renderArticles($articles)];
-});
-
-
 // Disable breadcrumbs on home page only.
-// Don't do this before ajax for faster result.
-$page->setBreadcrumbsVisiblity(false);
+// $page->setBreadcrumbsVisiblity(false);
 
 // Disable h1 title on home page only.
-// Don't do this before ajax for faster result.
 $page->setH1(null);
 
-$articles = getArticles();
-renderArticles($articles);
+$page->setHeaderHeight(100);
+
+// Get all the articles at once and all but the 5 firsts.
+// So loading more with the button does not take a server call.
+$articles = Article::getMultiple([/*'limit' => 12, */'fetchStatus' => ['coming soon', 'published'], 'fetchTags' => true]);
+renderArticles($articles, 5);
 
 $content = $tpl->parse('display', "$page->page-page");
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
+
 /**
  * Render the articles list.
  *
  * @param  Array $articles: An array of objects.
+ * @param  Array $lazyload: can be null to disable or an integer representing the number to
+ 							display per click. Useful for large size images.
  * @return String: the output html.
  */
-function renderArticles($articles)
+function renderArticles($articles, $lazyload = null)
 {
 	global $tpl;
 	$settings = Settings::get();
@@ -57,15 +54,33 @@ function renderArticles($articles)
 
 	if (count($articles))
 	{
-		foreach ($articles as $k => $article)
+		$k = 0;
+		foreach ($articles as $article)
 		{
 			$created = new DateTime($article->created);
 
-			$tpl->set_var(['articleLink' => url($article->page),
-						   'articleTitle' => $article->title,
+            $articleTags = '';
+
+			// If article tags are set.
+            if (isset($article->tags))
+            {
+                $articleTags .= '<div class="article-tags clear">';
+                foreach ($article->tags as $tagId => $tag)
+                {
+                    $articleTags .= "<span class='article-tag' data-id='$tagId'>{$tag->{"text$language"}}</span>";
+                }
+                $articleTags .= '</div>';
+            }
+
+			$tpl->set_var(['view'          => $latestArticlesUsePictures ? 'images' : 'list',
+                           'articleLink'   => $article->status === 'published' ? url($article->page) : 'javascript:null;',
+                           'hidden'        => $latestArticlesUsePictures && $lazyload && $k >= $lazyload ? ' hidden' : '',
+                           'articleTitle'  => $article->title,
+                           'comingSoon'    => $article->status === 'coming soon' ? ' data-comingsoon="'.text('Coming soon').'"' : '',
+						   'articleTags'   => $articleTags,
 						   'publishedByOn' => text(21, [
 								   					    'contexts' => 'article',
-								   						'formats' =>
+								   						'formats'  =>
 								   						[
 								   							'sprintf' =>
 								   							[
@@ -79,8 +94,13 @@ function renderArticles($articles)
 			if ($latestArticlesUsePictures)
 			{
 				$imgClass = 'img'.$article->id;
-				$image = preg_replace('~(u(?=ploads)|i(?=mages))(?:mages|ploads)%2F~', $settings->root.'images/?$1=', urlencode($article->image));
-				$tpl->set_var(['articleImgSrc' => $image, 'imgClass' => $imgClass]);
+				$image = preg_replace('~(u(?=ploads)|i(?=mages))(?:mages|ploads)%2F~',
+									  $settings->root.'images/?$1=',
+									  urlencode($article->image));
+				$tpl->set_var(['articleImgSrc'  => $image,
+					           'imgClass'       => $imgClass,
+					           'loadMoreButton' => $lazyload ? '<button class="more-articles i-plus" data-load="'.$lazyload.'">'
+							   								   .text('Charger plus d\'articles').'</button>' : '']);
 				$tpl->parse('theArticleBlockImages', 'articleBlockImages', true);
 			}
 			else
@@ -88,47 +108,18 @@ function renderArticles($articles)
 				$tpl->set_var('theArticleBlockImages', '');
 				$tpl->parse('theArticleBlock', 'articleBlock', true);
 			}
+
+			$k++;
 		}
 
 		$tpl->set_var(['latestArticlesTitle' => text('Derniers articles'),
 					   'theLatestArticlesBlock'.($latestArticlesUsePictures ? '' : 'Images') => '']);
-		$tpl->parse('theLatestArticlesBlock'.($latestArticlesUsePictures ? 'Images' : ''), 'latestArticlesBlock'.($latestArticlesUsePictures ? 'Images' : ''), true);
+		$tpl->parse('theLatestArticlesBlock'.($latestArticlesUsePictures ? 'Images' : ''),
+				    'latestArticlesBlock'.($latestArticlesUsePictures ? 'Images' : ''),
+					true);
 	}
 	else $tpl->set_var(['theLatestArticles' => '', 'theLatestArticlesImages' => '']);
 
 	return $tpl->get_var('theArticleBlockImages');
-}
-
-/**
- * Get the articles from database.
- *
- * @param Integer $limitFrom: specify a number from which to retrieve articles from DB.
- * @param Integer $quantity: specify a number of articles to retrieve from DB.
- * @return Array: an array of objects.
- */
-function getArticles($limitFrom = 0, $quantity = 10)
-{
-	$language = Language::getCurrent();
-
-	// Retrieve published articles from DB.
-	$db = database::getInstance();
-	$q = $db->query();
-	$q->select('articles',
-			   [$q->col("content_$language"),
-			    $q->col("page")->as('page'),
-			    $q->col("title_$language")->as('title'),
-			    $q->col('image'),
-			    $q->colIn('id', 'articles'),
-			    $q->colIn('created', 'articles'),
-			    $q->concat($q->colIn('firstName', 'users'), ' ', $q->colIn('lastName', 'users'))->as('author')])
-	  ->relate('articles.author', 'users.id')
-	  ->relate('articles.id', 'pages.article')
-	  ->relate('articles.category', 'article_categories.id');
-	$w = $q->where();
-	$w->col('published')->eq(1)->and($w->colIn('name', 'article_categories')->eq('travel'));
-	$q->orderBy('created', 'desc')
-	  ->limit($limitFrom, $quantity);
-
-	return $q->run()->loadObjects();
 }
 ?>
