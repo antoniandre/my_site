@@ -18,7 +18,7 @@
  */
 Class Form
 {
-	const existingElements = ['select', 'text', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
+	const existingElements = ['select', 'text', 'number', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
 	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
 								 'requiredIf' => ['pattern' => '~.+~', 'message' => 'This field is required if the previous option "%s" is chosen.'],
 								 'alpha' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
@@ -236,11 +236,18 @@ Class Form
 				// {
 					// Read from pic metadata and keep original picture date and time for img alt attribute.
 					$exif = exif_read_data(self::uploadsDirTemp.$fileName, 'IFD0');
-					$alt = $exif === false && isset($exif['DateTime']) && $exif['DateTime'] ? 'picture '.($k + 1).' (no date)'
-																							: $exif['DateTime'];
+
+                    // Rewrite exif data in Y-m-d H:i:s format.
+                    if ($exif !== false && isset($exif['DateTime']) && $exif['DateTime'])
+                    {
+                        list($date, $time) = explode(' ', $exif['DateTime']);
+                        $alt = str_replace(':', '-', $date) . " $time";
+                    }
+                    else $alt = 'picture ' . ($k + 1) . ' (no date)';
 
 
-					$imageNameBase = md5(date('YmdHis') . 'pw-salt');// Rename file for security.
+                    // Rename file for security but keep the natural date ordering with day start.
+                    $imageNameBase = date('d') . md5(date('YmdHis') . 'pw-salt');
 					$yearMonth = date('Ym');// Organize pics in month folders for convenience.
 
 					// Create folder if it does not exist.
@@ -295,7 +302,7 @@ HTML;
 	 * @see  existingElements const.
 	 * @see  existingValidations const.
 	 * @param string $type: the type of element you want to add to the form.
-	 *        possible values: select, text, checkbox, radio, textarea, hidden, email, phone, and more to come.
+	 *        possible values: select, text, number, checkbox, radio, textarea, wysiwyg, hidden, email, phone, and more to come.
 	 * @param array $attributes: an indexed array (attr_name=>attr_value) of html attributes to apply to the form element.
 	 *        possible values depending on the element type:
 	 *            name
@@ -311,10 +318,11 @@ HTML;
 	 *            etc.
 	 * @param array $options: an indexed array (['key' => 'value',...]) of extra options that may apply to the form element.
 	 *        possible pairs:
-	 *            default => (string/number): a default value to display if no value provided.
-	 *            			 (array): [(string/number)"default value", (boolean)ignore_default_on_form_submit]
-	 *            			          an array of string/number default value and boolean to ignore or not this default value when form is submitted. Default to false.
-	 *            label => (string): The field text to display in label tag.
+	 *            default => (string/number/array):
+	 						 string/number: a default value to display if no value provided.
+							 array: an array of defaults in case of select or checkbox.
+	 *            ignore_default_on_submit => (boolean): bool to ignore or not the default value when form is submitted. Default to false.
+	 			  label => (string): The field text to display in label tag.
 	 *            labelPosition => (string): before, after - the element.
 	 *            validation => (string/array): if there is any validation requirements for the form element.
 	 *            				@see: the existingValidations constant.
@@ -421,7 +429,8 @@ HTML;
 					elseif (!is_array($el->options->validation)) $el->options->validation = [$el->options->validation];
 					if (!in_array('email', $el->options->validation)) $el->options->validation[] = 'email';
 					break;
-				case 'text':
+                case 'text':
+				case 'number':
 				default:
 					break;
 			}
@@ -528,7 +537,7 @@ HTML;
 					   'method' => $this->method,
 					   'action' => $this->action,
 					   'formClass' => $this->class ? " class=\"$this->class\"" : '',
-					   'formWrapperClass' => $this->class ? " class=\"{$this->class}Wrapper\"" : '',
+					   'formWrapperClass' => $this->class ? " class=\"{$this->class}-wrapper\"" : '',
 					   'enctype' => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
 
 		//========================= ELEMENTS RENDERING =========================//
@@ -576,7 +585,7 @@ HTML;
 			// If the element is a wrapper then open its div tag.
 			if ($element->type === 'wrapper')
 			{
-				$wrapperBegin = $element->attributes->class ? "<div class=\"{$element->attributes->class}\"" : '<div';
+				$wrapperBegin = $element->attributes->class ? "<div class=\"wrapper {$element->attributes->class}\"" : '<div';
 				$wrapperBegin .= $toggle.'>';
 				$tpl->set_var('wrapperBegin', $wrapperBegin);
 			}
@@ -657,24 +666,21 @@ HTML;
 			}
 		}
 
-        if (isset($element->options->default) && is_array($element->options->default))
-        {
-			$element->options->ignoreDefaultOnSubmit = (bool)$element->options->default[1];
-			$element->options->default = $element->options->default[0];
-            // Here should keep a whole array of defaults.
-		}
 
-		$tpl->set_var(['name' => $element->name,
-				       'id' => $element->id,
-				       'class' => isset($element->attributes->class) ? " {$element->attributes->class}" : '',
-				       'validation' => isset($element->options->validation) ? implode(' ', (array)$element->options->validation) : null,
+		$tpl->set_var(['name'         => $element->name,
+				       'id'           => $element->id,
+				       'class'        => isset($element->attributes->class) ? " {$element->attributes->class}" : '',
+				       'validation'   => isset($element->options->validation) ? implode(' ', (array)$element->options->validation) : null,
 				       'errorMessage' => isset($element->error) && $element->error ? "<span class=\"error\">$element->message</span>" : '',
-				       'state' => isset($element->error) && $element->error ? ' invalid' : (isset($element->userdata) ? ' valid' : ''),// Validation state.
-				       'attr' => $attrHtml,
+				       'state'        => isset($element->error) && $element->error ? ' invalid' : (isset($element->userdata) ? ' valid' : ''),// Validation state.
+				       'attr'         => $attrHtml,
+					   // If there is a given default value fill the form element with it.
+					   // If default is an array (for checkbox/select) check/select the given values later in $element->type switch.
 				       // $element->userdata is an object if the element is a checkbox or multiple select.
-				       'value' => isset($element->userdata) && !is_object($element->userdata) && !is_array($element->userdata) ?
-				       			  stripslashes($element->userdata)
-				       			  : (isset($element->options->default) ? $element->options->default : '')]);
+					   // In that case 'value' is set to empty string.
+				       'value'        => isset($element->userdata) && !is_object($element->userdata) && !is_array($element->userdata) ?
+				       			         stripslashes($element->userdata)
+				       			         : (isset($element->options->default) && !is_array($element->options->default) ? $element->options->default : '')]);
 
 		switch ($element->type)
 		{
@@ -685,18 +691,18 @@ HTML;
 		 		$tpl->set_var(['level' => (int)$element->options->level, 'text' => $element->options->text, 'class' => isset($element->attributes->class) ? " class=\"{$element->attributes->class}\"" : '']);
 		 		break;
 		 	case 'select':
-		 		$multiple = isset($element->options->multiple) && $element->options->multiple == true;
+		 		$multiple = isset($element->options->multiple) && $element->options->multiple === true;
 		 		$tpl->set_var(['the'.ucfirst($element->type).'OptionBlock' => '',
-		 					   'ifMultiple' => $multiple ? '[]' : '',
-		 					   'multiple' => $multiple ? ' multiple' : '']);
+		 					   'ifMultiple'                                => $multiple ? '[]' : '',
+		 					   'multiple'                                  => $multiple ? ' multiple' : '']);
 		 		$i = 0;
 		 		foreach ($element->options->options as $value => $label)
 		 		{
 		 			$isSelected = (isset($element->userdata) && $element->userdata == $value)
-		 						  || (!isset($element->userdata) && isset($element->options->default) && $element->options->default == $value);
-					$tpl->set_var(['value' => $value,
-								   'label' => $label,
-								   'opt' => $i,
+		 						  || (!isset($element->userdata) && isset($element->options->default) && in_array($value, (array)$element->options->default));
+					$tpl->set_var(['value'    => $value,
+								   'label'    => $label,
+								   'opt'      => $i,
 								   'selected' => $isSelected ? 'selected="selected"' : '']);
 		 			$tpl->parse('the'.ucfirst($element->type).'OptionBlock', $element->type.'OptionBlock', true);
 		 			$i++;
@@ -716,7 +722,7 @@ HTML;
 		 		foreach ($element->options->options as $value => $label)
 		 		{
 		 			$isChecked = (isset($element->userdata) && in_array($value, (array)$element->userdata))
-		 						 || (!isset($element->userdata) && isset($element->options->default) && $element->options->default == $value);
+		 						 || (!isset($element->userdata) && isset($element->options->default) && in_array($value, (array)$element->options->default));
 					$tpl->set_var(['value' => $value,
 								   'ifArray' => $multiple ? '[]' : '',
 								   'br' => $inline ? '' : '<br />',
@@ -1167,12 +1173,20 @@ HTML;
 			// Only perform a validation if it is a known one!
 			if (array_key_exists($validation, self::existingValidations))
 			{
-				// discard the posted default value if it is untouched value and the ignoreDefaultOnSubmit is set to true.
-				if (isset($element->options->default)
-				    && isset($element->options->ignoreDefaultOnSubmit)
-				    && !is_object($element->userdata)
-				    && $element->userdata === $element->options->default)
-					$element->userdata = '';
+				// Discard the posted default value if it is untouched value and the ignoreDefaultOnSubmit is set to true.
+				if (isset($element->options->default) && isset($element->options->ignoreDefaultOnSubmit))
+				{
+					// If array (select/radio/checkbox).
+					if (is_object($element->userdata))
+					{
+						$userdataStr = implode(',', (array)$element->userdata);
+						$defaultsStr = implode(',', (array)$element->options->default);
+
+						if ($userdataStr === $defaultsStr) $element->userdata = '';
+					}
+					// if single value (all the rest).
+					elseif ($element->userdata === $element->options->default) $element->userdata = '';
+				}
 
 				// 'Switch' to treat specific validations.
 				switch ($validation)

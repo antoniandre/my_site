@@ -27,9 +27,15 @@
 
 <!-- BEGIN textBlock -->
 <span class="{validation}{state}">
-	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />{errorMessage}
+    <input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />{errorMessage}
 </span>
 <!-- END textBlock -->
+
+<!-- BEGIN numberBlock -->
+<span class="{validation}{state}">
+	<input type="number" name="{formId}{name}" id="{formId}{id}" class="text number{class}" value="{value}"{attr} />{errorMessage}
+</span>
+<!-- END numberBlock -->
 
 <!-- BEGIN emailBlock -->
 <span class="{validation}{state}">

@@ -1,240 +1,112 @@
+// This function will be called each time you change the page to edit in dropdown.
 var formReady = function()
 {
 	// Using jQuery Dropzone plugin: http://www.dropzonejs.com/#installation
-	/*loadScript('dropzone', function()
+	if ($(".Dropzone").length) loadScript('dropzone', function()
 	{
+		var formAction = $(".Dropzone").parents('form').attr('action');
 		Dropzone.autoDiscover = false;
+
 		$(".Dropzone").addClass('dropzone').dropzone(
 		{
-			url: $(".Dropzone").parents('form').attr('action')+'?upload=1',
+			url: formAction+'?upload=1',
+			method: 'post',
 			uploadMultiple: true,
+			// maxFiles: 1,
+			// acceptedFiles: "image/*,application/pdf,.psd",
+			// acceptedFiles: ".doc,.docx",// Also work.
+			// maxFilesize: 0,// in mb
 			paramName: $(".Dropzone").attr('data-name').replace('[]', ''),
-			addRemoveLinks: true
+			addRemoveLinks: true,
+			dictRemoveFile: '',
+			// dictDefaultMessage: 'Drop files here',
+			removedfile: function(file){$(file._removeLink).trigger('click');}
 		});
-	});*/
 
-	if ($('.wysiwyg').length) loadScript('redactor', function()
-	{
-
-		(function($)
+		$('.dropzone').on('click', '.dz-remove', discardUpload);
+		$('.discardAll').on('click', function()
 		{
-			$.Redactor.prototype.linkify().convertVideoLinks = function(html)
+			$.get(formAction, 'discardAllUploads', function(response)
 			{
-				alert('ok ok !!');
-				var iframeStart = '<figure><iframe class="redactor-linkify-object" width="500" height="281" src="',
-					iframeEnd = '" frameborder="0" allowfullscreen></iframe></figure>';
-
-				if (html.match(this.opts.linkify.regexps.youtube))
-				{
-					html = html.replace(this.opts.linkify.regexps.youtube, iframeStart + '//www.youtube.com/embed/$1' + iframeEnd);
-				}
-
-				if (html.match(this.opts.linkify.regexps.vimeo))
-				{
-					html = html.replace(this.opts.linkify.regexps.vimeo, iframeStart + '//player.vimeo.com/video/$2' + iframeEnd);
-				}
-
-				return html;
-			};
-
-
-			$.Redactor.prototype.youtube = function()
-			{
-				return {
-					init: function()
-					{
-						var button = this.button.addAfter('image', 'youtube', this.lang.get('video'));
-						this.button.addCallback(button, this.youtube.show);
-					},
-					show: function()
-					{
-						this.modal.addTemplate('youtube', this.youtube.getTemplate());
-
-						this.modal.load('youtube', this.lang.get('video'), 700);
-						this.modal.createCancelButton();
-
-						var button = this.modal.createActionButton(this.lang.get('insert'));
-						button.on('click', this.youtube.insert);
-
-						this.selection.save();
-						this.modal.show();
-
-						$('#redactor-insert-youtube-area').focus();
-					},
-					getTemplate: function()
-					{
-						return String()
-						+ '<section id="redactor-modal-youtube-insert">'
-							+ '<label>' + this.lang.get('video_html_code') + '</label>'
-							+ '<input type="text" id="redactor-insert-youtube-area" placeholder="The unique video id after \'www.youtube.com/embed/\' (E.g: 0TfooXDuttk)"/>'
-						+ '</section>';
-					},
-					insert: function()
-					{
-						var data = $('#redactor-insert-youtube-area').val(),
-						    iframe = '<figure><iframe style="width:500px;height:281px" src="https://www.youtube.com/embed/'
-							         + data + '?rel=0&controls=2&showinfo=0" frameborder="0" allowfullscreen></iframe></figure>\n';
-
-						this.selection.restore();
-						this.modal.close();
-
-						var current = this.selection.getBlock() || this.selection.getCurrent();
-
-						if (current) $(current).after(iframe);
-						else this.insert.html(iframe);
-
-						this.code.sync();
-					}
-				};
-			};
-		})(jQuery);
-
-		/*$.Redactor.prototype.figure = function()
+				$('.dz-preview').remove();
+			});
+		});
+		$('.addImagesToArticle').on('click', function()
 		{
-		    return
-		    {
-		        init: function()
-		        {
-					var button = this.button.addAfter('image', 'Figure');
-		            this.button.addCallback(button, this.figure.show);
-		 
-		            // make your added button as Font Awesome's icon
-		            this.button.setAwesome('advanced', 'fa-tasks');
-		        },
-				show: function()
+			$.ajax(
+			{
+			    type: 'GET',
+			    // dataType: 'json',
+			    url: formAction,
+			    data: 'addImagesToArticle',
+			    cache: false,
+				/*complete: function(response)
 				{
-					this.modal.addTemplate('figure', this.figure.getTemplate());
-
-					this.modal.load('figure', 'Figure', 700);
-					this.modal.createCancelButton();
-
-					var button = this.modal.createActionButton(this.lang.get('insert'));
-					button.on('click', this.figure.insert);
-
-					this.selection.save();
-					this.modal.show();
-
-					$('#redactor-insert-youtube-area').focus();
+				},*/
+				success: function(response)
+				{
+					$('textarea.wysiwyg').redactor('insert.html', response.html);
+					$('.dz-preview').remove();
 				},
-				getTemplate: function()
+				beforeSend: function(response)
 				{
-					return String()
-					+ '<section id="redactor-modal-youtube-insert">'
-						+ '<label>' + this.lang.get('video_html_code') + '</label>'
-						+ '<input type="text" id="redactor-insert-youtube-area" placeholder="The unique video id after \'www.youtube.com/embed/\' (E.g: 0TfooXDuttk)"/>'
-					+ '</section>';
-				},
-				insert: function()
-				{
-					var data = $('#redactor-insert-youtube-area').val(),
-					    iframe = '<figure><iframe style="width:500px;height:281px" src="https://www.youtube.com/embed/'
-						         + data + '?rel=0&controls=2&showinfo=0" frameborder="0" allowfullscreen></iframe></figure>\n';
-
-					this.selection.restore();
-					this.modal.close();
-
-					var current = this.selection.getBlock() || this.selection.getCurrent();
-
-					if (current) $(current).after(iframe);
-					else this.insert.html(iframe);
-
-					this.code.sync();
+					$('.dropzone').after('<div id="progress" style="display: none;">'
+										 +'<div class="progressBar">'
+											+'<div class="inner" style="width:0"/>'
+											+'<div class="percentage">0%</div>'
+										 +'</div></div>');
+					$('#progress').slideDown(400);
+					setTimeout(trackProgress, 700);
 				}
-			};
-		};*/
-
-		/*(function($)
-		{
-			$.Redactor.prototype.imagemanager = function()
-			{
-				return {
-					init: function()
-					{
-						if (!this.opts.imageManagerJson) return;
-
-						this.modal.addCallback('image', this.imagemanager.load);
-					},
-					load: function()
-					{
-						var $modal = this.modal.getModal();
-
-						this.modal.createTabber($modal);
-						this.modal.addTab(1, 'Upload', 'active');
-						this.modal.addTab(2, 'Choose');
-
-						$('#redactor-modal-image-droparea').addClass('redactor-tab redactor-tab1');
-
-						var $box = $('<div id="redactor-image-manager-box" style="overflow: auto; height: 300px;" class="redactor-tab redactor-tab2">okok okok').hide();
-						$modal.append($box);
-
-						$.ajax({
-						  dataType: "json",
-						  cache: false,
-						  url: this.opts.imageManagerJson,
-						  success: $.proxy(function(data)
-							{
-								$.each(data, $.proxy(function(key, val)
-								{
-									// title
-									var thumbtitle = '';
-									if (typeof val.title !== 'undefined') thumbtitle = val.title;
-
-									var img = $('<img src="' + val.thumb + '" rel="' + val.image + '" title="' + thumbtitle + '" style="width: 100px; height: 75px; cursor: pointer;" />');
-									$('#redactor-image-manager-box').append(img);
-									$(img).click($.proxy(this.imagemanager.insert, this));
-
-								}, this));
-
-
-							}, this)
-						});
-
-
-					},
-					insert: function(e)
-					{
-						this.image.insert('<img src="' + $(e.target).attr('rel') + '" alt="' + $(e.target).attr('title') + '">');
-					}
-				};
-			};
-		})(jQuery);*/
-
-		$('textarea.wysiwyg').redactor(
-		{
-			// fixed: true,
-			imageUpload: '../../uploads/',
-			// linebreaks: true,
-			paragraphize: false,
-			replaceDivs: false,
-			focus: true,
-			formatting: ['p', 'blockquote', 'h2', 'h3'],
-			formattingAdd: [
-		    {
-		        tag: 'p',
-		        title: 'Paragraph: force align left',
-		        class: 'left'
-		    },
-		    {
-		        tag: 'mark',
-		        title: 'marked',
-		        class: 'marked'
-		    },
-		    {
-		        tag: 'ul',
-		        title: 'ul glyph',
-		        class: 'glyph'
-		    }],
-			plugins: ['youtube'/*, 'figure'*/]
-			/*autosave: window.location,
-			interval: 30,
-			autosaveCallback: function(data, redactor_obj)
-			{
-				cl(data);
-			}*/
+			});
 		});
 	});
 
-	// Handle show/hide state of a form element if a data-toggle attribute is set.
+	if ($('.wysiwyg').length)
+	{
+		loadScript('redactor', function()
+		{
+			new editPanel();
+
+			$('textarea.wysiwyg').redactor(
+			{
+				// fixed: true,
+				imageUpload: '../../uploads/',
+				imageEditable: false,
+				// linebreaks: true,
+				paragraphize: false,
+				replaceDivs: false,
+				focus: true,
+				toolbarFixedTopOffset: $('#stickyBar').height(),
+				formatting: ['p', 'blockquote', 'h2', 'h3'],
+				formattingAdd: [
+			    {
+			        tag: 'p',
+			        title: 'Paragraph: force align left',
+			        class: 'left'
+			    },
+			    {
+			        tag: 'mark',
+			        title: 'marked',
+			        class: 'marked'
+			    },
+			    {
+			        tag: 'ul',
+			        title: 'ul glyph',
+			        class: 'glyph'
+			    }],
+				plugins: ['youtube', 'imagepx']
+				/*autosave: window.location,
+				interval: 30,
+				autosaveCallback: function(data, redactor_obj)
+				{
+					cl(data);
+				}*/
+			});
+		});
+	}
+
+	// Handle show/hide state of a form element if a data-toggle attribute is set (in form definition in PHP file).
 	if ($('[data-toggle]').length)
 	{
 		// Indexed array of elements that will trigger a show/hide on another element on onChange event.
@@ -257,7 +129,7 @@ var formReady = function()
 			togglers[togglerNameAttr].push({conditionValue:condition, element: $(el), toggle: toggle, effect: effect});
 		});
 
-		// Walk through the ready 'togglers' array to perform toggle on appropriate elements.
+		// Walk through the ready 'togglers' array (set in the php form) to perform toggle on appropriate elements.
 		for (var togglerName in togglers)
 		{
 			$('[name="'+togglerName+'"]').on('change', function(e)
@@ -304,6 +176,178 @@ var formReady = function()
 			});
 		}
 	}
+
+    if ($('.robotCheck').length)
+    {
+        robotCheck();
+    }
+},
+trials = 0,
+lastProgress = 0,
+trackProgress = function()
+{
+	$.getJSON(window.location, 'ajaxTrackProgress=1', function(response)
+	{
+		var progress = response.progress;
+		$('#progress .progressBar .inner').css('width', progress+'%').siblings('.percentage').text(progress+'%');
+
+		if (progress < 100 && (lastProgress != progress || (lastProgress == progress && trials < 10)))
+		{
+			setTimeout(trackProgress, 700);
+			trials = lastProgress != progress ? 0 : (trials + 1);
+		}
+
+		else $('#progress').delay(1000).slideUp(400);
+	});
+},
+discardUpload = function()
+{
+	var clicked = this,
+		formAction = $(".Dropzone").parents('form').attr('action');
+
+	$.get(formAction, 'discardUpload='+$(this).parents('.dz-preview').find('.dz-filename span').text(), function(response)
+	{
+		$(clicked).parents('.dz-preview').remove();
+	});
+};
+
+var robotCheck = function()
+{
+    $('.robotCheck label').each(function()
+    {
+        var form = $(this).parents('form');
+    }).one('click', function()
+    {
+        var form = $(this).parents('form');
+        form.append('<input type="hidden" name="'+form[0].id+'[robotCheck]" value="clear" />');
+        $(this).parent().addClass('notRobot');
+    });
 }
 
+var editPanel = function()
+{
+	var self = this;
+	self.panel = null;
+
+	self.createPanel = function()
+	{
+		return $('<div class="editPanel">\
+				<span class="duplicate i-plus" title="Duplicate"></span>\
+				<span class="rotate i-rot-r children_5" title="Rotate">\
+					<span class="rotate10ccw i-rot-l" title="Rotate left 10 degrees">10<br>º</span>\
+					<span class="rotate5ccw i-rot-l" title="Rotate left 5 degrees">5º</span>\
+					<span class="rotate0" title="Rotate left 5 degrees">0º</span>\
+					<span class="rotate5cw i-rot-r" title="Rotate right 5 degrees">5º</span>\
+					<span class="rotate10cw i-rot-r" title="Rotate right 10 degrees">10º</span>\
+				</span>\
+				<span class="remove i-x" title="Remove"></span>\
+				<span class="addCaption i-pencil" title="Add caption"></span>\
+				<span class="likePosition i-thumbup children_4" title="Change likes position">\
+					<span class="likeOnTopRight" title="Likes on top right">•</span>\
+					<span class="likeOnLeft" title="Likes on left">•</span>\
+					<span class="likeOnBottomRight" title="Likes on bottom right">•</span>\
+					<span class="noLike" title="Hide likes for this figure">ø</span>\
+				</span>\
+				<span class="resize i-resize children_5" title="Resize">\
+					<span class="size_xs" title="Resize xs">xs</span>\
+					<span class="size_s" title="Resize s">s</span>\
+					<span class="size_m" title="Resize m">m</span>\
+					<span class="size_l" title="Resize l">l</span>\
+					<span class="size_xl" title="Resize xl">xl</span>\
+				</span>\
+				<span class="postcard i-scissors" title="Apply postcard style"/>\
+				</div>').hide();
+	};
+
+	self.bindEvents = function()
+	{
+		self.panel.on('click', 'span', function(e)
+		{
+			var Class = $(e.target).attr('class').replace(/ .*/, ''),// Keep only the first class.
+				figure = $(this).parents('figure');
+			switch(Class)
+			{
+				case 'rotate':
+					figure.removeClass('rotate10ccw rotate5ccw rotate0 rotate5cw rotate10cw rotate');
+					break;
+				case 'rotate10ccw':
+				case 'rotate5ccw':
+				case 'rotate5cw':
+				case 'rotate0':
+				case 'rotate10cw':
+					figure
+						.removeClass('rotate10ccw rotate5ccw rotate0 rotate5cw rotate10cw')
+						.addClass('rotate '+Class);
+					break;
+				case 'likeOnTopRight':
+				case 'likeOnLeft':
+				case 'likeOnBottomRight':
+				case 'noLike':
+					figure
+						.removeClass('likeOnTopRight likeOnLeft likeOnBottomRight noLike')
+						.addClass(Class);
+					break;
+				case 'size_xs':
+				case 'size_s':
+				case 'size_m':
+				case 'size_l':
+				case 'size_xl':
+					var size = Class.replace('size_', ''),
+						image = figure.find('img');
+
+					// First update figure class to new size.
+					figure.removeClass('size_xs size_s size_m size_l size_xl').addClass(Class);
+
+					// Then update image source to use the proper size.
+					image.attr('src', image.attr('src').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
+					image.attr('alt', image.attr('alt').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
+					break;
+				case 'duplicate':
+					figure.after(figure.clone());
+					break;
+				case 'remove':
+					if (confirm('Do you also want to delete the picture file?'))
+					{
+						cl('TODO: finish this task!');
+						$.getJSON(window.location, 'removeImage='+figure.find('img').attr('src'), function(response)
+						{
+							setMessage(response.message);
+						});
+					}
+					figure.remove();
+					break;
+				case 'addCaption':
+					if (!figure.find('figcaption').length) figure.append('<figcaption>Caption</figcaption>');
+					figure.find('figcaption').select();
+					break;
+				case 'postcard':
+					figure.toggleClass('postcard i-scissors');
+					break;
+			}
+		});
+
+		$('article').off().on('mouseenter', 'figure', function()
+		{
+			var figEditPanel = self.panel.clone(true);
+			// bindEditEvents(figEditPanel);
+			$(this).addClass('edit hover').append(figEditPanel);
+			$(this).find('.editPanel').stop(true, true).toggle('slide', 'easeInOutQuad', {direction:'left'}, 300);
+		})
+		.on('mouseleave', 'figure', function()
+		{
+			var figure = $(this);
+			figure.removeClass('hover').find('.editPanel').stop(true, true).toggle('slide', 'easeInOutQuad', function()
+			{
+				// Check again if not hover before removing editPanel.
+				if (!figure.hasClass('hover')) $(this).parent().removeClass('edit').end().remove();
+			}, {direction:'left'}, 300);
+		});
+	};
+
+	self.init = function()
+	{
+		self.panel = self.createPanel();
+		self.bindEvents();
+	}();
+};
 
