@@ -1,3 +1,7 @@
 .content ul {margin-left: 0;}
 ul li {list-style-type: none;padding: 3px 0;}
 ul :before {font-size: 200%;padding-right: 10px;}
+
+ul li .buttons {float: none;}
+ul li .buttons button {background: none;padding-left: 0;border: none;}
+ul li form span.error:before {border-width: .4em;}

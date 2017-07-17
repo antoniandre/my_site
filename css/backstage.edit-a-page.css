@@ -1,3 +1,5 @@
+form .inline, form .inline + .row {display: inline-block;vertical-align: middle;}
+form .inline h2 {margin: 15px 10px 15px 0;}
 .languageBlock {float:left;width: 48.4%;margin-top: 20px;margin-bottom: 20px;}
 .languageBlock.first {border-left:none;margin-right:1.5%;padding-right:1.5%;border-right:1px solid #ddd;}
 .languageBlock .language {text-align:right;}
@@ -7,10 +9,19 @@ letter-spacing:5px;
 margin: 0 0 15px;
 padding: 10px;
 background: rgba(0,0,0,.075);}
-.languageBlock label {display:none;vertical-align:middle;min-width: 100px;}
-.languageBlock input, .languageBlock textarea {width:260px;vertical-align:middle;}
-.languageBlock.first label {display:inline-block;}
+.languageBlock label {visibility: hidden;vertical-align:middle;min-width: 110px;}
+
+.languageBlock .row > span {width:100%;}
+.languageBlock input, .languageBlock textarea {width:100%;vertical-align:middle;box-sizing: border-box;}
+.languageBlock.first label {visibility: visible;}
 .panes .nopadding {padding:5px 0;}
 .panes .pane p.intro {padding:10px 0 10px 0px;}
 
 article {width:1060px;max-width:101%;}
+
+.redactor-toolbar {text-align: center;}
+
+@media screen and (max-width: 550px) {
+    .languageBlock {width: 100%;}
+    .languageBlock label {visibility: visible;}
+}
