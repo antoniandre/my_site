@@ -7,6 +7,7 @@
 	<meta http-equiv="Content-Script-Type" content="text/javascript" />
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	<meta http-equiv="Content-language" content="{language}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="Author" content="{author}" />
 	<meta name="description" content="{metaDesc}" />
 	<meta name="keywords" content="{metaKey}" />
@@ -23,28 +24,120 @@
 	<meta itemprop="description" content="{metaDesc}" />
 
 	<meta name="Robots" content="{noCrawl}index, {noCrawl}follow" />
-	<link href="{ROOT}images/?i=favicon.png" rel="shortcut icon" type="image/x-icon" />
-	<!--[if IE 6]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=6" /><![endif]-->
-	<!--[if IE 7]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=7" /><![endif]-->
-	<!--[if IE 8]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=8" /><![endif]-->
-	<!--[if !IE]><!--><link rel="stylesheet" media="screen" type="text/css" href="?css=1" /><!--<![endif]-->
-	<script type="text/javascript"><!--
-	document.documentElement.className = document.documentElement.className.replace('nojs', 'js');
-	var ROOT= '{ROOT}';
-	<!-- BEGIN googleAnalytics -->
-	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount','{GAtracker}'],['_setDomainName','none'],['_trackPageview']);
-	(function(){
-	var ga= document.createElement('script');ga.type= 'text/javascript';ga.async= 'true';
-	ga.src= 'http://www.google-analytics.com/ga.js';
-	var s= document.getElementsByTagName('script')[0];s.parentNode.insertBefore(ga,s);
-	})();
-	<!-- END googleAnalytics -->
-	--></script>
-	<script type="text/javascript" src="?js=1"></script>
+    <link href="{ROOT}images/?i=favicon.png" rel="shortcut icon" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="{ROOT}vendor/slick/slick.css"/>
+    <link href="https://file.myfontastic.com/DGfWSEbT6gS8DacjuW2aF9/icons.css" rel="stylesheet">
+    <!--[if IE 6]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=6" /><![endif]-->
+    <!--[if IE 7]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=7" /><![endif]-->
+    <!--[if IE 8]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=8" /><![endif]-->
+    <!--[if !IE]><!--><link rel="stylesheet" media="screen" type="text/css" href="?css=1.26" /><!--<![endif]-->
+    <script type="text/javascript"><!--
+    document.documentElement.className = document.documentElement.className.replace('nojs', 'js');
+    var ROOT = '{ROOT}';
+    <!-- BEGIN googleAnalytics -->
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', '{GAtracker}', 'auto');
+    ga('send', 'pageview');
+    <!-- END googleAnalytics -->
+    --></script>
+    <script type="text/javascript" src="?js=1.26"></script>
+    <script type="text/javascript" src="{ROOT}vendor/slick/slick.min.js"></script>
 </head>
-<body id="{pageId}Page" class="{pageId}">
-<div class="logo"><{strongOrH1}><a href="{homeUrl}" title="{backToHomeText}"><img src="{logoSrc}" alt="{siteName}"></a></{strongOrH1}></div>
+<body id="{pageId}-page" class="{pageId}">
+
+
+{*<!--  @todo: integrate facebook login.
+<script>
+// This is called with the results from from FB.getLoginStatus().
+function statusChangeCallback(response)
+{
+    console.log('statusChangeCallback');
+    console.log(response);
+    // The response object is returned with a status field that lets the
+    // app know the current login status of the person.
+    // Full docs on the response object can be found in the documentation
+    // for FB.getLoginStatus().
+    if (response.status === 'connected')
+    {
+		// Logged into your app and Facebook.
+		testAPI();
+    }
+    else if (response.status === 'not_authorized')
+    {
+		// The person is logged into Facebook, but never accessed your app. And has to agree terms.
+		document.getElementById('status').innerHTML = 'Please log into this app.';
+    }
+    else
+    {
+		// The person is not logged into Facebook, so we're not sure if
+		// they are logged into this app or not.
+		document.getElementById('status').innerHTML = 'Please log into Facebook.';
+		// FB.login(function(){testAPI();});
+    }
+}
+
+// This function is called when someone finishes with the Login Button.
+// See the onlogin handler attached to it in the sample code below.
+function checkLoginState()
+{
+    FB.getLoginStatus(function(response) {statusChangeCallback(response);});
+}
+
+window.fbAsyncInit = function()
+{
+	FB.init({
+		appId      : '572076889621885',
+		cookie     : true,  // enable cookies to allow the server to access the session
+		xfbml      : true,  // parse social plugins on this page
+		version    : 'v2.5' // use version 2.2
+	});
+
+	// Now that we've initialized the JavaScript SDK, we call
+	// FB.getLoginStatus().  This function gets the state of the
+	// person visiting this page and can return one of three states to
+	// the callback you provide.  They can be:
+	//
+	// 1. Logged into your app ('connected')
+	// 2. Logged into Facebook, but not your app ('not_authorized')
+	// 3. Not logged into Facebook and can't tell if they are logged into
+	//    your app or not.
+	//
+	// These three cases are handled in the callback function.
+	FB.getLoginStatus(function(response) {statusChangeCallback(response);});
+
+};
+
+// Load the SDK asynchronously
+(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+
+// Here we run a very simple test of the Graph API after login is
+// successful.  See statusChangeCallback() for when this call is made.
+function testAPI() {
+    console.log('Welcome!  Fetching your information.... ');
+    FB.api('/me', function(response) {
+    	console.log(JSON.stringify(response));
+      console.log('Successful login for: ' + response.name);
+      document.getElementById('status').innerHTML =
+        'Thanks for logging in, ' + response.name + '!';
+
+    	document.getElementById('status').innerHTML += '<img src="//graph.facebook.com/'+response.id+'/picture?type=square" width="30">';
+    	document.getElementById('status').innerHTML += '<img src="//graph.facebook.com/'+response.id+'/picture?type=large" width="200">';
+    	document.getElementById('status').innerHTML += '<img src="//graph.facebook.com/'+response.id+'/picture?type=normal" width="75">';
+    });
+}
+</script> -->*}
+
+
 <div class="overlay"></div>
 <div id="lightbox" class="hide">
 	<div class="overlay"></div>
@@ -57,51 +150,109 @@
 		</div>
 	</div>
 </div>
-<div id="spinner">
-	<div class="bokeh">
-		<span></span>
-		<span></span>
-		<span></span>
-		<span></span>
+<input type="checkbox" id="mobile-menu-open">
+<label class="hamburger" for="mobile-menu-open">
+	<span></span>
+</label>
+<div id="all">
+	<div id="spinner">
+		<div class="bokeh">
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
 	</div>
-</div>
-{headerMessage}
-<div id="topBar">
-	<nav id="menu" role="navigation" aria-label="Primary">
-		<ul>
-			<li><a href="{homeUrl}" class="home">{homeText}</a></li>
-			<li><a href="{contactUrl}" class="contact">{contactText}</a></li>
-		</ul>
-	</nav>
-	<form id="lang" action="{SELF}" method="post">
-		<div>
-		<button type="submit" name="lang" value="en" class="en{classEn}">English (US)</button>
-		<button type="submit" name="lang" value="fr" class="fr{classFr}">Fran&ccedil;ais</button>
+	{headerMessage}
+	<header style="height:{headerHeight}vh" class="parallax" data-speed=".25" data-end-on-reach-top="#page">
+        <div class="main-slideshow-wrapper">
+            <div class="main-slideshow">
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/alcohol-1853327_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/bar-1839361_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/beer-2375021_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/caipirinha-599513_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/champagne-762697_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/cocktail-857393_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/cocktail-2282032_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/female-731895_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/mojito-698499_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+            </div>
+            <a href="javascript:;" class="i-chevron-l slick-arrow slick-prev"></a>
+            <a href="javascript:;" class="i-chevron-r slick-arrow slick-next"></a>
+        </div>
+		<div id="top-zone">
+			<div class="logo"><{strongOrH1}><a href="{homeUrl}" title="{backToHomeText}" data-text="{siteName}">{siteName}</a></{strongOrH1}></div>
+            {mainMenu}
+			{newsletter}<br class="clear" />
+            {topZoneContent}
+        </div>
+        <div id="bottom-zone">{bottomZoneContent}{goDownLink}</div>
+	</header>
+	<div id="page">
+		<div id="sticky-bar">
+			<a class="logo" href="{homeUrl}" title="{backToHomeText}">{siteName}</a>
+			{breadcrumbs}
+			<form class="lang-selector" action="{SELF}" method="post">
+				<div>
+				<button type="submit" name="lang" value="en" class="en{classEn}" title="English (US)">En</button>
+				<button type="submit" name="lang" value="fr" class="fr{classFr}" title="Fran&ccedil;ais">Fr</button>
+				</div>
+			</form>
+			<br class="clear" />
 		</div>
-	</form>	
-</div>
-<div id="topZone">{newsletter}<br class="clear" /></div>
-<div id="frame"><a name="top"></a>
-	<div class="inner" role="main">
-		<!-- BEGIN h1Block --><h1 id="title"{icon}>{h1}</h1><!-- END h1Block -->
-		<div id="contentWrapper">
-			{breadcrumbs}{social}{brClear}{error}{debug}<div class="content">
-			{contentMessage}{content}
+			<div class="inner" role="main"><a id="top" name="top"></a>
+
+	{*<!-- @todo: integrate facebook login.
+		<div
+		  class="fb-like"
+		  data-share="true"
+		  data-width="450"
+		  data-show-faces="true">
+		</div>
+		<\!--
+		  Below we include the Login Button social plugin. This button uses
+		  the JavaScript SDK to present a graphical Login button that triggers
+		  the FB.login() function when clicked.
+		--\>
+		<fb:login-button scope="public_profile,email,user_friends" onlogin="checkLoginState();">
+		</fb:login-button>
+		<div id="status">
+		</div>
+		-->*}
+
+
+			<!-- BEGIN h1Block --><h1 id="title"{icon}>{h1}</h1><!-- END h1Block -->
+			<div id="contentWrapper">
+				{error}{debug}<div class="content">
+				{contentMessage}{content}
+				</div>
+				<div class="loading"></div>
 			</div>
-			<div class="loading"></div>
 		</div>
+		<a id="pageBottom" name="pageBottom"></a>
+	</div>
+	<div id="footer">
+		<div class="bg" data-original="{footerImgSrc}"></div>
 		<div id="bottom">
 			<a href="#top" id="goTop" class="tooltip i-chevron-u" title="{goTopText}"><span>{goTopText}</span></a>
 		</div>
-	</div>
-	<div id="footer">
-		<div id="copyright" class="floatLeft" role="contentinfo">{copyright}</div>
-		<ul class="menu floatRight" role="navigation" aria-label="Secondary">
+		<div id="copyright" role="contentinfo">{copyright}</div>
+		<ul class="menu" role="navigation" aria-label="Secondary">
 			<li><a href="{sitemapUrl}">{sitemapText}</a></li>
 			<li><a href="{contactUrl}">{contactText}</a></li>
 		</ul>
 		<br class="clear" />
 	</div>
-	</div>
+</div>
+<div id="mobile-menu">
+	<form class="lang-selector clearfix" action="{SELF}" method="post">
+		<div>
+		<button type="submit" name="lang" value="en" class="en{classEn}" title="English (US)">En</button>
+		<button type="submit" name="lang" value="fr" class="fr{classFr}" title="Fran&ccedil;ais">Fr</button>
+		</div>
+	</form>
+	<div class="sitemap">{sitemapTree}</div>
+	<div class="articles"><h3>{articlesListText}</h3>{articlesList}</div>
+</div>
 </body>
 </html>

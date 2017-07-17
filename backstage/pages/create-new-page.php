@@ -20,6 +20,7 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 // fetch existing tags.
 $db = database::getInstance();
 $q = $db->query();
+$tags_options = [];
 $tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
 foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
@@ -37,123 +38,201 @@ foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
 $form = new Form();
 $form->addElement('wrapper',
-				  ['class' => 'panes'],
-				  ['numberElements' => 30]);
+				  ['class'          => 'panes'],
+				  ['numberElements' => 31]);
 $form->addElement('wrapper',
-				  ['class' => 'newPage pane'],
+				  ['class'          => 'newPage pane'],
 				  ['numberElements' => 19]);
 $form->addElement('header',
-				  ['class' => 'title'],
-				  ['level' => 2, 'text' => text('Create a new page')]);
+				  ['class'          => 'title'],
+				  ['level'          => 2,
+                  'text'            => text('Create a new page')]);
 $form->addElement('wrapper',
-				  ['class' => 'inner'],
+				  ['class'          => 'inner'],
 				  ['numberElements' => 17]);
 $form->addElement('paragraph',
-				  ['class' => 'intro'],
-				  ['text' => text(1)]);
+				  ['class'          => 'intro'],
+				  ['text'           => text(1)]);
 $form->addElement('radio',
-                  ['name' => 'page[type]', 'tabindex' => 1],
-                  ['validation' => 'required', 'inline' => true, 'options' => ['php' => text('PHP'), 'article' => text('Article')], 'label' => text(14)]);
+                  ['name'           => 'page[type]',
+                   'tabindex'       => 1],
+                  ['validation'     => 'required',
+                   'inline'         => true,
+                   'options'        => ['php' => text('PHP'), 'article' => text('Article')],
+                   'label'          => text(14)]);
 $form->addElement('text',
-                  ['name' => 'page[name]', 'placeholder' => text(10), 'tabindex' => 2],
-                  ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(9)]);
+                  ['name'           => 'page[name]',
+                   'placeholder'    => text(10),
+                   'tabindex'       => 2],
+                  ['validation'     => 'requiredIf(page[type]=php)',
+                   'toggle'         => 'showIf(page[type]=php)',
+                   'toggleEffect'   => 'slide',
+                   'label'          => text(9)]);
 $form->addElement('text',
-                  ['name' => 'page[path]', 'placeholder' => text(12), 'tabindex' => 3],
-                  ['validation' => 'requiredIf(page[type]=php)', 'toggle' => 'showIf(page[type]=php)', 'toggleEffect' => 'slide', 'label' => text(11)]);
+                  ['name'           => 'page[path]',
+                   'placeholder'    => text(12),
+                   'tabindex'       => 3],
+                  ['validation'     => 'requiredIf(page[type]=php)',
+                   'toggle'         => 'showIf(page[type]=php)',
+                   'toggleEffect'   => 'slide',
+                   'label'          => text(11)]);
 
 $form->addElement('wrapper',
-				  ['class' => 'languageBlock first'],
+				  ['class'          => 'languageBlock first'],
 				  ['numberElements' => 5]);
 $form->addElement('header',
 				  [],
-				  ['level' => 3, 'text' => 'En']);
+				  ['level'          => 3,
+                   'text'           => 'En']);
 $form->addElement('text',
-                  ['name' => 'page[title][en]', 'placeholder' => text('The page title'), 'tabindex' => 4, 'class' => 'pageTitle'],
-                  ['validation' => 'required', 'label' => text(6)]);
+                  ['name'           => 'page[title][en]',
+                   'placeholder'    => text('The page title'),
+                   'tabindex'       => 4,
+                   'class'          => 'pageTitle'],
+                  ['validation'     => 'required',
+                   'label'          => text(6)]);
 $form->addElement('text',
-                  ['name' => 'page[url][en]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 6, 'class' => 'pageUrl'],
-                  ['validation' => 'required', 'label' => text(5)]);
+                  ['name'           => 'page[url][en]',
+                   'placeholder'    => text('A nice url for the new page'),
+                   'tabindex'       => 6,
+                   'class'          => 'pageUrl'],
+                  ['validation'     => 'required',
+                   'label'          => text(5)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][en]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 8],
-                  ['label' => text(7), 'default' => $settings->defaultMetaDesc['en']]);
+                  ['name'           => 'page[metaDesc][en]',
+                   'placeholder'    => text('Some sentences describing the content at stake.'),
+                   'cols'           => 30,
+                   'rows'           => 10,
+                   'tabindex'       => 8],
+                  ['label'          => text(7),
+                   'default'        => $settings->defaultMetaDesc['en']]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][en]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 10],
-                  ['label' => text(8), 'default' => $settings->defaultMetaKey['en']]);
+                  ['name'           => 'page[metaKey][en]',
+                   'placeholder'    => text('Some coma separated words describing the content at stake.'),
+                   'cols'           => 30,
+                   'rows'           => 10,
+                   'tabindex'       => 10],
+                  ['label'          => text(8),
+                   'default'        => $settings->defaultMetaKey['en']]);
 
 $form->addElement('wrapper',
-				  ['class' => 'languageBlock'],
+				  ['class'          => 'languageBlock'],
 				  ['numberElements' => 5]);
 $form->addElement('header',
 				  [],
-				  ['level' => 3, 'text' => 'Fr']);
+				  ['level'          => 3,
+                   'text'           => 'Fr']);
 $form->addElement('text',
-                  ['name' => 'page[title][fr]', 'placeholder' => text('The page title'), 'tabindex' => 5, 'class' => 'pageTitle'],
-                  ['validation' => 'required', 'label' => text(6)]);
+                  ['name'           => 'page[title][fr]',
+                   'placeholder'    => text('The page title'),
+                   'tabindex'       => 5,
+                   'class'          => 'pageTitle'],
+                  ['validation'     => 'required',
+                   'label'          => text(6)]);
 $form->addElement('text',
-                  ['name' => 'page[url][fr]', 'placeholder' => text('A nice url for the new page'), 'tabindex' => 7, 'class' => 'pageUrl'],
-                  ['validation' => 'required', 'label' => text(5)]);
+                  ['name'           => 'page[url][fr]',
+                   'placeholder'    => text('A nice url for the new page'),
+                   'tabindex'       => 7,
+                   'class'          => 'pageUrl'],
+                  ['validation'     => 'required', 'label' => text(5)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaDesc][fr]', 'placeholder' => text('Some sentences describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 9],
-                  ['default' => $settings->defaultMetaDesc['fr'], 'label' => text(7)]);
+                  ['name'           => 'page[metaDesc][fr]',
+                   'placeholder'    => text('Some sentences describing the content at stake.'),
+                   'cols'           => 30,
+                   'rows'           => 10,
+                   'tabindex'       => 9],
+                  ['default'        => $settings->defaultMetaDesc['fr'],
+                   'label'          => text(7)]);
 $form->addElement('textarea',
-                  ['name' => 'page[metaKey][fr]', 'placeholder' => text('Some coma separated words describing the content at stake.'), 'cols' => 30, 'rows' => 10, 'tabindex' => 11],
-                  ['default' => $settings->defaultMetaKey['fr'], 'label' => text(8)]);
+                  ['name'           => 'page[metaKey][fr]',
+                   'placeholder'    => text('Some coma separated words describing the content at stake.'),
+                   'cols'           => 30,
+                   'rows'           => 10,
+                   'tabindex'       => 11],
+                  ['default'        => $settings->defaultMetaKey['fr'],
+                   'label'          => text(8)]);
 
 
 
 $form->addElement('select',
-                  ['name' => 'page[parent]', 'tabindex' => 12],
-                  ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home']);
+                  ['name'           => 'page[parent]',
+                   'tabindex'       => 12],
+                  ['options'        => $options,
+                   'label'          => text(13),
+                   'rowClass'       => 'clear',
+                   'validation'     => 'required',
+                   'default'        => 'home']);
 $form->addElement('wrapper',
-				  ['class' => 'newArticle pane'],
-				  ['numberElements' => 9, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
+				  ['class'          => 'newArticle pane'],
+				  ['numberElements' => 10,
+                   'toggle'         => 'showIf(page[type]=article)',
+                   'toggleEffect'   => 'slide']);
 $form->addElement('header',
-				  ['class' => 'title'],
-				  ['level' => 2, 'text' => text('Create a new article')]);
+				  ['class'          => 'title'],
+				  ['level'          => 2,
+                   'text'           => text('Create a new article')]);
 $form->addElement('wrapper',
-				  ['class' => 'inner'],
+				  ['class'          => 'inner'],
 				  ['numberElements' => 8]);
 $form->addElement('paragraph',
-				  ['class' => 'intro'],
-				  ['text' => text(1)]);
+				  ['class'          => 'intro'],
+				  ['text'           => text(1)]);
 /*$form->addElement('upload',
-                  ['name' => 'article[upload][]'],
-                  ['label' => text('upload'), 'accept' => ['jpg', 'png', 'gif']]);*/
+                  ['name'           => 'article[upload][]'],
+                  ['label'          => text('upload'),
+                   'accept'         => ['jpg', 'png', 'gif']]);*/
 $form->addElement('wysiwyg',
-                  ['name' => 'article[content][en]',
-                   'placeholder' => text('The article content in English.'),
-                   'cols' => 50,
-                   'rows' => 30,
-                   'tabindex' => 13],
-                  ['label' => textf(20, 'En')]);
+                  ['name'           => 'article[content][en]',
+                   'placeholder'    => text('The article content in English.'),
+                   'cols'           => 50,
+                   'rows'           => 30,
+                   'tabindex'       => 13],
+                  ['label'          => textf(20, 'En')]);
 $form->addElement('wysiwyg',
-                  ['name' => 'article[content][fr]',
-                   'placeholder' => text('The article content in French.'),
-                   'cols' => 50,
-                   'rows' => 30,
-                   'tabindex' => 14],
-                  ['label' => textf(20, 'Fr')]);
+                  ['name'           => 'article[content][fr]',
+                   'placeholder'    => text('The article content in French.'),
+                   'cols'           => 50,
+                   'rows'           => 30,
+                   'tabindex'       => 14],
+                  ['label'          => textf(20, 'Fr')]);
 $form->addElement('select',
-                  ['name' => 'article[category]', 'tabindex' => 15],
-                  ['validation' => 'requiredIf(page[type]=article)', 'options' => [1 => 'system', 2 => 'travel'], 'value' => 2, 'label' => text('Article category'), 'default' => 2]);
+                  ['name'           => 'article[category]',
+                   'tabindex'       => 15],
+                  ['validation'     => 'requiredIf(page[type]=article)',
+                   'options'        => [1 => 'system', 2 => 'travel'],
+                   'value'          => 2,
+                   'label'          => text('Article category'),
+                   'default'        => 2]);
 $form->addElement('text',
-                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 16],
-                  ['default' => ['images/gallery/___.jpg', true]]);
+                  ['name'           => 'article[image]',
+                   'placeholder'    => text('Article image for home page'),
+                   'tabindex'       => 16],
+                  ['default'        => 'images/gallery/___.jpg',
+				   'label'          => text('Article image'),
+				   'ignoreDefaultOnSubmit' => true]);
 $form->addElement('checkbox',
-                  ['name' => 'article[tags]',
-                   'tabindex' => 17],
-                  ['inline' => false,
-                   'options' => $tags_options,
-                   'label' => text('Article tags'),
-                   'multiple' => true]);
+                  ['name'           => 'article[tags]',
+                   'tabindex'       => 17],
+                  ['inline'         => false,
+                   'options'        => $tags_options,
+                   'label'          => text('Article tags'),
+                   'multiple'       => true]);
 $form->addElement('textarea',
-                  ['name' => 'article[newTags]', 'placeholder' => text('Any new tag.'), 'cols' => 30, 'rows' => 5, 'tabindex' => 18],
-                  ['label' => text('Article tags')]);
-$form->addElement('checkbox',
-                  ['name' => 'article[published]', 'tabindex' => 19],
-                  ['inline' => true,
-                   'options' => ['published' => 'published'],
-                   'checked' => isset($posts->article->published) && $posts->article->published]);
+                  ['name'           => 'article[newTags]',
+                   'placeholder'    => text('Any new tag.'),
+                   'cols'           => 30,
+                   'rows'           => 5,
+                   'tabindex'       => 18],
+                  ['label'          => text('Article tags')]);
+$form->addElement('radio',
+                  ['name'           => 'article[status]',
+                   'tabindex'       => 19],
+                  ['options'        => ['published'   => text('Published'),
+				   				        'draft'       => text('Draft'),
+				   				        'coming soon' => text('Coming soon'),
+				   				        'deleted'     => text('Deleted')],
+				   'label'          => text('Article status')]);
+
 
 $form->addButton('cancel', text(17));
 $form->addButton('validate', text(18));
@@ -205,11 +284,11 @@ function validateForm1($result, $form)
 		}
 
         // Article creation.
-        elseif ($postingArticle = $form->getPostedData('page[type]') === 'article') $articleId = saveArticleInDB($form);
+        elseif ($form->getPostedData('page[type]') === 'article') $articleId = saveArticleInDB($form);
 
         // In both cases if no error, save the new page in DB.
 		// Store a new page entry in DB only if previous steps were successful.
-		if (($postingArticle && $articleId) || $fileCreated)
+		if ($articleId || $fileCreated)
 		{
             $pageId = savePageInDB($form, $pageName, $articleId);
 
@@ -234,7 +313,7 @@ function validateForm1($result, $form)
                     'content'
                 );
 
-                $return = true;// To clear form fields.
+                $return = false;// To clear form fields.
             }
         }
     }
@@ -246,7 +325,7 @@ function createPhpFile($fileName, $path)
 {
 	if ($path{strlen($path)-1} === '/') $path = substr($path, 0, -1);
 	if ($path{0} === '/') $path= substr($path, 1);
-	$backstage = strpos($path, 'backstage') !== false && !strpos($path, 'backstage') ? 'backstage/' : '';
+    $backstage = strpos($path, 'backstage') === 0 ? '' : 'backstage/';// $path starts with 'backstage'.
 	// Count slashes and climb tree up with '../': str_repeat('../', substr_count($path, '/')+1)
 
 	$fileContents = "<?php\n//======================= VARS ========================//\n"
@@ -279,10 +358,10 @@ function saveArticleInDB($form)
     $q = $db->query();
     $q->insert('articles', ['content_en' => $contentEn,
                             'content_fr' => $contentFr,
-                            'author' => User::getInstance()->getId(),
-                            'category' => (int)$form->getPostedData('article[category]'),
-                            'image' => $form->getPostedData('article[image]'),
-                            'published' => (string)$form->getPostedData('article[published]')]);
+                            'author'     => User::getInstance()->getId(),
+                            'category'   => (int)$form->getPostedData('article[category]'),
+                            'image'      => $form->getPostedData('article[image]'),
+                            'status'     => (string)$form->getPostedData('article[status]')]);
     $q->run();
     $articleId = $q->info()->insertId;
 

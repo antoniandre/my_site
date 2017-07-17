@@ -19,6 +19,7 @@ foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 // fetch existing tags.
 $db = database::getInstance();
 $q = $db->query();
+$tags_options = [];
 $tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
 foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
@@ -29,7 +30,7 @@ $form->addElement('header',
 				  ['class' => 'title'],
 				  ['level' => 2, 'text' => 'Select a page to edit', 'rowClass' => 'inline']);
 $form->addElement('select',
-                  ['name' => 'page[selection]'],
+                  ['name'    => 'page[selection]'],
                   ['options' => $options, 'rowClass' => 'clear', 'validation' => 'required']);
 $form->addElement('radio',
                   ['name' => 'page[type]', 'tabindex' => 1],
@@ -38,7 +39,7 @@ $form->addElement('radio',
 
 $form->addElement('wrapper',
 				  ['class' => 'pageEdition', 'tabindex' => 2],
-				  ['numberElements' => 22, 'toggle' => 'hideIf(page[type]=undefined)', 'toggleEffect' => 'slide']);
+				  ['numberElements' => 24, 'toggle' => 'hideIf(page[type]=undefined)', 'toggleEffect' => 'slide']);
 
 $form->addElement('hidden',
                   ['name' => 'page[nameInDB]']);
@@ -88,57 +89,59 @@ $form->addElement('textarea',
                   ['label' => text(8)]);
 
 $form->addElement('select',
-                  ['name' => 'page[parent]'],
-                  ['options' => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home', 'tabindex' => 13]);
+                  ['name'        => 'page[parent]'],
+                  ['options'     => $options, 'label' => text(13), 'rowClass' => 'clear', 'validation' => 'required', 'default' => 'home', 'tabindex' => 13]);
 
 
 $form->addElement('wrapper',
-				  ['class' => 'articleStuff'],
-				  ['numberElements' => 5, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
+				  ['class'       => 'articleStuff'],
+				  ['numberElements' => 7, 'toggle' => 'showIf(page[type]=article)', 'toggleEffect' => 'slide']);
 $form->addElement('upload',
-                  ['name' => 'page[uploads]'],
+                  ['name'        => 'page[uploads]'],
                   []);
 $form->addElement('wysiwyg',
-                  ['name' => 'article[content][en]',
+                  ['name'        => 'article[content][en]',
                    'placeholder' => text('Some coma separated words describing the content of the current page.'),
-                   'cols' => 50,
-                   'rows' => 30,
-                   'tabindex' => 14],
-                  ['label' => textf(20, 'En')]);
+                   'cols'        => 50,
+                   'rows'        => 30,
+                   'tabindex'    => 14],
+                  ['label'       => textf(20, 'En')]);
 $form->addElement('wysiwyg',
-                  ['name' => 'article[content][fr]',
+                  ['name'        => 'article[content][fr]',
                    'placeholder' => text('Some coma separated words describing the content of the current page.'),
-                   'cols' => 50,
-                   'rows' => 30,
-                   'tabindex' => 15],
-                  ['label' => textf(20, 'Fr')]);
+                   'rows'        => 30,
+                   'cols'        => 50,
+                   'tabindex'    => 15],
+                  ['label'       => textf(20, 'Fr')]);
 $form->addElement('select',
-                  ['name' => 'article[category]'],
-                  ['options' => [1 => 'system', 2 => 'travel'],
-                   'value' => 2,
-                   'label' => text('Article category'),
-                   'tabindex' => 16]);
+                  ['name'        => 'article[category]'],
+                  ['options'     => [1 => 'system', 2 => 'travel'],
+                   'value'       => 2,
+                   'label'       => text('Article category'),
+                   'tabindex'    => 16]);
 $form->addElement('checkbox',
-                  ['name' => 'article[tags]',
-                   'tabindex' => 17],
-                  ['inline' => true,
-                   'options' => $tags_options,
-                   'label' => text('Article tags'),
-                   'multiple' => true
+                  ['name'        => 'article[tags]',
+                   'tabindex'    => 17],
+                  ['options'     => $tags_options,
+                   'label'       => text('Article tags'),
+                   'multiple'    => true
                   ]);
 $form->addElement('text',
-                  ['name' => 'article[image]', 'placeholder' => text('Article image for home page'), 'tabindex' => 18],
-                  ['default' => ['images/gallery/___.jpg', true]]);
-$form->addElement('checkbox',
-                  ['name' => 'article[published]',
-                   'tabindex' => 19],
-                  ['inline' => true,
-                   'options' => ['1' => 'Published'],
-                   'default' => isset($posts->article->published) && $posts->article->published]);
-/*$form->addElement('paragraph',
-                  ['class' => 'viewArticle'],
-                  ['text' => text('View the article here <a href="'.url($posts->page->url->{$language}).'" target="_blank">'.$posts->page->url->{$language}.'</a>.'),
-                   'toggle' => 'hideIf(article[published]=0)']);*/
+                  ['name'        => 'article[image]',
+				   'placeholder' => text('Article image for home page'),
+				   'tabindex'    => 18],
+                  ['default'     => 'images/gallery/___.jpg',
+				   'label'       => text('Article image'),
+				   'ignoreDefaultOnSubmit' => true]);
+$form->addElement('radio',
+                  ['name'        => 'article[status]',
+                   'tabindex'    => 19],
+                  ['options'     => ['published'   => text('Published'),
+				   				     'draft'       => text('Draft'),
+				   				     'coming soon' => text('Coming soon'),
+				   				     'deleted'     => text('Deleted')],
+				   'label'       => text('Article status')]);
+
 
 $form->addButton('cancel', text(17), ['toggle' => 'hideIf(page[type]=undefined)']);
 $form->addButton('validate', text(18), ['toggle' => 'hideIf(page[type]=undefined)']);
@@ -231,10 +234,10 @@ function afterValidateForm($result, $form)
 
 			$q->update('articles', ['content_en' => $GLOBALS["content_en"],
 	                                'content_fr' => $GLOBALS["content_fr"],
-	                                'author' => User::getInstance()->getId(),
-	                                'category' => (int)$form->getPostedData('article[category]'),
-	                                'image' => $form->getPostedData('article[image]'),
-	                                'published' => (int)$form->getPostedData('article[published]')]);
+	                                'author'     => User::getInstance()->getId(),
+	                                'category'   => (int)$form->getPostedData('article[category]'),
+	                                'image'      => $form->getPostedData('article[image]'),
+	                                'status'     => $form->getPostedData('article[status]')]);
 			$w = $q->where()->col('id')->eq($articleId);
 			$q->run();
 			$affectedRows = $q->info()->affectedRows;
@@ -259,17 +262,17 @@ function afterValidateForm($result, $form)
 
         // In both cases PHP file and article, save a page entry in database.
 		$q = $db->query();
-		$q->update('pages', ['page' => $pageName,
-	                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',
-	                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
-	                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
-	                         'title_en' => $form->getPostedData('page[title][en]'),
-	                         'title_fr' => $form->getPostedData('page[title][fr]'),
+		$q->update('pages', ['page'        => $pageName,
+	                         'path'        => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']]) : '',
+	                         'url_en'      => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
+	                         'url_fr'      => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
+	                         'title_en'    => $form->getPostedData('page[title][en]'),
+	                         'title_fr'    => $form->getPostedData('page[title][fr]'),
 	                         'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
 	                         'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
-	                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
-	                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
-	                         'parent' => $form->getPostedData('page[parent]')]);
+	                         'metaKey_en'  => $form->getPostedData('page[metaKey][en]'),
+	                         'metaKey_fr'  => $form->getPostedData('page[metaKey][fr]'),
+	                         'parent'      => $form->getPostedData('page[parent]')]);
 		$w = $q->where()->col('article')->eq($articleId);
 		$q->run();
 		$affectedRows += $q->info()->affectedRows;
@@ -307,39 +310,39 @@ function fetchPage($page, $form)
 
 	$page = getPageByProperty('page', $page);
 	$array = [
-		'page[type]' => $page->article ? 'article' : 'php',
-		'page[selection]' => $page->page,
-		'page[nameInDB]' => $page->page,
-		'page[name]' => $page->page,
-		'page[path]' => $page->path,
-		'page[parent]' => $page->parent,
-		'page[url][en]' => $page->url->en,
-		'page[url][fr]' => $page->url->fr,
-		'page[title][en]' => $page->title->en,
-		'page[title][fr]' => $page->title->fr,
-		'page[metaKey][en]' => $page->metaKey->en,
-		'page[metaKey][fr]' => $page->metaKey->fr,
+		'page[type]'         => $page->article ? 'article' : 'php',
+		'page[selection]'    => $page->page,
+		'page[nameInDB]'     => $page->page,
+		'page[name]'         => $page->page,
+		'page[path]'         => $page->path,
+		'page[parent]'       => $page->parent,
+		'page[url][en]'      => $page->url->en,
+		'page[url][fr]'      => $page->url->fr,
+		'page[title][en]'    => $page->title->en,
+		'page[title][fr]'    => $page->title->fr,
+		'page[metaKey][en]'  => $page->metaKey->en,
+		'page[metaKey][fr]'  => $page->metaKey->fr,
 		'page[metaDesc][en]' => $page->metaDesc->en,
-		'page[metaDesc][fr]' => $page->metaDesc->fr,
+		'page[metaDesc][fr]' => $page->metaDesc->fr
 	];
 
-	if ($page->article)
+	if ($page->article)// $page->article = Article id.
 	{
 		$article = getArticleInfo($page->article);
-		$array['article[category]'] = $article->category;
-		$array['article[published]'] = $article->published;
+		$array['article[category]']    = $article->category;
+		$array['article[status]']      = $article->status;
 		$array['article[content][en]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_en);
 		$array['article[content][fr]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_fr);
-		$array['article[image]'] = $article->image;
-		$array['article[created]'] = $article->created;
-        $array['article[author]'] = $article->author;
+		$array['article[image]']       = $article->image;
+		$array['article[created]']     = $article->created;
+        $array['article[author]']      = $article->author;
 
         $db = Database::getInstance();
-        $q = $db->query();
+        $q  = $db->query();
         // $q->select('article_tags', [$q->col('id'), $q->col("text$language")->as('text')])
         $q->select('article_tags', [$q->col('tag')])
           ->relate('tags.id', 'article_tags.tag', true);
-        $w = $q->where()->col('article')->eq(39);
+        $w = $q->where()->col('article')->eq($page->article);
         $tags = array_keys($q->run()->loadObjects('tag'));
 		$array['article[tags]'] = $tags;
 	}
