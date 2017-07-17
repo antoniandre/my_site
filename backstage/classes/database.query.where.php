@@ -41,10 +41,13 @@ Class Where extends DatabaseEntity
 	/**
 	 * Get the only instance of this class.
 	 *
+	 * @param string $condition: the where condition or just a part of it.
 	 * @return the only instance of this class.
 	 */
 	public static function getInstance($condition = null)
 	{
+		// If where is initiated with 1 E.g. $q->where(1); then add it to the array of tempPieces.
+		if ($condition === [1] && isset(self::$instance)) self::$instance->tempPieces[] = 1;
 		if (!isset(self::$instance)) self::$instance = new self($condition);
 		return self::$instance;
 	}

@@ -31,7 +31,8 @@ var // General vars. (g for general)
 		borderRadius: 'borderRadius' in s || 'WebkitBorderRadius' in s ||  'MozBorderRadius' in s
 	},
 	cl = function(){console.log.apply(console, arguments);},// Shortcut function for console.log().
-	// Check if requested JS file is loaded or not and if it needs a dedicated css. Then load the required files accordingly.
+	// Check if requested JS file is loaded or not and if it needs a dedicated css.
+	// Then load the required files accordingly.
 
 	loadScript = function(scriptName, callback)
 	{
@@ -94,7 +95,8 @@ var // General vars. (g for general)
 	 * @param String icon: the icon to show with the message among valid, info, warning, invalid.
 	 * @param String Class: the class to apply to the message container.
 	 * @param String position: the position of the message among header or content. default header.
-	 * @param Array animation: an array of [delay_before_display, delay_before_hidding] in milliseconds. Default [1000, 3000]
+	 * @param Array animation: an array of [delay_before_display, delay_before_hidding] in milliseconds.
+	 * 						   Default [1000, 3000], give null to prevent hidding message.
 	 * @return jQuery object: the appended message.
 	 */
 	setMessage = function(message, icon, Class, position, animation)
@@ -103,23 +105,41 @@ var // General vars. (g for general)
 		if (animation === undefined) animation = [1000, 3000];
 
 		var timeToSlideDown = animation && animation[0] !== null ? animation[0] : null,
-			timeToSlideUp = animation && animation[1] !== null ? animation[1] : null,
-			classColors = {success: 'green', failure: 'red', error: 'red', info: 'yellow', warning: 'orange'},
-			Class = Class+(classColors.hasOwnProperty(Class) ? ' '+classColors[Class] : ''),
-			message = '<div class="'+Class+' message">'
-					+(icon !== undefined ? '<span class="ico i-'+icon+'"></span>' : '')
-					+message+'</div>',
+			timeToSlideUp   = animation && animation[1] !== null ? animation[1] : null,
+			classColors     = {
+								success: 'green',
+								failure: 'red',
+								error: 'red',
+								info: 'yellow',
+								warning: 'orange'
+							  },
+			Class           = Class + (classColors.hasOwnProperty(Class) ? ' ' + classColors[Class] : ''),
+			message         = '<div class="' + Class + ' message">'
+							+ (icon !== undefined ? '<span class="ico i-' + icon + '"></span>' : '')
+							+ message + '</div>',
 			$message = $(message)[timeToSlideDown !== null ? 'hide' : 'show'](),
 			messageContainer = position== 'header' ? 'body' : '#contentWrapper .content';
-		if (!$('#'+position+'Message').length)
+		if (!$('#' + position + 'Message').length)
 		{
-			$(messageContainer).prepend('<div id="'+position+'Message"/>');
+			$(messageContainer).prepend('<div id="' + position + 'Message"/>');
 		}
-		$message.appendTo('#'+position+'Message');
+		$message.appendTo('#' + position + 'Message');
 		setTimeout(function()
 		{
+			// Show message.
 			if (timeToSlideDown !== null) $message.hide().delay(timeToSlideDown).slideDown(500, 'easeInOutQuad');
-			if (timeToSlideUp !== null) $message.delay(timeToSlideUp).slideUp(500, 'easeInOutQuad', function(){$(this).remove()});
+
+			// Hide message.
+			if (timeToSlideUp !== null)
+				$message.delay(timeToSlideUp).slideUp(500, 'easeInOutQuad', function(){$(this).remove()});
+			// Bind event on close cross to hide message.
+			else
+			{
+				$message.prepend('<span class="ico i-cross close"/>').find('.close').one('click', function()
+				{
+					$(this).parent().slideUp(500, 'easeInOutQuad', function(){$(this).remove()});
+				});
+			}
 		}, 100);
 
 		return $message;
@@ -127,7 +147,8 @@ var // General vars. (g for general)
 
 	handleOldBrowsers = function()
     {
-		// Add support for IE8- (http://stackoverflow.com/questions/1744310/how-to-fix-array-indexof-in-javascript-for-internet-explorer-browsers)
+		// Add support for IE8- (http://stackoverflow.com/questions/1744310/
+		//how-to-fix-array-indexof-in-javascript-for-internet-explorer-browsers)
 		if (!Array.prototype.indexOf)
 		{
 		    Array.prototype.indexOf= function(obj, start)
@@ -730,7 +751,7 @@ var commonReady = function()
 	initForm();
 	new scrollHandler();
 	// resizeHandler();
-	// new imagePreloader(['vietnam-map.png', 'logo.jpg']);
+	// new imagePreloader(['logo.jpg']);
 
     if ($('#lightbox').length)               handleLightbox();
     if ($('#cookieNotice').length)           handleCookieNotice();

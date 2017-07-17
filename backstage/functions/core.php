@@ -358,7 +358,7 @@ function dbg()
     // 'Apply' concept: apply the arguments 'func_get_args()' to the method 'add' of the object 'Debug::getInstance()'
     // Doing only 'Debug::getInstance()->add(func_get_args())' would wrap the args into an array...
     call_user_func_array(array(Debug::getInstance(), 'add'), func_get_args());
-    Debug::getInstance()->setLevel3caller();
+    Debug::getInstance()->setLevel2caller();
 }
 
 /**

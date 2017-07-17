@@ -115,6 +115,15 @@ function handlePosts($callback)
  * Handle ajax requests.
  * /!\ Can only be called once per page load if the callback returns not null - since there is a die.
  *
+ * Ex.
+ * handleAjax(function()
+ * {
+ *     $articles = Article::getMultiple(['limit'       => [12, 100],
+ *     								     'fetchStatus' => ['coming soon', 'published'],
+ *     								     'fetchTags'   => true]);
+ *     return ["html" => renderArticles($articles)];
+ * });
+ *
  * @param  callable $callback: a function to execute when an ajax request is made.
  *                             The callback function must return an object or an indexed array to send back to JS.
  * @return String: a json string to send back to JS.
