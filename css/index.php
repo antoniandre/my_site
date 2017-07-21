@@ -11,7 +11,7 @@ $gets = Userdata::get();
 $settings = Settings::get();
 
 $min = $settings->useMinified ? '.min' : '';
-$css = ["common$min", "form$min"];// CSS files to load.
+$css = ["common$min", "form$min", 'vendor/slick/slick.css'];// CSS files to load.
 
 $useCompress = !IS_LOCAL;// Do not minify on localhost.
 //=====================================================//
@@ -54,7 +54,13 @@ else
 $cssFiles = '';
 foreach($css as $k => $filename)
 {
-	if ($filename && is_file(ROOT."css/$filename.css"))
+    // If in vendor.
+	if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
+	{
+	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
+	}
+    // If in normal css folder.
+	elseif ($filename && is_file(ROOT."css/$filename.css"))
 	{
 	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."css/$filename.css");
 	}
@@ -62,10 +68,14 @@ foreach($css as $k => $filename)
 
 // Preg_replace to replace css 'url(/path)' with 'url(ROOT.'css/path)' except if 'data:' is found.
 $cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:)(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~', 'url("'.$settings->root.'css/$2$3")', $cssFiles);
+$cssOutput = "@charset \"UTF-8\";\n$cssOutput";
+
+
 // @TODO: find the right caching.
 // header("Pragma: public");
 // header("Cache-Control: maxage=$expires");
 // header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
+
 header('Content-type: text/css; charset=utf-8');
 die((string)($useCompress ? compress($cssOutput) : $cssOutput));
 //============================================ end of MAIN =============================================//

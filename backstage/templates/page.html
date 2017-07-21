@@ -25,12 +25,11 @@
 
 	<meta name="Robots" content="{noCrawl}index, {noCrawl}follow" />
     <link href="{ROOT}images/?i=favicon.png" rel="shortcut icon" type="image/x-icon" />
-    <link rel="stylesheet" type="text/css" href="{ROOT}vendor/slick/slick.css"/>
     <link href="https://file.myfontastic.com/DGfWSEbT6gS8DacjuW2aF9/icons.css" rel="stylesheet">
     <!--[if IE 6]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=6" /><![endif]-->
     <!--[if IE 7]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=7" /><![endif]-->
     <!--[if IE 8]><link rel="stylesheet" media="screen" type="text/css" href="?css=1&amp;ie=8" /><![endif]-->
-    <!--[if !IE]><!--><link rel="stylesheet" media="screen" type="text/css" href="?css=1.26" /><!--<![endif]-->
+    <!--[if !IE]><!--><link rel="stylesheet" media="screen" type="text/css" href="?css=1.28" /><!--<![endif]-->
     <script type="text/javascript"><!--
     document.documentElement.className = document.documentElement.className.replace('nojs', 'js');
     var ROOT = '{ROOT}';
@@ -43,8 +42,7 @@
     ga('send', 'pageview');
     <!-- END googleAnalytics -->
     --></script>
-    <script type="text/javascript" src="?js=1.26"></script>
-    <script type="text/javascript" src="{ROOT}vendor/slick/slick.min.js"></script>
+    <script type="text/javascript" src="?js=1.28"></script>
 </head>
 <body id="{pageId}-page" class="{pageId}">
 
@@ -167,30 +165,25 @@ function testAPI() {
 	<header style="height:{headerHeight}vh" class="parallax" data-speed=".25" data-end-on-reach-top="#page">
         <div class="main-slideshow-wrapper">
             <div class="main-slideshow">
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/alcohol-1853327_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/bar-1839361_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/beer-2375021_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/caipirinha-599513_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/champagne-762697_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/cocktail-857393_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/cocktail-2282032_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/female-731895_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
-                <div class="slide"><div class="bg" data-original="{ROOT}images/main-slides/mojito-698499_1920.jpg" style="background-image: url({ROOT}images/blank.gif);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/?i=main-slides/sailing_xl.jpg" style="background-image: url({ROOT}images/?i=blank);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/?i=main-slides/road_xl.jpg" style="background-image: url({ROOT}images/?i=blank);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/?i=main-slides/plane_xl.jpg" style="background-image: url({ROOT}images/?i=blank);"></div></div>
+                <div class="slide"><div class="bg" data-original="{ROOT}images/?i=main-slides/desert_xl.jpg" style="background-image: url({ROOT}images/?i=blank);"></div></div>
             </div>
             <a href="javascript:;" class="i-chevron-l slick-arrow slick-prev"></a>
             <a href="javascript:;" class="i-chevron-r slick-arrow slick-next"></a>
         </div>
 		<div id="top-zone">
-			<div class="logo"><{strongOrH1}><a href="{homeUrl}" title="{backToHomeText}" data-text="{siteName}">{siteName}</a></{strongOrH1}></div>
+			<div class="logo"><{strongOrH1}><a href="{homeUrl}" title="{backToHomeText}" data-text="{siteName}"><img src="{logoSrc}" alt="{siteName}"></a></{strongOrH1}></div>
             {mainMenu}
 			{newsletter}<br class="clear" />
             {topZoneContent}
         </div>
         <div id="bottom-zone">{bottomZoneContent}{goDownLink}</div>
 	</header>
-	<div id="page">
+	<div id="page" data-original="{ROOT}images/?i=vietnam-map.png">
 		<div id="sticky-bar">
-			<a class="logo" href="{homeUrl}" title="{backToHomeText}">{siteName}</a>
+			<a class="logo" href="{homeUrl}" title="{backToHomeText}"><img src="{logoSrc}" alt="{siteName}"></a>
 			{breadcrumbs}
 			<form class="lang-selector" action="{SELF}" method="post">
 				<div>
@@ -222,19 +215,19 @@ function testAPI() {
 
 
 			<!-- BEGIN h1Block --><h1 id="title"{icon}>{h1}</h1><!-- END h1Block -->
-			<div id="contentWrapper">
+			<div id="content-wrapper">
 				{error}{debug}<div class="content">
 				{contentMessage}{content}
 				</div>
 				<div class="loading"></div>
 			</div>
 		</div>
-		<a id="pageBottom" name="pageBottom"></a>
+		<a id="page-bottom" name="page-bottom"></a>
 	</div>
 	<div id="footer">
 		<div class="bg" data-original="{footerImgSrc}"></div>
 		<div id="bottom">
-			<a href="#top" id="goTop" class="tooltip i-chevron-u" title="{goTopText}"><span>{goTopText}</span></a>
+			<a href="#top" id="go-top" class="tooltip i-chevron-u" title="{goTopText}"><span>{goTopText}</span></a>
 		</div>
 		<div id="copyright" role="contentinfo">{copyright}</div>
 		<ul class="menu" role="navigation" aria-label="Secondary">

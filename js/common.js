@@ -169,18 +169,18 @@ var // General vars. (g for general)
 
 	initBasics = function()
     {
-    	//---------------------------- GoTop ----------------------------//
-		if ($('#goTop').length)
+    	//---------------------------- Go-top ----------------------------//
+		if ($('#go-top').length)
 		{
-			$('#goTop').on('click', function(e)
+			$('#go-top').on('click', function(e)
 			{
 				$.scrollTo($('body'), 600, {easing: 'easeOutQuad'});
 				e.preventDefault();
 			});
 		}
-		if ($('.goDown').length)
+		if ($('.go-down').length)
 		{
-			$('.goDown').on('click', function(e)
+			$('.go-down').on('click', function(e)
 			{
 				var href = $(this).attr('href');
 				$.scrollTo(href, 600, {easing: 'easeOutQuad'});
@@ -250,18 +250,18 @@ var // General vars. (g for general)
 
 	handleCookieNotice = function()
     {
-        $('#cookieNotice').delay(500).animate({bottom: 0}, 1000, 'easeInOutQuad')
+        $('#cookie-notice').delay(500).animate({bottom: 0}, 1000, 'easeInOutQuad')
         .find('a.ok').click(function(e)
         {
             e.preventDefault();
             $.cookie('cookie_consent', "yes", {expires: 365+30, path: '/'});// 13 months.
-            $(this).parents('#cookieNotice').animate({bottom: '-32px', opacity: 0}, 700, 'easeInOutQuad');
+            $(this).parents('#cookie-notice').animate({bottom: '-32px', opacity: 0}, 700, 'easeInOutQuad');
         });
     },
 
 	handleSocials = function()
 	{
-		var lang = g.lang == 'Fr' ? 'fr-FR' : 'en-US',
+		var lang = g.lang == 'fr' ? 'fr-FR' : 'en-US',
 			location = window.location.toString(),
 		    facebook = '<div class="wrapper" style="width:140px;"><fb:like send="true" layout="button_count"\
 					    width="450" show_faces="true" href="'+location+'"></fb:like></div>';
@@ -334,11 +334,11 @@ var // General vars. (g for general)
 
 	handleMobileMenu = function()
 	{
-		var mobileMenu = $('#mobileMenu'),
+		var mobileMenu = $('#mobile-menu'),
 			toggler = $('.hamburger');
 
         // SlideDown submenu.
-		mobileMenu.on('click', '.lvl1 > li.parent > a, .lvl1 > li.parent > h4', function(e)
+		mobileMenu.on('click', 'li.parent > a, li.parent > h4', function(e)
 		{
 		    e.preventDefault();
 		    var submenu = $(this).siblings('ul');
@@ -358,23 +358,21 @@ var // General vars. (g for general)
 		    // (have to check it is not a click inside menu or toggler)
 		    if (!$(e.target).is(mobileMenu) && !mobileMenu.find(e.target).length
 		    	&& !$(e.target).is(toggler) && !$(toggler).find(e.target).length
-		        && $('#mobileMenuOpen').is(':checked'))
+		        && $('#mobile-menu-open').is(':checked'))
 		    {
 		        toggler.trigger('click');
 		    }
-		    console.log(e.type)
 		});
 	},
 
 	scrollHandler = function()
 	{
 		var self = this,
-			bar = $('#stickyBar'),
+			bar = $('#sticky-bar'),
 			barThreshold = null,
 			barInitialOffsetTop = bar.parent().offset().top,
 			barSticky = false,
 			page = $('#page'),
-			footer = $('#footer'),
 			parallaxObj = [],
 
 			// Define the window dimension vars outside the loop for faster results. BUT UPDATE ON RESIZE EVENT.
@@ -569,12 +567,14 @@ var // General vars. (g for general)
 				if (!barSticky && barInitialOffsetTop <= documentScroll)// Check boolean faster than check element class.
 				{
 					barSticky = true;
-					bar.addClass('sticky');
+                    bar.addClass('sticky');
+					$('body').addClass('sticky-bar');
 				}
 				else if (barSticky && barInitialOffsetTop > documentScroll)
 				{
 					barSticky = false;
-					bar.removeClass('sticky');
+                    bar.removeClass('sticky');
+					$('body').removeClass('sticky-bar');
 				}
 				//----------------------------------------------------------------//
 			})
@@ -585,7 +585,7 @@ var // General vars. (g for general)
 				winHeight = window.screen.availHeight || $(window).height();
 				$(window).trigger('scroll', this);
 
-			    $('header .bg').css('height', winHeight);
+			    // $('header .bg').css('height', winHeight);
 			});
 		}();
 	},
@@ -665,7 +665,6 @@ var // General vars. (g for general)
                     // Only apply the new size to the img src if the breakpoint size is strictly smaller than the initial one.
                     applyNewSrc = sizes.indexOf(size) < sizes.indexOf(currSize);
                 if (applyNewSrc) $(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
-                console.log(currSize, applyNewSrc);
             }
 			else $(this).attr('data-original', $(this).data('original').replace(/_(xs|s|m|l|xl)\.(jpg|jpeg|png|gif)/, '_'+size+'.$2'));
 		});
@@ -730,7 +729,39 @@ var // General vars. (g for general)
 		"ý":"y","ŷ":"y","ÿ":"y","ẏ":"y","ỵ":"y","ỳ":"y","ƴ":"y","ỷ":"y","ỿ":"y","ȳ":"y","ẙ":"y","ɏ":"y","ỹ":"y","ź":"z","ž":"z",
 		"ẑ":"z","ʑ":"z","ⱬ":"z","ż":"z","ẓ":"z","ȥ":"z","ẕ":"z","ᵶ":"z","ᶎ":"z","ʐ":"z","ƶ":"z","ɀ":"z","ﬀ":"ff","ﬃ":"ffi",
 		"ﬄ":"ffl","ﬁ":"fi","ﬂ":"fl","ĳ":"ij","œ":"oe","ﬆ":"st","ₐ":"a","ₑ":"e","ᵢ":"i","ⱼ":"j","ₒ":"o","ᵣ":"r","ᵤ":"u","ᵥ":"v","ₓ":"x"}
-	};
+	},
+
+    initSlickSlider = function()
+    {
+        $('.main-slideshow')
+		.on('init', function(slick)
+		{
+			var $this = $(this);
+			$this.find("[data-original]").lazyload(
+			{
+				effect: "fadeIn",
+				load: function(){$this.addClass('loaded')},
+				container: $this.find(".slick-track")
+			});
+		})
+		.slick(
+		{
+            // autoplay: true,
+            speed: 700,
+            prevArrow: $('.slick-prev'),
+            nextArrow: $('.slick-next'),
+            infinite: true,
+            dots: true,
+            responsive: [
+                {
+                  breakpoint: 680,
+                  settings: {
+                    arrows: false
+                  }
+                }
+            ]
+        });
+    };
 
 String.prototype.toLatinChars = function(){return this.replace(/[^A-Za-z0-9\[\] ]/g,function(a){return toLatinChars.latin_map[a]||a})};
 String.prototype.isLatin = function(){return this==this.toLatinChars()};
@@ -742,10 +773,6 @@ String.prototype.isLatin = function(){return this==this.toLatinChars()};
 //==================================================================================//
 var commonReady = function()
 {
-
-    $('header .bg').css('height', g.loadScreenHeight);
-    $('#footer .bg').css('height', $('#footer .bg').css('height'));
-
 	handleOldBrowsers();
 	initBasics();
 	initForm();
@@ -754,12 +781,13 @@ var commonReady = function()
 	// new imagePreloader(['logo.jpg']);
 
     if ($('#lightbox').length)               handleLightbox();
-    if ($('#cookieNotice').length)           handleCookieNotice();
+    if ($('#cookie-notice').length)          handleCookieNotice();
     if ($('[data-original]').length)         lazyload();
     if ($('.slideshow').length)              handleSlideshow();
 	if ($('.social').length && !localhost)   handleSocials();
     if ($('.comments').length)               handleComments();
     if (g.screenWidth <= 550)                handleMobileMenu();
+    if ($('.main-slideshow').length)         initSlickSlider();
 };
 //================================= end of  M A I N ================================//
 //==================================================================================//

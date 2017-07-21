@@ -395,7 +395,8 @@ Class Page
 					   'strongOrH1' => $this->h1 === null ? 'h1' : 'strong',
 					   'icon' => $page->icon ? " class=\"$page->icon\"" : '',
 					   'breadcrumbs' => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',
-					   'goDownLink' => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"goDown i-chevron-d\"></a>" : '',
+					   'goDownLink' => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"go-down i-chevron-d\">".text(99).'</a>' : '',
+
 					   // 'social' => $this->social ? '<div class="social clearfix"></div>' : '',// Moved inside article only.
 					   'contactUrl' => url(getPageByProperty('id', 'contact', $language)->page.'.php'),
 					   'contactText' => getPageByProperty('id', 'contact', $language)->title->$language,
@@ -403,8 +404,8 @@ Class Page
 					   'classFr' => $language == 'fr' ? ' active' : '',
 					   'error' => Cerror::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Cerror::show()."</div>" : '',
 					   'debug' => Debug::getInstance()->getCount() && $showErrors ? "<div id=\"debug\"><p><span class=\"i-bug\"></span> DEBUG </p>".Debug::getInstance()->show()."</div>" : '',
-					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"headerMessage\">$headerMessage</div>" : '',
-					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"contentMessage\">$contentMessage</div>" : '',
+					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"header-message\">$headerMessage</div>" : '',
+					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"content-message\">$contentMessage</div>" : '',
 					   'copyright' => textf(19, $settings->siteName, date('Y')),
 					   'sitemapUrl' => url(getPageByProperty('id', 'sitemap', $language)->page.'.php'),
 					   'sitemapText' => getPageByProperty('id', 'sitemap', $language)->title->$language,

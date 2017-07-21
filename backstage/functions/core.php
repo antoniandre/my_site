@@ -64,7 +64,9 @@ function getPagesFromDB()
     foreach ($pagesFromDB as $k => $p)
     {
         $pages[$k] = $p;
-        $pages[$k]->id = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $p->page))));
+        // Camel case.
+        // $pages[$k]->id = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $p->page))));
+        $pages[$k]->id = $p->page;
         foreach ($p as $attr => $val)
         {
             // Look for language-related vars (texts) and convert sth like metaDesc_fr to sth like metaDesc->fr
