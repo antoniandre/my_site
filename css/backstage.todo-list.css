@@ -484,7 +484,6 @@ transition:.3s ease-in-out;}
 .todoListWrapper .buttons .left > * {float:left;margin-right:5px;}
 .todoListWrapper .buttons .right > * {float:right;margin-left:5px;}
 .todoListWrapper .buttons .center {position:absolute;left:0;width:100%;}
-.todoListWrapper .buttons .center:hover {}
 .todoListWrapper .buttons button,
 .todoListWrapper .buttons a
 {background:linear-gradient(#fdfdff,#f5f5ff);
@@ -496,7 +495,6 @@ text-align:center;
 font-weight:bold;
 cursor: pointer;
 color:#259;
-line-height:normal;
 outline:none;
 margin-top:7px;
 text-decoration:none;
