@@ -6,8 +6,23 @@
 
 .robotCheck {float: right;margin-top: 10px;max-height: 28px;overflow: hidden;}
 .robotCheck *, .robotCheck :before, .robotCheck :after {line-height: 2.3em;vertical-align: middle;display: inline-block;}
-.robotCheck span {opacity: 0;}
-.robotCheck:hover span {opacity: 1;}
+.robotCheck span {
+    opacity: 0;
+    -webkit-transition: .3s ease-out;
+    -o-transition: .3s ease-out;
+    transition: .3s ease-out;
+    -webkit-transform: translateX(15px);
+    -ms-transform: translateX(15px);
+    -o-transform: translateX(15px);
+    transform: translateX(15px);
+}
+.robotCheck:hover span {
+    opacity: 1;
+    -webkit-transform: translateX(0px);
+    -ms-transform: translateX(0px);
+    -o-transform: translateX(0px);
+    transform: translateX(0px);
+}
 .robotCheck label {color: #999;cursor: pointer;}
 .robotCheck.notRobot
 {opacity: 0;
@@ -21,7 +36,7 @@ transition: .8s 1.3s;}
 .robotCheck label:after {content: attr(data-yes);}
 .robotCheck.notRobot label:after {content: attr(data-no);}
 .robotCheck label:before {
-    content: "F";
+    content: "\4b";
     color: #32cd32;
     line-height: inherit;
     font-size: 250%;
@@ -31,7 +46,7 @@ transition: .8s 1.3s;}
     -o-animation: wiggle 2.5s infinite;
     animation: wiggle 2.5s infinite;
 }
-.robotCheck.notRobot label:before {content: "y";}
+.robotCheck.notRobot label:before {content: "u";}
 @keyframes wiggle {
     0% { transform: rotate(0deg); }
    80% { transform: rotate(0deg); }
@@ -39,6 +54,7 @@ transition: .8s 1.3s;}
    95% { transform: rotate(-5deg); }
   100% { transform: rotate(0deg); }
 }
+
 
 button {cursor: pointer;}
 button, input[type="submit"], input[type="reset"], select
@@ -106,8 +122,8 @@ transition:color .3s;
 text-shadow: 0 0 15px #fff;}
 .wysiwyg .required:after, .wysiwyg .valid:after, .wysiwyg .invalid:after {top: 2em;}
 .required:after {content:"*";}
-.valid:after {content:"y";line-height:1.8em;font-size:1.4em;right:.4em;color:#3b3;}
-.invalid:after {content:"X";line-height:1.8em;font-size:1.4em;right:.4em;color:#c33;}
+.valid:after {content:"u";line-height:1.8em;font-size:1.4em;right:.4em;color:#3b3;}
+.invalid:after {content:"x";line-height:1.8em;font-size:1.4em;right:.4em;color:#c33;}
 .radio .required:after, .checkbox .required:after, .select .required:after {line-height:1.4em;}
 .radio .valid:after, .radio .invalid:after,
 .checkbox .valid:after, .checkbox .invalid:after,
