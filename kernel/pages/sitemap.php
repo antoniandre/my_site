@@ -12,12 +12,11 @@
 $page->setBreadcrumbsVisiblity(false);// Disable breadcrumbs on sitemap page.
 $content = getTree('sitemap', ['[article]']);
 
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "backstage/templates/$page->page.html");
+$tpl = newPageTpl();
 $tpl->set_var(['content'          => $content,
                'articlesList'     => $page->renderArticlesList(),
                'articlesListText' => text('Tous les articles')]);
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 ?>

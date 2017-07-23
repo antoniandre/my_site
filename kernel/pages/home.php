@@ -1,6 +1,5 @@
 <?php
 //======================= VARS ========================//
-$page = Page::getInstance();
 //=====================================================//
 
 
@@ -11,16 +10,17 @@ $page = Page::getInstance();
 //======================================================================================================//
 //============================================= MAIN ===================================================//
 $settings = Settings::get();
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "backstage/templates/$page->page.html");
-$tpl->set_block("$page->page-page", 'latestArticlesBlock', 'theLatestArticlesBlock');
+$page     = Page::getInstance();
+$tpl      = newPageTpl();
+
+$tpl->set_block($page->page, 'latestArticlesBlock', 'theLatestArticlesBlock');
 $tpl->set_block('latestArticlesBlock', 'articleBlock', 'theArticleBlock');
-$tpl->set_block("$page->page-page", 'latestArticlesBlockImages', 'theLatestArticlesBlockImages');
+$tpl->set_block($page->page, 'latestArticlesBlockImages', 'theLatestArticlesBlockImages');
 $tpl->set_block('latestArticlesBlockImages', 'articleBlockImages', 'theArticleBlockImages');
 $tpl->set_var('ROOT', $settings->root);
 
 // Disable breadcrumbs on home page only.
-// $page->setBreadcrumbsVisiblity(false);
+$page->setBreadcrumbsVisiblity(false);
 
 // Disable h1 title on home page only.
 $page->setH1(null);
@@ -30,9 +30,9 @@ $page->setHeaderHeight(100);
 // Get all the articles at once and all but the 5 firsts.
 // So loading more with the button does not take a server call.
 $articles = Article::getMultiple([/*'limit' => 12, */'fetchStatus' => ['coming soon', 'published'], 'fetchTags' => true]);
-renderArticles($articles, 5);
+renderArticles($articles, 5, $tpl);
 
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -45,9 +45,9 @@ $content = $tpl->parse('display', "$page->page-page");
  							display per click. Useful for large size images.
  * @return String: the output html.
  */
-function renderArticles($articles, $lazyload = null)
+function renderArticles($articles, $lazyload = null, $tpl)
 {
-	global $tpl;
+	// global $tpl;
 	$settings = Settings::get();
 	$language = Language::getCurrent();
 	$latestArticlesUsePictures = $settings->latestArticlesUsePictures;

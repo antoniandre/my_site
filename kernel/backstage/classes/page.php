@@ -14,6 +14,7 @@ Class Page
 	public $path;
 	public $title;
 	public $h1;
+	public $content;
 
 	// A number between 0 and 100 to set the <header> html tag height making the
 	// page to start from this same point.
@@ -287,16 +288,24 @@ Class Page
 	}
 
 
+	public function setContent($content = '')
+	{
+		$this->content = $content;
+
+		return $this;
+	}
+
+
 	/**
 	 * Render the current page.
 	 *
 	 * @return the HTML of the full page
 	 */
-	public function render()
+	public function render($echo = true)
 	{
-		global $page, $content, $user;
+		global $page, $user;
 		$settings = Settings::get();
-		$cookies = Userdata::get('cookie');
+		$cookies  = Userdata::get('cookie');
 		$language = Language::getCurrent();
 
 		// FINAL RENDER
@@ -307,10 +316,9 @@ Class Page
 		header('Content-Type: text/html; charset=utf-8');
 		header('Content-language: '.strtolower($language));
 
-		$tpl = new Template(ROOT.'backstage/templates');
-		$tpl->set_file('page-tpl', 'page.html');
-		$tpl->set_block('page-tpl', 'h1Block', 'theH1Block');
-		$tpl->set_block('page-tpl', 'googleAnalytics', 'theGoogleAnalytics');
+		$tpl = newPageTpl('page');
+		$tpl->set_block($page->page, 'h1Block', 'theH1Block');
+		$tpl->set_block($page->page, 'googleAnalytics', 'theGoogleAnalytics');
 
 
 		if ($this->showBreadcrumbs) $this->calculateBreadcrumbs($this);
@@ -360,7 +368,7 @@ Class Page
 			}
 		);
 
-		$tpl->set_var(['content' => $content,
+		$tpl->set_var(['content' => $this->content,
 					   'ROOT' => $settings->root,
 					   'SELF' => url('SELF'),
 					   'language' => $language,
@@ -429,7 +437,10 @@ Class Page
 		if (Cerror::getCount()) Cerror::log();
 		if (Debug::getInstance()->getCount()) Debug::getInstance()->log();
 
-		return $tpl->parse('display', 'page-tpl');
+		$html = $tpl->parse('display', $page->page);
+		if ($echo) echo $html;
+
+		return $html;
 	}
 
 	/**

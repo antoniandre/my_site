@@ -335,7 +335,7 @@ function createPhpFile($fileName, $path)
 				  ."//======================================================================================================//\n"
 				  ."//============================================= MAIN ===================================================//\n"
 				  ."\$tpl = new Template();\n"
-				  ."\$tpl->set_file(\"\$page->page-page\", \"{$backstage}templates/\$page->page.html\");\n"
+				  ."\$tpl->set_file(\"\$page->page-page\", \"kernel/{$backstage}templates/\$page->page.html\");\n"
 				  ."\$tpl->set_var('content', \"The page content goes here for page \\\"\$page->page\\\".\");\n"
 				  ."\$content = \$tpl->parse('display', \"\$page->page-page\");\n"
 				  ."//============================================ end of MAIN =============================================//\n"
@@ -343,9 +343,9 @@ function createPhpFile($fileName, $path)
 	$path = ROOT."$path";
 	if (!is_dir($path)) mkdir($path);
 	file_put_contents("$path/$fileName.php", $fileContents);
-	file_put_contents(ROOT."backstage/templates/$fileName.html", '{content}');
+	file_put_contents(ROOT."kernel/backstage/templates/$fileName.html", '{content}');
 
-	return is_file(ROOT."backstage/templates/$fileName.html");
+	return is_file(ROOT."kernel/backstage/templates/$fileName.html");
 }
 
 function saveArticleInDB($form)

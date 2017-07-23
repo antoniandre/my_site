@@ -27,8 +27,8 @@
  * 		$q->run()->loadObjects();
  *
  */
-include ROOT.'backstage/classes/database.entity.php';
-include ROOT.'backstage/classes/database.query.where.php';
+includeClass('database.entity');
+includeClass('database.query.where');
 
 Class Query extends DatabaseEntity
 {

@@ -18,8 +18,7 @@ $articleNextLink = '';
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$tpl = new Template();
-$tpl->set_file("$page->page-page", 'backstage/templates/article.html');
+$tpl = newPageTpl('article');
 
 // Get the current article.
 $article     = Article::get($page->article->id);
@@ -131,17 +130,17 @@ elseif ($article && $article->status === 'published')
 
 
 // Main display.
-$tpl->set_var(['articleId' => $page->article->id,
-               'articleTags' => $articleTags,
-               'content' => $articleContent,
-			   'social' => '<div class="social clearfix"></div>',
-			   'created' => $articleCreated,
+$tpl->set_var(['articleId'       => $page->article->id,
+               'articleTags'     => $articleTags,
+               'content'         => $articleContent,
+			   'social'          => '<div class="social clearfix"></div>',
+			   'created'         => $articleCreated,
 			   'prevArticleLink' => $articlePrevLink,
 			   'nextArticleLink' => $articleNextLink ? ($articlePrevLink ? ' | ' : '') . $articleNextLink : '',
-			   'comments' => Utility::generateCommentSystem('comments.created', 'DESC')// Add comment system.
+			   'comments'        => Utility::generateCommentSystem('comments.created', 'DESC')// Add comment system.
 			  ]);
 
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 

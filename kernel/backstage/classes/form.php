@@ -514,7 +514,7 @@ HTML;
 	 */
 	public function render()
 	{
-		$tpl = new Template(ROOT.'backstage/templates/');
+		$tpl = new Template(ROOT.'kernel/backstage/templates/');
 		$tpl->set_file(['form-tpl' => 'form.html',
 						'form-element-tpl' => 'form-elements.html']);
 		$tpl->set_block('form-tpl', 'wrapperBlock', 'theWrapperBlock');

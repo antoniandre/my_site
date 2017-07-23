@@ -5,26 +5,45 @@ define('ROOT', __DIR__.'/');
 
 
 //===================== INCLUDES ======================//
-include ROOT.'backstage/functions/core.php';
+include ROOT.'kernel/backstage/functions/core.php';
 //=====================================================//
 
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-if ($page->isArticle())
+// @todo: write a Cache class.
+/*if ($settings->useCache && !Userdata::is_set('post'))
 {
-	$article = getPageByProperty('id', 'article', $language);
-	$includePath = ROOT."$article->path$article->page.php";
-}
-else
-{
-	if (!is_file(ROOT."$page->path$page->page.php")) $page = getPageByProperty('id', 'notFound', $language);
-	$includePath = ROOT."$page->path$page->page.php";
-}
+    include(ROOT."kernel/backstage/cache/$page->path$page->page.html");
+}*/
+// dbgd(UserData::get()->font);
+if (isset(UserData::get()->js))  include ROOT . 'kernel/js/index.php';
+if (isset(UserData::get()->css)) include ROOT . 'kernel/css/index.php';
+if (isset(UserData::get()->font)) include ROOT . 'kernel/css/fonts/'.UserData::get()->font;
 
-include($includePath);
 
-echo Page::getInstance()->render();
+include getPagePath();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
+
+function getPagePath()
+{
+	$page = Page::getInstance();
+
+	if ($page->isArticle())
+	{
+		$article     = getPageByProperty('id', 'article', $language);
+		$includePath = $article->path . $article->page;
+	}
+	else
+	{
+		if (!is_file(ROOT."kernel/$page->path$page->page.php")) $page = getPageByProperty('id', 'notFound', $language);
+		$includePath = $page->path . $page->page;
+	}
+
+    $backstage   = strpos($includePath, 'backstage/pages/') === 0 ? 'backstage/' : '';
+    $includePath = str_replace(['backstage/', 'pages/'], '', $includePath);
+
+	return "kernel/{$backstage}pages/$includePath.php";
+}
 ?>

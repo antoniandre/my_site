@@ -1,7 +1,8 @@
 <?php
 
 //======================= VARS ========================//
-$js = ['jquery', 'form', 'common'.($settings->useMinified ? '.min' : ''), 'jquery.lazyload'];// JS files to load.
+$min = $settings->useMinified ? '.min' : '';
+$js  = ['jquery', 'form', 'common'.$min, 'jquery.lazyload', 'vendor/slick/slick.min.js'];// JS files to load.
 $css = ['common'];// CSS files to load
 $readyFunctions = [];
 //=====================================================//
@@ -35,7 +36,7 @@ foreach ($existingJsFiles as $file) if (substr($file, -3, 3) === '.js')
 	if ((!$user->isAdmin() && strpos($file, 'backstage') !== false)) continue;
 
     $filename = basename($file, '.js');
-    $scripts[$filename] = ['loaded' => in_array($filename, $js), 'css' => is_file(ROOT."css/$filename.css")];
+    $scripts[$filename] = ['loaded' => in_array($filename, $js), 'css' => is_file(ROOT."kernel/css/$filename.css")];
 }
 
 // This file (index.php) is called with a requested page JS behavior in param.
@@ -50,9 +51,18 @@ if (array_key_exists($requestedJs, $scripts))
 
 // Prepare the single output js file.
 $jsFiles = '';
-foreach($js as $k => $filename) if ($filename && is_file(ROOT."js/$filename.js"))
+foreach($js as $k => $filename)
 {
-	$jsFiles .=  ($k?"\n\n\n":'').file_get_contents(ROOT."js/$filename.js");
+    // If in vendor.
+    if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
+    {
+        $jsFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
+    }
+    // If in normal js folder.
+    elseif ($filename && is_file(ROOT."kernel/js/$filename.js"))
+    {
+	    $jsFiles .=  ($k?"\n\n\n":'').file_get_contents(ROOT."kernel/js/$filename.js");
+    }
 }
 
 // Create an array of functions to call when DOM is ready.

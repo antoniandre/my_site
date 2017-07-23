@@ -55,9 +55,9 @@ $user = User::getInstance();
  */
 function includeClass($class)
 {
-    $ok = include ROOT."backstage/classes/$class.php";
+    $ok = include ROOT."kernel/backstage/classes/$class.php";
     if (!$ok)
-        Cerror::add("The class '$class' was not found in '".ROOT."backstage/classes/$class.php'.", 'NOT FOUND');
+        Cerror::add("The class '$class' was not found in '".ROOT."kernel/backstage/classes/$class.php'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -70,12 +70,13 @@ function includeClass($class)
  */
 function includeFunction($function)
 {
-    $ok = include ROOT."backstage/functions/$function.php";
+    $ok = include ROOT."kernel/backstage/functions/$function.php";
     if (!$ok)
-        Cerror::add("The function '$function' was not found in '".ROOT."backstage/functions/$function.php'.", 'NOT FOUND');
+        Cerror::add("The function '$function' was not found in '".ROOT."kernel/backstage/functions/$function.php'.", 'NOT FOUND');
 
     return $ok;
 }
+
 
 /**
  * Shortcut function to simply include a php web service.
@@ -85,17 +86,17 @@ function includeFunction($function)
  */
 function includeWebservice($ws)
 {
-    $ok = include ROOT."backstage/webservices/$ws.php";
+    $ok = include ROOT."kernel/backstage/webservices/$ws.php";
     if (!$ok)
-        Cerror::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+        Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
 
     return $ok;
 }
 function includeOnceWebservice($ws)
 {
-    $ok = include_once ROOT."backstage/webservices/$ws.php";
+    $ok = include_once ROOT."kernel/backstage/webservices/$ws.php";
     if (!$ok)
-        Cerror::add("The web service '$ws' was not found in '".ROOT."backstage/webservices/$ws.php'.", 'NOT FOUND');
+        Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
 
     return $ok;
 }

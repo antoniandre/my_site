@@ -5,7 +5,7 @@
 
 
 //======================= INCLUDES ====================//
-require ROOT.'backstage/functions/minicore.php';// Minimum required core. (the min for js/, css/, images/).
+require __DIR__.'/minicore.php';// Minimum required core. (the min for js/, css/, images/).
 
 includeClass('debug');
 
@@ -20,30 +20,22 @@ includeClass('encryption');
 includeClass('article');
 includeFunction('sitemap');
 
-include ROOT.'backstage/libraries/template.inc';
+includeClass('template');
 //=====================================================//
 
 
 //======================= VARS ========================//
+$language = Language::getCurrent();
+$pages    = getPagesFromDB();
+$aliases  = getPagesAlias($pages);
+$page     = Page::getInstance();
 //=====================================================//
 
 
 //======================================================================================================//
 //=============================================== MAIN =================================================//
-$language = Language::getCurrent();
-$pages = getPagesFromDB();
-$aliases = getPagesAlias($pages);
-$page = Page::getInstance();
 $page->setLanguage($language);
 if (Language::getTarget()) $page->refresh();
-
-// todo: write a Cache class.
-/*if ($settings->useCache && !Userdata::is_set('post'))
-{
-    include(ROOT."backstage/cache/$page->path$page->page.html");
-}*/
-if (isset(UserData::get()->js)) include ROOT.'js/index.php';
-if (isset(UserData::get()->css)) include ROOT.'css/index.php';
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -51,6 +43,16 @@ if (isset(UserData::get()->css)) include ROOT.'css/index.php';
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
+function newPageTpl($tplName = '')
+{
+    $page    = Page::getInstance();
+    $tpl     = new Template(ROOT.'kernel/backstage/templates/');
+    $tplName = $tplName ? $tplName : $page->page;
+	$tpl->set_file($page->page, "$tplName.html");
+
+    return $tpl;
+}
+
 /**
  * getPagesFromDB retrieve all the pages tables from the database.
  *
@@ -79,6 +81,7 @@ function getPagesFromDB()
             }
         }
     }
+
     return $pages;
 }
 

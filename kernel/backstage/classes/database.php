@@ -8,13 +8,13 @@
  *        DROP DATABASE  `my_site` ;
  * @dependencies: Settings.
  **/
-include ROOT.'backstage/classes/database.query.php';
+includeClass('database.query');
 
 Class Database
 {
 	const connectionError = '<p>Un probl&egrave;me de connection &agrave; la base de donn&eacute;es est survenu.<br />Ce probl&egrave;me temporaire sera r&eacute;solu d&egrave;s que possible aupr&egrave;s de notre h&eacute;bergeur.<br />Merci de votre compr&eacute;hension.</p><hr />'
 						   .'<p>A database connection error occured.<br />We are already working on solving this problem with our host.<br />Thank you for your understanding.</p>';
-	const minimumDbSqlFile = 'backstage/install/minimum-db.sql';
+	const minimumDbSqlFile = 'kernel/backstage/install/minimum-db.sql';
 	private static $instance = null;
 	private $mysqli;
 

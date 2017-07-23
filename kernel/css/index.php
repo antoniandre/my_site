@@ -4,7 +4,6 @@
  * The classes and vars Settings, Userdata, $page are defined in functions/core.php.
  * The folder css/ and its content are not accessible from the site.
  */
-
 //======================= VARS ========================//
 if (!class_exists('Userdata') || !class_exists('Settings')) die('You can\'t access this file directly.');
 $gets = Userdata::get();
@@ -60,9 +59,9 @@ foreach($css as $k => $filename)
 	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
 	}
     // If in normal css folder.
-	elseif ($filename && is_file(ROOT."css/$filename.css"))
+	elseif ($filename && is_file(ROOT."kernel/css/$filename.css"))
 	{
-	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."css/$filename.css");
+	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."kernel/css/$filename.css");
 	}
 }
 

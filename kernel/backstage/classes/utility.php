@@ -30,14 +30,13 @@ Class Utility
 	{
 		global $likes;
 
-		$db = database::getInstance();
-		$page = Page::getInstance();
+		$db       = database::getInstance();
+		$page     = Page::getInstance();
 		$language = Language::getCurrent();
-		$return = '';
+		$return   = '';
 
-		$tpl = new Template();
-		$tpl->set_file('comments', 'backstage/templates/comments.html');
-		$tpl->set_block('comments', 'commentBlock', 'theCommentBlock');
+		$tpl = newPageTpl('comments');
+		$tpl->set_block($page->page, 'commentBlock', 'theCommentBlock');
 
 		$form = new Form(['class' => 'leaveComment']);
 		$form->addElement('paragraph',
@@ -164,7 +163,7 @@ Class Utility
 			$tpl->parse('theCommentBlock', 'commentBlock', true);
 		}
 
-		$return = $tpl->parse('display', 'comments');
+		$return = $tpl->parse('display', $page->page);
 
 		return $return;
 	}

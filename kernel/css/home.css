@@ -1,18 +1,49 @@
+#breadcrumbs .home:after {vertical-align: text-bottom;}
+.en #breadcrumbs .home:after {content: " Bienvenue sur notre blog de voyage !";}
+.fr #breadcrumbs .home:after {content: " Welcome to our traveling blog!";}
 
 h2 {margin-top:0;}
 
 .quote
 {position: fixed;
-bottom: 10%;
-right: 2%;
-width: 30%;
-z-index: -1;
+bottom: 20%;
+right: 0;
+width: 31%;
 font-size: 100%;
 border: none;
-background: rgba(0,0,0,0.3);
-color: #bbb;
+padding: 20px 5px 20px 45px;
+min-height: 0;
+font-family: 'dinnext', Arial, Helvetica, sans-serif;
+background: -moz-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%);
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.5)));
+background: -webkit-linear-gradient(left, rgba(0,0,0,0) 0%,rgba(0,0,0,0.5) 100%);
+background: -o-linear-gradient(left, rgba(0,0,0,0) 0%,rgba(0,0,0,0.5) 100%);
+background: -ms-linear-gradient(left, rgba(0,0,0,0) 0%,rgba(0,0,0,0.5) 100%);
+background: linear-gradient(to right, rgba(0,0,0,0) 0%,rgba(0,0,0,0.5) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#80000000',GradientType=1 );
+color: rgba(255,255,255,.7);
+-webkit-transform: translateX(40px);
+-moz-transform: translateX(40px);
+-ms-transform: translateX(40px);
+-o-transform: translateX(40px);
+transform: translateX(40px);
+opacity: 0;
+-webkit-transition: .8s ease-out;
+-moz-transition: .8s ease-out;
+-ms-transition: .8s ease-out;
+-o-transition: .8s ease-out;
+transition: .8s ease-out;
 text-shadow: 0 0 8px rgba(0,0,0,.5);}
-.quote .i-quote-l:before, .quote .i-quote-r:before {color: #666;color:rgba(255,255,255,.3);text-shadow: none;font-size: 180%;}
+.show .quote {
+    opacity: 1;
+    -webkit-transform: translateX(0px);
+    -moz-transform: translateX(0px);
+    -ms-transform: translateX(0px);
+    -o-transform: translateX(0px);
+    transform: translateX(0px);
+}
+
+.quote .i-quote-l:before, .quote .i-quote-r:before {display: none;}
 
 
 /*========================================= ARTICLES LIST ========================================*/
@@ -187,7 +218,8 @@ background: rgba(0,0,0,.2);
 /*border: 1px solid rgba(0,0,0,.08);*/
 border-width: 1px 0;
 padding: .4em 1em;
-z-index: 1;}
+z-index: 1;
+box-sizing: border-box;}
 .images-view .image .details
 {display: block;
 position: absolute;
@@ -212,9 +244,9 @@ background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,.4) 100%); /*
 background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,.4) 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#80000000',GradientType=1 ); /* IE6-9 */}
 .images-view .image .bg
-{display:block;
+{display: block;
 height: 260px;
-background:url('../images/texture-bg.png') center;
+background: #eee url('../images/texture-bg.png') center;
 -webkit-transition: 1s ease-in-out;
 -o-transition: 1s ease-in-out;
 transition: 1s ease-in-out;
@@ -225,7 +257,10 @@ transform: scale(1);
 z-index: 0;}
 @media screen and (max-width: 550px) {
    .images-view .image .bg {height: 200px;}
-   .quote {width: auto;left: 2%;padding-bottom: 30px;}
+   .quote {width: auto;left: 2%;padding-bottom: 30px;text-align: right;}
+}
+@media screen and (max-width: 400px) {
+   div.images-view .image .title {padding-left: .5em;padding-right: .6em;max-width: 100%;}
 }
 
 .images-view .image .bg.loaded {background-size: cover;}
@@ -287,7 +322,21 @@ animation: sk-scaleout 1.0s infinite ease-in-out;}
 transform: scale(1.05);}
 
 /*------------------------- Title on left. Background from left to right. --------------------------*/
-.titleOnLeft .title
+.images-view .img3 .title,
+.images-view .img6 .title,
+.images-view .img8 .title,
+.images-view .img11 .title,
+.images-view .img15 .title,
+.images-view .img16 .title,
+.images-view .img26 .title,
+.images-view .img27 .title,
+.images-view .img35 .title,
+.images-view .img43 .title,
+.images-view .img48 .title,
+.images-view .img50 .title,
+.images-view .img52 .title,
+.images-view .img53 .title,
+.images-view .img55 .title
 {left: 0%;
 text-align: left;
 right: auto;
@@ -302,7 +351,26 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#80000000', e
 /*--------------------------------------------------------------------------------------------------*/
 
 /*------------------------- Title on right. Background from right to left. -------------------------*/
-.titleOnRight .title
+.images-view .img4 .title,
+.images-view .img5 .title,
+.images-view .img9 .title,
+.images-view .img12 .title,
+.images-view .img13 .title,
+.images-view .img18 .title,
+.images-view .img20 .title,
+.images-view .img21 .title,
+.images-view .img25 .title,
+.images-view .img28 .title,
+.images-view .img33 .title,
+.images-view .img36 .title,
+.images-view .img37 .title,
+.images-view .img41 .title,
+.images-view .img42 .title,
+.images-view .img49 .title,
+.images-view .img51 .title,
+.images-view .img54 .title,
+.images-view .img56 .title,
+.images-view .img57 .title
 {right: 0%;
 text-align: right;
 left: auto;
@@ -317,6 +385,77 @@ background: linear-gradient(to right, rgba(0,0,0,0) 0%,rgba(0,0,0,0.5) 100%); /*
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#80000000',GradientType=1 ); /* IE6-9 */}
 /*--------------------------------------------------------------------------------------------------*/
 
+.images-view .img3 .title {top: 20%;padding-left: 2em;width: 2em;}
+.images-view .img3 .bg {background-position: center 45%;}
+.images-view .img4 .title {top: 7%;padding-left: 2em;}
+.images-view .img4 .bg {background-position: center 55%;}
+.images-view .img5 .title {top: 0;bottom: 0;}
+.images-view .img6 .title {top: 10%;padding-right: 14em;}
+.images-view .img7 .title {top: 10%;background: rgba(0,0,100,.3);border: 1px solid rgba(0,0,100,.2);}
+.images-view .img8 .title {top: auto;bottom: 0;padding-right: 14em;}
+@media screen and (max-width: 550px) {
+    .images-view .img8 .title {top: auto;bottom: 0;padding-right: 6em;}
+}
+.images-view .img9 .title {top: auto;bottom: 12%;}
+.images-view .img10 .title {top: auto;bottom: 0;}
+.images-view .img11 .title {top: auto;bottom: 8%;}
+.images-view .img12 .title {top: 7%;}
+.images-view .img13 .title {top: 0;bottom: 0;padding-top: 1em;}
+.images-view .img14 .title {top: 5%;}
+.images-view .img15 .title {top: 0%;}
+.images-view .img15 .bg {background-position: center 65%;}
+.images-view .img15 .bg {background-position: center 40%;}
+.images-view .img16 .title {width: 5em;}
+.images-view .img16 .bg {background-position: center 35%;}
+.images-view .img17 .title {top: auto;bottom: 0;}
+.images-view .img17 .bg {background-position: center 40%;}
+.images-view .img18 .title {top: 5%;width: 8.5em;}
+.images-view .img19 .title {top: auto;bottom: 0;left:20%;}
+.images-view .img20 .title {top: 0;width:16em;}
+.images-view .img20 .bg {background-position: center 60%;}
+.images-view .img21 .title {top: 0;width:10em;padding-left:3em;}
+.images-view .img22 .bg {background-position: center 40%;}
+.images-view .img25 .title {top: 5%;width:8em;}
+.images-view .img26 .title {bottom: 15%;top:auto;width:10em;padding-right: 1em;}
+.images-view .img27 .title {bottom: 15%;top:auto;width:7em;padding-right: 1em;}
+.images-view .img28 .title {top: 0;width:10em;padding-left:3em;}
+.images-view .img29 .bg {background-position: center 70%;}
+.images-view .img30 .title {bottom: 0%;top:auto;}
+.images-view .img30 .bg {background-position: center 30%;}
+.images-view .img31 .bg {background-position: center 37%;}
+.images-view .img31 .title {top: 31%;}
+.images-view .img32 .title {top: auto;bottom: 0%;}
+.images-view .img34 .bg {background-position: center 80%;}
+.images-view .img34 .title {top: auto;bottom: 0%;}
+.images-view .img35 .title {top: auto;bottom: 9%;}
+.images-view .img35 .bg {background-position: center 40%;}
+.images-view .img36 .title {top: auto;bottom: 11%;width: 4em;padding-left: 3em;}
+.images-view .img37 .title {top: 5%;width: 4em;padding-left: 2em;}
+.images-view .img37 .bg {background-position: center 65%;}
+.images-view .img38 .title {top: 5%;}
+.images-view .img39 .title {top: 5%;}
+.images-view .img40 .title {top: auto;bottom: 0%;}
+.images-view .img40 .bg {background-position: center 40%;}
+.images-view .img41 .title {top: 5%;width: 4em;padding-left: 3em;}
+.images-view .img41 .bg {background-position: center 5%;}
+.images-view .img42 .title {top: 10%;padding-left: 2em;}
+.images-view .img43 .title {top: 10%;}
+.images-view .img43 .bg {background-position: center 10%;}
+.images-view .img46 .title {top: auto;bottom: 0;}
+.images-view .img46 .bg {background-position: center 25%;}
+.images-view .img47 .title {top: 0;}
+.images-view .img48 .title {top: 0%;padding-right: 3em;}
+.images-view .img49 .title {top: auto;bottom: 10%;}
+.images-view .img50 .title {top: auto;bottom: 0;}
+.images-view .img51 .title {top: 0%;width: 6em;padding-left: 1em;}
+.images-view .img52 .title {top: auto;bottom: 10%;}
+.images-view .img53 .title {top: auto;bottom: 0;}
+.images-view .img54 .title {top: auto;bottom: 10%;width: 6em;padding-left: 1em;}
+.images-view .img54 .bg {background-position: center 70%;}
+.images-view .img55 .title {top: 5%;padding-right: 3em;}
+.images-view .img56 .title {top: auto;bottom: 5%;width: 8em;padding-left: 1em;}
+.images-view .img56 .bg {background-position: center 40%;}
+.images-view .img57 .title {top: 0;width: 18em;padding-left: 2em;padding-right: 2em;}
 /*================================================================================================*/
 
 .more-articles

@@ -8430,3 +8430,19 @@
 - WRONG DATA ERROR in file /backstage/classes/text.php at line 169:
   The text id #70 is not found in database.
 
+2017-07-21 09:38:05
+- WRONG DATA ERROR in file /backstage/classes/text.php at line 169:
+  The text id #99 is not found in database.
+- NOTICE in file //Users/anto/Programming/web/localhost/my_site/site/backstage/classes/page.php at line 412:
+  Trying to get property of non-object
+- NOTICE in file //Users/anto/Programming/web/localhost/my_site/site/backstage/functions/core.php at line 236:
+  Trying to get property of non-object
+- NOTICE in file //Users/anto/Programming/web/localhost/my_site/site/backstage/functions/core.php at line 236:
+  Trying to get property of non-object
+- WARNING in file //Users/anto/Programming/web/localhost/my_site/site/backstage/functions/core.php at line 236:
+  Creating default object from empty value
+- NOTICE in file //Users/anto/Programming/web/localhost/my_site/site/backstage/classes/page.php at line 413:
+  Trying to get property of non-object
+- NOTICE in file //Users/anto/Programming/web/localhost/my_site/site/backstage/classes/page.php at line 413:
+  Trying to get property of non-object
+

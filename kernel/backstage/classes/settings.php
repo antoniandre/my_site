@@ -6,7 +6,7 @@
 
 Class Settings
 {
-	const CONFIG_DIR = ROOT.'backstage/config';
+	const CONFIG_DIR = ROOT.'kernel/backstage/config';
 	const CONFIG_FILE = 'config.ini';
 	private static $instance = null;
 

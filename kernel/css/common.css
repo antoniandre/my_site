@@ -43,7 +43,7 @@
  #sitemap-page #page li:before, ul.glyph li:before, .required:after, .valid:after, .invalid:after, .newsletter .error:before,
  article h2:before, article h3:before, #sticky-bar:after, .dz-remove:before, figure.postcard:before, #mobile-menu .glyph li a:before,
  #mobile-menu .glyph li h4:before, #a28fig16.play:before
- {font-family: "template-site" !important;
+ {font-family: "template-site", "arial black", arial, sans-serif !important;
  font-style: normal !important;
  font-weight: normal !important;
  font-variant: normal !important;
