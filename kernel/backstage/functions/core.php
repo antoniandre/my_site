@@ -5,37 +5,37 @@
 
 
 //======================= INCLUDES ====================//
-require __DIR__.'/minicore.php';// Minimum required core. (the min for js/, css/, images/).
+// Minimum required core. (the min for js/, css/, images/).
+require __DIR__.'/minicore.php';
 
 includeClass('debug');
-
-includeClass('utility');
-includeClass('message');
-includeClass('form');
 includeClass('page');
 includeClass('language');
 includeClass('database');
-includeClass('text');
-includeClass('encryption');
-includeClass('article');
-includeFunction('sitemap');
-
-includeClass('template');
-//=====================================================//
-
-
-//======================= VARS ========================//
-$language = Language::getCurrent();
-$pages    = getPagesFromDB();
-$aliases  = getPagesAlias($pages);
-$page     = Page::getInstance();
 //=====================================================//
 
 
 //======================================================================================================//
 //=============================================== MAIN =================================================//
-$page->setLanguage($language);
-if (Language::getTarget()) $page->refresh();
+$language = Language::getCurrent();
+// $aliases  = getPagesAlias($pages);
+$page     = Page::getCurrent();
+
+if (isset(UserData::get()->js)) include ROOT . 'kernel/js/index.php';
+elseif (isset(UserData::get()->css)) include ROOT . 'kernel/css/index.php';
+else
+{
+    if (Language::getTarget()) $page->refresh();
+
+    includeClass('message');
+    includeClass('utility');
+    includeClass('form');
+    includeClass('text');
+    includeClass('encryption');
+    includeClass('article');
+    includeFunction('sitemap');
+    includeClass('template');
+}
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -45,44 +45,12 @@ if (Language::getTarget()) $page->refresh();
 //=========================================== FUNCTIONS ================================================//
 function newPageTpl($tplName = '')
 {
-    $page    = Page::getInstance();
+    $page    = Page::getCurrent();
     $tpl     = new Template(ROOT.'kernel/backstage/templates/');
     $tplName = $tplName ? $tplName : $page->page;
 	$tpl->set_file($page->page, "$tplName.html");
 
     return $tpl;
-}
-
-/**
- * getPagesFromDB retrieve all the pages tables from the database.
- *
- * @return array: the pages onject as they are stored in DB.
- */
-function getPagesFromDB()
-{
-    $db = database::getInstance();
-    $q = $db->query();
-    $pagesFromDB = $q->select('pages', '*')->run()->loadObjects('page');
-    foreach ($pagesFromDB as $k => $p)
-    {
-        $pages[$k] = $p;
-        // Camel case.
-        // $pages[$k]->id = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $p->page))));
-        $pages[$k]->id = $p->page;
-        foreach ($p as $attr => $val)
-        {
-            // Look for language-related vars (texts) and convert sth like metaDesc_fr to sth like metaDesc->fr
-            // if recognised language.
-            if (preg_match('~^([-_a-zA-Z0-9]+)_([a-z]{2})$~', $attr, $matches) && array_key_exists($matches[2], Language::allowedLanguages))
-            {
-                if (!isset($pages[$k]->{$matches[1]})) $pages[$k]->{$matches[1]} = new StdClass();
-                $pages[$k]->{$matches[1]}->{$matches[2]} = $val;
-                unset($pages[$k]->{"$matches[1]_$matches[2]"});
-            }
-        }
-    }
-
-    return $pages;
 }
 
 /**
@@ -96,21 +64,11 @@ function getPagesFromDB()
  */
 function getPageByProperty($property, $propertyValue, $language = null)
 {
-    global $pages, $aliases;
-
-    if (!$language) $language = Language::getCurrent();
-
-    foreach($pages as $page)
-    {
-        if (is_object($page->$property) && $page->$property !== 'id' && $page->$property->$language == Userdata::unsecureString($propertyValue)) return $page;
-        elseif ($page->$property == Userdata::unsecureString($propertyValue)) return $page;
-    }
-
-    // If not found, look in aliases
-    if (array_key_exists($propertyValue, $aliases)) return getPageByProperty('id', $aliases[$propertyValue], $language);
-
-    // Fallback if the page does not exist: return the 404 page
-    foreach($pages as $page) if ($page->id == 'notFound') return $page;
+    return Page::getByProperty($property, $propertyValue, $language = null);
+}
+function getPageById($pageId, $language = null)
+{
+    return Page::get($pageId);
 }
 
 /**
@@ -157,12 +115,12 @@ function getArticleInfo($articleId)
 function url($url, $data = [], $fullUrl = false)
 {
     global $page;
-    $settings = Settings::get();
-    $gets     = Userdata::get();
-    $language = isset($data['language']) && Language::exists($data['language']) ? $data['language']
+    $settings    = Settings::get();
+    $gets        = Userdata::get();
+    $language    = isset($data['language']) && Language::exists($data['language']) ? $data['language']
                                                                                 : Language::getCurrent();
     unset($data['language']);
-    $root = $fullUrl ? "$settings->siteUrl/" : $settings->root;
+    $root        = $fullUrl ? "$settings->siteUrl/" : $settings->root;
 
     // As $page is global, create another var $matchedPage to not overwrite $page.
     $matchedPage = $page;

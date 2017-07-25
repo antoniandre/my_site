@@ -11,8 +11,8 @@ RewriteEngine On
 #==============================================#
 
 #==================== PRD =====================#
-ErrorDocument 404 /pages/not-found.php
-ErrorDocument 403 /pages/forbidden.php
+# ErrorDocument 404 kernel/pages/not-found.php
+# ErrorDocument 403 kernel/pages/forbidden.php
 #==============================================#
 
 #================= robots.txt =================#
@@ -180,16 +180,16 @@ RewriteRule . abuse.txt [L]
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Let go through the images, uploads, vendor, css and js and send everything else to index.php
+# Let go through the images, uploads and vendor and send everything else to index.php.
 RewriteRule ^(vendor|images|uploads)/.*$ - [NC,QSA,L]
 RewriteRule ^css/fonts/(.*)$ kernel/css/fonts/$1 [NC,QSA,L]
 
 RewriteRule ^backstage/tmp/.*$ - [NC,QSA,L]
-RewriteRule ^(en|fr)/backstage/.*$ backstage/index.php?lang=$1 [NC,QSA,L]
+#RewriteRule ^(en|fr)/backstage/.*$ kernel/backstage/index.php?lang=$1 [NC,QSA,L]
 RewriteRule ^(en|fr)/.*$ index.php?lang=$1 [NC,QSA,L]
 
 # RewriteCond to prevent a double redirection...
-RewriteCond %{REQUEST_URI} !backstage/index\.php
+#RewriteCond %{REQUEST_URI} !backstage/index\.php
 RewriteCond %{REQUEST_URI} !kernel/css/fonts/.*
 RewriteRule ^.*$ index.php [NC,QSA,L]
 #==============================================#

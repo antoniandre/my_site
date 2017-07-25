@@ -11,7 +11,7 @@
 //================================================ MAIN ================================================//
 $language = Language::getCurrent();
 $settings = Settings::get();
-$pages = getPagesFromDB();
+$pages = Page::getAllPages();
 foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 {
 	$options[$thePage->page] = $thePage->title->$language;
@@ -239,7 +239,7 @@ $form->addButton('validate', text(18));
 
 $form->validate('validateForm1');
 
-$content = $form->render();
+$page->setContent($form->render())->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -334,10 +334,9 @@ function createPhpFile($fileName, $path)
 				  ."//=====================================================//\n\n\n"
 				  ."//======================================================================================================//\n"
 				  ."//============================================= MAIN ===================================================//\n"
-				  ."\$tpl = new Template();\n"
-				  ."\$tpl->set_file(\"\$page->page-page\", \"kernel/{$backstage}templates/\$page->page.html\");\n"
+				  ."\$tpl = newPageTpl();\n"
 				  ."\$tpl->set_var('content', \"The page content goes here for page \\\"\$page->page\\\".\");\n"
-				  ."\$content = \$tpl->parse('display', \"\$page->page-page\");\n"
+				  ."\$page->setContent(\$tpl->parse('display', \$page->page))->render();\n"
 				  ."//============================================ end of MAIN =============================================//\n"
 				  ."//======================================================================================================//\n?>";
 	$path = ROOT."$path";
@@ -396,18 +395,18 @@ function savePageInDB($form, $pageName, $articleId)
 
     $db = database::getInstance();
     $q = $db->query();
-    $q->insert('pages', ['page' => $pageName,
-                         'path' => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']])                                         : '',
-                         'url_en' => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
-                         'url_fr' => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
-                         'title_en' => $form->getPostedData('page[title][en]'),
-                         'title_fr' => $form->getPostedData('page[title][fr]'),
+    $q->insert('pages', ['page'        => $pageName,
+                         'path'        => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']])                                         : '',
+                         'url_en'      => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
+                         'url_fr'      => text($form->getPostedData('page[url][fr]'), ['formats' => ['sef']]),
+                         'title_en'    => $form->getPostedData('page[title][en]'),
+                         'title_fr'    => $form->getPostedData('page[title][fr]'),
                          'metaDesc_en' => $form->getPostedData('page[metaDesc][en]'),
                          'metaDesc_fr' => $form->getPostedData('page[metaDesc][fr]'),
-                         'metaKey_en' => $form->getPostedData('page[metaKey][en]'),
-                         'metaKey_fr' => $form->getPostedData('page[metaKey][fr]'),
-                         'parent' => $form->getPostedData('page[parent]'),
-                         'article' => isset($articleId) ? $articleId : null]);
+                         'metaKey_en'  => $form->getPostedData('page[metaKey][en]'),
+                         'metaKey_fr'  => $form->getPostedData('page[metaKey][fr]'),
+                         'parent'      => $form->getPostedData('page[parent]'),
+                         'article'     => isset($articleId) ? $articleId : null]);
     $q->run();
     if (!$q->info()->affectedRows) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
     else $pageId = $q->info()->insertId;

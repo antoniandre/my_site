@@ -39,7 +39,7 @@ var // General vars. (g for general)
 		if (!g.scripts[scriptName].loaded && !g.scripts[scriptName].loading)
 		{
 			if (g.scripts[scriptName].css) loadStyleSheet(scriptName);
-			$.getScript(ROOT+'js/'+scriptName+'.js', function()
+			$.getScript('?js=1&get='+scriptName, function()
 			{
 				g.scripts[scriptName].loaded = true;
 				g.scripts[scriptName].loading = false;

@@ -24,14 +24,14 @@ var formReady = function()
 		});
 
 		$('.dropzone').on('click', '.dz-remove', discardUpload);
-		$('.discardAll').on('click', function()
+		$('.discard-all').on('click', function()
 		{
 			$.get(formAction, 'discardAllUploads', function(response)
 			{
 				$('.dz-preview').remove();
 			});
 		});
-		$('.addImagesToArticle').on('click', function()
+		$('.add-images-to-article').on('click', function()
 		{
 			$.ajax(
 			{
@@ -51,7 +51,7 @@ var formReady = function()
 				beforeSend: function(response)
 				{
 					$('.dropzone').after('<div id="progress" style="display: none;">'
-										 +'<div class="progressBar">'
+										 +'<div class="progress-bar">'
 											+'<div class="inner" style="width:0"/>'
 											+'<div class="percentage">0%</div>'
 										 +'</div></div>');
@@ -71,13 +71,13 @@ var formReady = function()
 			$('textarea.wysiwyg').redactor(
 			{
 				// fixed: true,
-				imageUpload: '../../uploads/',
+				imageUpload: ROOT + 'uploads/',
 				imageEditable: false,
 				// linebreaks: true,
 				paragraphize: false,
 				replaceDivs: false,
 				focus: true,
-				toolbarFixedTopOffset: $('#stickyBar').height(),
+				toolbarFixedTopOffset: $('#sticky-bar').height(),
 				formatting: ['p', 'blockquote', 'h2', 'h3'],
 				formattingAdd: [
 			    {
@@ -177,7 +177,7 @@ var formReady = function()
 		}
 	}
 
-    if ($('.robotCheck').length)
+    if ($('.robot-check').length)
     {
         robotCheck();
     }
@@ -189,7 +189,7 @@ trackProgress = function()
 	$.getJSON(window.location, 'ajaxTrackProgress=1', function(response)
 	{
 		var progress = response.progress;
-		$('#progress .progressBar .inner').css('width', progress+'%').siblings('.percentage').text(progress+'%');
+		$('#progress .progress-bar .inner').css('width', progress+'%').siblings('.percentage').text(progress+'%');
 
 		if (progress < 100 && (lastProgress != progress || (lastProgress == progress && trials < 10)))
 		{
@@ -213,14 +213,14 @@ discardUpload = function()
 
 var robotCheck = function()
 {
-    $('.robotCheck label').each(function()
+    $('.robot-check label').each(function()
     {
         var form = $(this).parents('form');
     }).one('click', function()
     {
         var form = $(this).parents('form');
         form.append('<input type="hidden" name="'+form[0].id+'[robotCheck]" value="clear" />');
-        $(this).parent().addClass('notRobot');
+        $(this).parent().addClass('not-robot');
     });
 }
 

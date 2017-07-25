@@ -10,7 +10,8 @@
 //======================================================================================================//
 //================================================ MAIN ================================================//
 $language = Language::getCurrent();
-$pages = getPagesFromDB();
+$pages    = Page::getAllPages();
+
 foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 {
 	$options[$thePage->page] = $thePage->title->$language;
@@ -173,7 +174,7 @@ $form->validate('afterValidateForm');
 //  @todo: test this.
 // $form->modifyElementAttributes('page[metaDesc][en]', ['placeholder' => text('A nice hahaha')]);
 
-$content = $form->render();
+$page->setContent($form->render())->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
@@ -279,7 +280,7 @@ function afterValidateForm($result, $form)
 
 		if ($affectedRows)
 		{
-			$pages = getPagesFromDB();
+			$pages = Page::getAllPages();
 			$GLOBALS['pages'] = $pages;// Update the $pages global var.
 
 			new Message(nl2br(textf(67, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content');

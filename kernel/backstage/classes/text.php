@@ -49,7 +49,7 @@ Class Text
 		}
 
 		// Add the current page context + general context to the array.
-		if (Text::$texts === null) $this->getContext(['general', Page::getInstance()->page]);
+		if (Text::$texts === null) $this->getContext(['general', Page::getCurrent()->page]);
 	}
 
 	/**

@@ -23,7 +23,7 @@ $form->validate('getTexts');
 //-------------------------------------------------------------------------------//
 $form2 = new Form(['id' => 'sendArticle']);
 
-$pages = getPagesFromDB();
+$pages = Page::getAllPages();
 foreach ($pages as $id => $thePage) if ($thePage->page !== $page->page)
 {
     $options[$thePage->page] = $thePage->title->$language;
@@ -38,8 +38,7 @@ $form2->addButton('submit',
 $form2->validate('sendArticle');
 //-------------------------------------------------------------------------------//
 
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "templates/$page->page.html");
+$tpl = newPageTpl();
 $tpl->set_var(['h2' => text(70),
                'createNewPageUrl' => url('create-new-page'),
                'createNewPageText' => getPageByProperty('page', 'create-new-page')->title->$language,
@@ -53,7 +52,7 @@ $tpl->set_var(['h2' => text(70),
                'manageDatabaseText' => getPageByProperty('page', 'database-manager')->title->$language,
                'fetchTextsFromLiveButton' => IS_LOCAL ? $form->render() : '',
                'sendArticleToLive' => IS_LOCAL ? $form2->render() : '']);
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 

@@ -31,7 +31,7 @@ Class Utility
 		global $likes;
 
 		$db       = database::getInstance();
-		$page     = Page::getInstance();
+		$page     = Page::getCurrent();
 		$language = Language::getCurrent();
 		$return   = '';
 
@@ -62,7 +62,7 @@ Class Utility
 			$return = false;
 			$db = database::getInstance();
 			$q = $db->query();
-			$page = Page::getInstance();
+			$page = Page::getCurrent();
 			$comment = $form->getPostedData('comment');
 
 			// Do not perform the insertion in db if page found in DB.
@@ -79,7 +79,7 @@ Class Utility
 				new Message(nl2br(text(92)), 'info', 'info', 'header');
 				$form->unsetPostedData('comment', false);
 			}
-			elseif ($allowed = false)// Disable comments.
+			else
 			{
 				$q->insert('users', ['login' => $form->getPostedData('firstName'),
 									 'firstName' => $form->getPostedData('firstName'),
@@ -115,7 +115,6 @@ Class Utility
 				}
 				else new Message(text(84), 'error', 'error', 'header');// There was a pb.
 			}
-            new Message(text('Comments disabled due to abuse.'), 'error', 'error', 'header');
 
 			return $return;
 		});

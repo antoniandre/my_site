@@ -9,16 +9,16 @@
 var backstageReady = function()
 {
 	// Create a new text.
-	if ($('#createNewTextPage').length)
+	if ($('#create-new-text-page').length)
 	{
-		$('#form1pagecontext8opt15').on('change', function()
+		$('#form1pageselection2opt15').on('change', function()
 		{
 			$(this).parent().prev().children().val($(this).val());
 		});
 	}
 
 	// Create a new page.
-	else if ($('#createNewPagePage').length)
+	else if ($('#create-new-page-page').length)
 	{
 		updateUrlFromTitle();
 
@@ -30,7 +30,7 @@ var backstageReady = function()
 	}
 
 	// Edit a page.
-	else if ($('#editAPagePage').length)
+	else if ($('#edit-a-page-page').length)
 	{
 		loadStyleSheet('article');
 		bindEvents();

@@ -28,6 +28,6 @@ uploads/*
 uploads/temp/*
 !uploads/temp/
 !uploads/index.php
-cache/
+kernel/cache/
 vendor/
-backstage/logs/*.log
+kernel/backstage/logs/*.log

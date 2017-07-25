@@ -1,8 +1,8 @@
 <?php
 //======================= VARS ========================//
-$isArchive = isset($_GET['archive']) && $_GET['archive'];
-$jsonFile =  ROOT.'backstage/pages/todo-list.json';
-$archiveJsonFile =  ROOT.'backstage/pages/todo-list-archive.json';
+$isArchive       = isset($_GET['archive']) && $_GET['archive'];
+$jsonFile        =  ROOT.'kernel/backstage/pages/todo-list.json';
+$archiveJsonFile =  ROOT.'kernel/backstage/pages/todo-list-archive.json';
 //=====================================================//
 
 
@@ -12,9 +12,8 @@ $archiveJsonFile =  ROOT.'backstage/pages/todo-list-archive.json';
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "templates/$page->page.html");
-$tpl->set_block("$page->page-page", 'tableHeader', 'theTableHeader');
+$tpl = newPageTpl();
+$tpl->set_block($page->page, 'tableHeader', 'theTableHeader');
 
 $jsonTree = json_decode(file_get_contents($isArchive ? $archiveJsonFile: $jsonFile));
 $headers = $jsonTree->headers;
@@ -86,7 +85,7 @@ $tpl->set_var([
                 'tableRows' => renderTableRows($headers, $rows).renderTableRows($headers, $rows, 3)
               ]);
 
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 

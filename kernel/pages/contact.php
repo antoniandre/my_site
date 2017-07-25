@@ -30,7 +30,7 @@ $form->addButton('cancel', text(17));
 $form->addButton('validate', text(18));
 
 $form->validate('validateContact');
-$content = $form->render();
+$page->setContent($form->render())->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 

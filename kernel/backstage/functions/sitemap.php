@@ -26,7 +26,8 @@ function getTree($page = 'sitemap', $exclude = [])
  */
 function getChildrenPages($page, $exclude = [])
 {
-	global $pages, $user;
+	global $user;
+	$pages = Page::getAllPages();
 	$language = Language::getCurrent();
 	$pagesTree = [];
 

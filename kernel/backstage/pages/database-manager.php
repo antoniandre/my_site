@@ -9,16 +9,15 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$tpl = new Template();
-$tpl->set_file("$page->page-page", "templates/$page->page.html");
+$tpl = newPageTpl();
 $tpl->set_var('content', "The page content goes here for page \"$page->page\".");
 
-foreach (getPagesFromDB() as $id => $thePage)
+foreach (Page::getAllPages() as $id => $thePage)
 {
 	dbg($thePage);
 }
 
-$content = $tpl->parse('display', "$page->page-page");
+$page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 ?>

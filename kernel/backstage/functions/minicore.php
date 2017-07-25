@@ -14,10 +14,6 @@ define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
 
 
 //======================= INCLUDES ====================//
-// Error class name is reserved for PHP since PHP 7.0. Place our custom Error class in a
-// namespace to keep using as is.
-use travel\Error as Error;
-
 includeClass('error');
 includeClass('settings');
 includeClass('userdata');
@@ -47,6 +43,17 @@ $user = User::getInstance();
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
+function checkInTheme($path)
+{
+    // When including the Settings class, the Settings class itself is not yet known.
+    $settings  = class_exists('Settings') ? Settings::get() : null;
+    if (!$settings) return $path;
+
+    $theme     = $settings->theme;
+    $themePath = str_replace(['kernel/', 'kernel/backstage/'], "themes/$theme/", $path);
+
+    return is_file($themePath) ? $themePath : $path;
+}
 /**
  * Shortcut function to simply include a php class.
  *
@@ -55,7 +62,7 @@ $user = User::getInstance();
  */
 function includeClass($class)
 {
-    $ok = include ROOT."kernel/backstage/classes/$class.php";
+    $ok = include checkInTheme(ROOT."kernel/backstage/classes/$class.php");
     if (!$ok)
         Cerror::add("The class '$class' was not found in '".ROOT."kernel/backstage/classes/$class.php'.", 'NOT FOUND');
 
@@ -70,7 +77,7 @@ function includeClass($class)
  */
 function includeFunction($function)
 {
-    $ok = include ROOT."kernel/backstage/functions/$function.php";
+    $ok = include checkInTheme(ROOT."kernel/backstage/functions/$function.php");
     if (!$ok)
         Cerror::add("The function '$function' was not found in '".ROOT."kernel/backstage/functions/$function.php'.", 'NOT FOUND');
 
@@ -86,7 +93,7 @@ function includeFunction($function)
  */
 function includeWebservice($ws)
 {
-    $ok = include ROOT."kernel/backstage/webservices/$ws.php";
+    $ok = include checkInTheme(ROOT."kernel/backstage/webservices/$ws.php");
     if (!$ok)
         Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
 
@@ -94,7 +101,7 @@ function includeWebservice($ws)
 }
 function includeOnceWebservice($ws)
 {
-    $ok = include_once ROOT."kernel/backstage/webservices/$ws.php";
+    $ok = include_once checkInTheme(ROOT."kernel/backstage/webservices/$ws.php");
     if (!$ok)
         Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
 

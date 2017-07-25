@@ -10,7 +10,7 @@
 //======================================================================================================//
 //============================================= MAIN ===================================================//
 $settings = Settings::get();
-$page     = Page::getInstance();
+$page     = Page::getCurrent();
 $tpl      = newPageTpl();
 
 $tpl->set_block($page->page, 'latestArticlesBlock', 'theLatestArticlesBlock');

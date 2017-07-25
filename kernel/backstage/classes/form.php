@@ -16,7 +16,7 @@
  *    );
  *    echo $newsletter->render();
  */
-Class Form
+class Form
 {
 	const existingElements = ['select', 'text', 'number', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
 	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
@@ -29,8 +29,8 @@ Class Form
 								 'num+' => ['pattern' => '~^[0-9.,]+$~', 'message' => 'This field must contain numeric chars only.'],
 								 'phone' => ['pattern' => '~^[0-9+ ()-]+$~', 'message' => 'This field must contain phone numbers only.'],
 								 'email' => ['pattern' => '~^[a-z0-9_][a-z0-9._]+@[a-z0-9][a-z0-9._]{1,40}[a-z0-9]$~i', 'message' => 'This field only accept valid emails.']];
-	const uploadsDir = '../uploads/';
-	const uploadsDirTemp = '../uploads/temp/';
+	const uploadsDir = ROOT . 'uploads/';
+	const uploadsDirTemp = ROOT . 'uploads/temp/';
 	static private $idCounter = 1;// Form id counter. incremented on each new form.
 	private $elementId = 1;
 	private $id;// Form id. Useful when multiple forms on a page to know which form is submitted.

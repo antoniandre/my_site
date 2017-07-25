@@ -4,9 +4,9 @@
 .buttons {float:right;}
 .buttons button {float:left;}
 
-.robotCheck {float: right;margin-top: 10px;max-height: 28px;overflow: hidden;}
-.robotCheck *, .robotCheck :before, .robotCheck :after {line-height: 2.3em;vertical-align: middle;display: inline-block;}
-.robotCheck span {
+.robot-check {float: right;margin-top: 10px;max-height: 28px;overflow: hidden;}
+.robot-check *, .robot-check :before, .robot-check :after {line-height: 2.3em;vertical-align: middle;display: inline-block;}
+.robot-check span {
     opacity: 0;
     -webkit-transition: .3s ease-out;
     -o-transition: .3s ease-out;
@@ -16,15 +16,15 @@
     -o-transform: translateX(15px);
     transform: translateX(15px);
 }
-.robotCheck:hover span {
+.robot-check:hover span {
     opacity: 1;
     -webkit-transform: translateX(0px);
     -ms-transform: translateX(0px);
     -o-transform: translateX(0px);
     transform: translateX(0px);
 }
-.robotCheck label {color: #999;cursor: pointer;}
-.robotCheck.notRobot
+.robot-check label {color: #999;cursor: pointer;}
+.robot-check.not-robot
 {opacity: 0;
 max-height: 0;
 margin: 0;
@@ -32,10 +32,10 @@ margin: 0;
 -o-transition: .8s 1.3s;
 transition: .8s 1.3s;}
 
-.robotCheck.notRobot label {color: #32cd32;}
-.robotCheck label:after {content: attr(data-yes);}
-.robotCheck.notRobot label:after {content: attr(data-no);}
-.robotCheck label:before {
+.robot-check.not-robot label {color: #32cd32;}
+.robot-check label:after {content: attr(data-yes);}
+.robot-check.not-robot label:after {content: attr(data-no);}
+.robot-check label:before {
     content: "\4b";
     color: #32cd32;
     line-height: inherit;
@@ -46,7 +46,7 @@ transition: .8s 1.3s;}
     -o-animation: wiggle 2.5s infinite;
     animation: wiggle 2.5s infinite;
 }
-.robotCheck.notRobot label:before {content: "u";}
+.robot-check.not-robot label:before {content: "u";}
 @keyframes wiggle {
     0% { transform: rotate(0deg); }
    80% { transform: rotate(0deg); }
@@ -360,13 +360,11 @@ line-height: 1.6em;}
 .dropzone .buttons div:hover
 {opacity: 1;
 filter: alpha(opacity=100);}
-/*.dropzone .addImagesToArticle {}
-.dropzone .discardAll {}*/
-.dropzone .addImagesToArticle:hover:before {color:green;}
-.dropzone .discardAll:hover:before {color:#c00;}
+.dropzone .add-images-to-article:hover:before {color:green;}
+.dropzone .discard-all:hover:before {color:#c00;}
 .dropzone.dz-started .dz-message {display: block;}
 
-.progressBar {
+.progress-bar {
     background: #ddd;
     border-radius: 1em;
     width: 350px;
@@ -377,7 +375,7 @@ filter: alpha(opacity=100);}
     border: 1px solid #aaa;
     overflow: hidden;
 }
-.progressBar .inner {
+.progress-bar .inner {
     background: greenyellow;
     width: 67%;
     position: absolute;
@@ -388,7 +386,7 @@ filter: alpha(opacity=100);}
     -o-transition: .3s;
     transition: .3s;
 }
-.progressBar .percentage {
+.progress-bar .percentage {
     position: absolute;
     width: 100%;
     text-align: center;
