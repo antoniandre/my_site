@@ -26,11 +26,20 @@ function getPagePath()
 {
 	$page = Page::getCurrent();
 
-	if ($page->isArticle())
+	// Webservice call from Localhost. We are now on distant side.
+	// So run the code to emit and return to localhost.
+	if (strpos($_SERVER['QUERY_STRING'], 'ws='))
+	{
+		includeClass('webservice');
+		new Webservice();
+	}
+
+	elseif ($page->isArticle())
 	{
 		$article     = Page::get('article');
 		$includePath = $article->path . $article->page;
 	}
+
 	else
 	{
 		if (!is_file(ROOT."kernel/$page->path$page->page.php")) $page = Page::get('not-found');
