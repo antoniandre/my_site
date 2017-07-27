@@ -309,7 +309,7 @@ function fetchPage($page, $form)
 {
 	$settings = Settings::get();
 
-	$page = getPageByProperty('page', $page);
+	$page = Page::getByProperty('page', $page);
 	$array = [
 		'page[type]'         => $page->article ? 'article' : 'php',
 		'page[selection]'    => $page->page,

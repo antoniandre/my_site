@@ -50,7 +50,7 @@ function checkInTheme($path)
     if (!$settings) return $path;
 
     $theme     = $settings->theme;
-    $themePath = str_replace(['kernel/', 'kernel/backstage/'], "themes/$theme/", $path);
+    $themePath = str_replace(['kernel/backstage/', 'kernel/'], "themes/$theme/", $path);
 
     return is_file($themePath) ? $themePath : $path;
 }

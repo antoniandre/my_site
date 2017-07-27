@@ -46,29 +46,11 @@ else
 function newPageTpl($tplName = '')
 {
     $page    = Page::getCurrent();
-    $tpl     = new Template(ROOT.'kernel/backstage/templates/');
+    $tpl     = new Template();
     $tplName = $tplName ? $tplName : $page->page;
-	$tpl->set_file($page->page, "$tplName.html");
+	$tpl->set_file($page->page, checkInTheme(ROOT."kernel/backstage/templates/$tplName.html"));
 
     return $tpl;
-}
-
-/**
- * find the wanted page informations from only one property.
- * The most common way to look for a page is from the 'page' property which is unique simple and in lowercase.
- *
- * @param string $property: the property (page/id/path/title) on which to make comparison to get the wanted page
- * @param string $propertyValue: the page/id/path/title of the wanted page.
- * @param string $language: the target language for the wanted page.
- * @return object: the wanted page informations (page/id/path/title).
- */
-function getPageByProperty($property, $propertyValue, $language = null)
-{
-    return Page::getByProperty($property, $propertyValue, $language = null);
-}
-function getPageById($pageId, $language = null)
-{
-    return Page::get($pageId);
 }
 
 /**
@@ -179,8 +161,8 @@ function url($url, $data = [], $fullUrl = false)
         if (strtolower($urlObj->path) === 'self') $data['page'] = $matchedPage->page;
         else
         {
-            // Get the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
-            $matchedPage = getPageByProperty('page', str_replace('.php', '', $urlObj->path), $language);
+            // Get the wanted page from the $pages array via Page::getByProperty() and set the url from the retrieved page object.
+            $matchedPage = Page::getByProperty('page', str_replace('.php', '', $urlObj->path), $language);
             $data['page'] = $matchedPage->page;
         }
     }
@@ -191,8 +173,8 @@ function url($url, $data = [], $fullUrl = false)
     {
         if (strtolower($urlObj->path) == 'self') $urlPath = "$root$language/{$matchedPage->url->$language}.html";
 
-        // Get the wanted page from the $pages array via getPageByProperty() and set the url from the retrieved page object.
-        else $matchedPage = getPageByProperty('page', str_replace('.php', '', $urlObj->path), $language);
+        // Get the wanted page from the $pages array via Page::getByProperty() and set the url from the retrieved page object.
+        else $matchedPage = Page::getByProperty('page', str_replace('.php', '', $urlObj->path), $language);
 
         list($matchedPage->url->$language, $seoData) = seo($matchedPage->url->$language, $data, $language);
         $data = array_merge($seoData, $data);
@@ -318,6 +300,7 @@ function getCaller()
  */
 function dbg()
 {
+    if (!class_exists('Debug')) return;
     // 'Apply' concept: apply the arguments 'func_get_args()' to the method 'add' of the object 'Debug::getInstance()'
     // Doing only 'Debug::getInstance()->add(func_get_args())' would wrap the args into an array...
     call_user_func_array(array(Debug::getInstance(), 'add'), func_get_args());
@@ -332,6 +315,7 @@ function dbg()
  */
 function dbgd()
 {
+    if (!class_exists('Debug')) {echo '-- Class Debug not available --<br>';return;}
     // 'Apply' concept: apply the arguments 'func_get_args()' to the method 'add' of the object 'Debug::getInstance()'
     // Doing only 'Debug::getInstance()->add(func_get_args())' would wrap the args into an array...
     call_user_func_array(array(Debug::getInstance(), 'add'), func_get_args());

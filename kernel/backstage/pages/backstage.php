@@ -39,19 +39,19 @@ $form2->validate('sendArticle');
 //-------------------------------------------------------------------------------//
 
 $tpl = newPageTpl();
-$tpl->set_var(['h2' => text(70),
-               'createNewPageUrl' => url('create-new-page'),
-               'createNewPageText' => getPageByProperty('page', 'create-new-page')->title->$language,
-               'editAPageUrl' => url('edit-a-page'),
-               'editAPageText' => getPageByProperty('page', 'edit-a-page')->title->$language,
-               'createNewTextUrl' => url('create-new-text'),
-               'createNewTextText' => getPageByProperty('page', 'create-new-text')->title->$language,
-               'toDoListUrl' => url('todo-list'),
-               'toDoListText' => getPageByProperty('page', 'todo-list')->title->$language,
-               'manageDatabaseUrl' => url('database-manager'),
-               'manageDatabaseText' => getPageByProperty('page', 'database-manager')->title->$language,
+$tpl->set_var(['h2'                       => text(70),
+               'createNewPageUrl'         => url('create-new-page'),
+               'createNewPageText'        => Page::get('create-new-page')->getTitle(),
+               'editAPageUrl'             => url('edit-a-page'),
+               'editAPageText'            => Page::get('edit-a-page')->getTitle(),
+               'createNewTextUrl'         => url('create-new-text'),
+               'createNewTextText'        => Page::get('create-new-text')->getTitle(),
+               'toDoListUrl'              => url('todo-list'),
+               'toDoListText'             => Page::get('todo-list')->getTitle(),
+               'manageDatabaseUrl'        => url('database-manager'),
+               'manageDatabaseText'       => Page::get('database-manager')->getTitle(),
                'fetchTextsFromLiveButton' => IS_LOCAL ? $form->render() : '',
-               'sendArticleToLive' => IS_LOCAL ? $form2->render() : '']);
+               'sendArticleToLive'        => IS_LOCAL ? $form2->render() : '']);
 $page->setContent($tpl->parse('display', $page->page))->render();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//

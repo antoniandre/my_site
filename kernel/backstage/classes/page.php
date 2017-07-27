@@ -154,6 +154,15 @@ class Page
 		return isset(self::$allPages[$pageId]);
 	}
 
+	/**
+	 * Find the wanted page informations from only one property.
+	 * The most common way to look for a page is from the 'page' property which is unique simple and in lowercase.
+	 *
+	 * @param string $property: the property (page/id/path/title) on which to make comparison to get the wanted page
+	 * @param string $propertyValue: the page/id/path/title of the wanted page.
+	 * @param string $language: the target language for the wanted page.
+	 * @return object: the wanted page informations (page/id/path/title).
+	 */
 	public static function getByProperty($property, $propertyValue, $language = null)
 	{
 		// global $aliases;
@@ -170,7 +179,7 @@ class Page
 
 		// If not found, look in aliases.
 		// @todo: redo the aliases check.
-		// if (array_key_exists($propertyValue, $aliases)) return getPageById($aliases[$propertyValue], $language);
+		// if (array_key_exists($propertyValue, $aliases)) return self::get($aliases[$propertyValue], $language);
 
 		// Fallback if the page does not exist: return the 404 page.
 		return self::get('not-found');
@@ -460,8 +469,8 @@ class Page
 					   'headerImgSrc' => url('images/?i=home-slides/sailing_xl.jpg'),
 					   'footerImgSrc' => url('images/?i=sunset_l.jpg'),
 					   'backToHomeText' => text(45),
-					   'homeUrl' => url(getPageById('home', $language)->page.'.php'),
-					   'homeText' => getPageById('home', $language)->title->$language,
+					   'homeUrl' => url(self::get('home', $language)->page.'.php'),
+					   'homeText' => self::get('home', $language)->title->$language,
 					   'h1' => ucfirst($this->h1 ? $this->h1 : $page->title->$language),
 					   // If h1 is explicitly set to null then set an h1 with the site name for SEO.
 					   'headerHeight' => $this->headerHeight,
@@ -476,8 +485,8 @@ class Page
 					   'goDownLink' => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"go-down i-chevron-d\">".text(99).'</a>' : '',
 
 					   // 'social' => $this->social ? '<div class="social clearfix"></div>' : '',// Moved inside article only.
-					   'contactUrl' => url(getPageById('contact', $language)->page.'.php'),
-					   'contactText' => getPageById('contact', $language)->title->$language,
+					   'contactUrl' => url(self::get('contact', $language)->page.'.php'),
+					   'contactText' => self::get('contact', $language)->title->$language,
 					   'classEn' => $language == 'en' ? ' active' : '',
 					   'classFr' => $language == 'fr' ? ' active' : '',
 					   'error' => Cerror::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Cerror::show()."</div>" : '',
@@ -485,10 +494,10 @@ class Page
 					   'headerMessage' => ($headerMessage = Message::show('header')) ? "<div id=\"header-message\">$headerMessage</div>" : '',
 					   'contentMessage' => ($contentMessage = Message::show('content')) ? "<div id=\"content-message\">$contentMessage</div>" : '',
 					   'copyright' => textf(19, $settings->siteName, date('Y')),
-					   'sitemapUrl' => url(getPageById('sitemap', $language)->page.'.php'),
-					   'sitemapText' => getPageById('sitemap', $language)->title->$language,
-					   'legalTermsUrl' => url(getPageById('legalTerms', $language)->page.'.php'),
-					   'legalTermsText' => getPageById('legalTerms', $language)->title->$language
+					   'sitemapUrl' => url(self::get('sitemap', $language)->page.'.php'),
+					   'sitemapText' => self::get('sitemap', $language)->title->$language,
+					   'legalTermsUrl' => url(self::get('legalTerms', $language)->page.'.php'),
+					   'legalTermsText' => self::get('legalTerms', $language)->title->$language
 					  ]);
 
 		//----------------- Google Analytics ----------------//
