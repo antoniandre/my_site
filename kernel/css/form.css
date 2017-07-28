@@ -16,7 +16,7 @@
     -o-transform: translateX(15px);
     transform: translateX(15px);
 }
-.robot-check:hover span {
+.robot-check:hover span, .robot-check.show span {
     opacity: 1;
     -webkit-transform: translateX(0px);
     -ms-transform: translateX(0px);

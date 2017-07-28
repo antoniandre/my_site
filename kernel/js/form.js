@@ -179,7 +179,7 @@ var formReady = function()
 
     if ($('.robot-check').length)
     {
-        robotCheck();
+		robotCheck();
     }
 },
 trials = 0,
@@ -221,7 +221,15 @@ var robotCheck = function()
         var form = $(this).parents('form');
         form.append('<input type="hidden" name="'+form[0].id+'[robotCheck]" value="clear" />');
         $(this).parent().addClass('not-robot');
-    });
+	})
+	.parents('form').on('submit', function()
+	{
+		if (!$('.robot-check').hasClass('not-robot'))
+		{
+			$('.robot-check').addClass('show');
+			return false;
+		}
+	});
 }
 
 var editPanel = function()
