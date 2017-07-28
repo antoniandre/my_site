@@ -49,24 +49,10 @@ else
     $css[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '').$page->page;
 }
 
-// Now add each css file in the output string if the file exists.
-$cssFiles = '';
-foreach($css as $k => $filename)
-{
-    // If in vendor.
-	if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
-	{
-	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
-	}
-    // If in normal css folder.
-	elseif ($filename && is_file(ROOT."kernel/css/$filename.css"))
-	{
-	    $cssFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."kernel/css/$filename.css");
-	}
-}
+$cssContents = addCssContents($css);
 
 // Preg_replace to replace css 'url(/path)' with 'url(ROOT.'css/path)' except if 'data:' is found.
-$cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:)(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~', 'url("'.$settings->root.'css/$2$3")', $cssFiles);
+$cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:)(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~', 'url("'.$settings->root.'css/$2$3")', $cssContents);
 $cssOutput = "@charset \"UTF-8\";\n$cssOutput";
 
 
@@ -80,6 +66,34 @@ die((string)($useCompress ? compress($cssOutput) : $cssOutput));
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
+function addCssContents($css)
+{
+    $settings = Settings::get();
+
+    // Now add each css file in the output string if the file exists.
+    $cssContents = '';
+    foreach($css as $k => $filename)
+    {
+        // If in vendor.
+        if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
+        {
+            $cssContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
+        }
+        // If in normal css folder.
+        elseif ($filename && is_file(ROOT."kernel/css/$filename.css"))
+        {
+            $cssContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."kernel/css/$filename.css");
+        }
+
+        // If in theme/css folder.
+        if ($filename && is_file(ROOT."themes/$settings->theme/css/$filename.css"))
+        {
+            $cssContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."themes/$settings->theme/css/$filename.css");
+        }
+    }
+
+    return $cssContents;
+}
 
 function compress($cssOutput)
 {

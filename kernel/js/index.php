@@ -18,7 +18,11 @@ $get = UserData::get();
 if ($get->get)
 {
     $filename = basename($get->get, '.js');
-    $jsOutput = file_get_contents(ROOT."kernel/js/$filename.js");
+    $path = ROOT."kernel/js/$filename.js";
+    $pathInTheme = ROOT."themes/$settings->theme/js/$filename.js";
+
+    if (file_exists($path)) $jsOutput = file_get_contents($path);
+    if (file_exists($pathInTheme)) $jsOutput .= file_get_contents($pathInTheme);
 }
 else
 {
@@ -57,21 +61,8 @@ else
         $readyFunctions[] = str_replace('-', '', $page->page);
     }
 
-    // Prepare the single output js file.
-    $jsFiles = '';
-    foreach($js as $k => $filename)
-    {
-        // If in vendor.
-        if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
-        {
-            $jsFiles .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
-        }
-        // If in normal js folder.
-        elseif ($filename && is_file(ROOT."kernel/js/$filename.js"))
-        {
-            $jsFiles .=  ($k?"\n\n\n":'').file_get_contents(ROOT."kernel/js/$filename.js");
-        }
-    }
+    $jsContents = addJsContents($js);
+
 
     // Create an array of functions to call when DOM is ready.
     $onReady = '';
@@ -81,7 +72,7 @@ else
     }
 
     // Append few vars and array of ready functions to the output.
-    $jsOutput = "var l = '$language',\n    localhost= ".(int)IS_LOCAL.",\n    page = '$page',\n    scripts = ".json_encode($scripts).";\n\n$jsFiles\n\n\$(document).ready(function(){commonReady();$onReady});";
+    $jsOutput = "var l = '$language',\n    localhost= ".(int)IS_LOCAL.",\n    page = '$page',\n    scripts = ".json_encode($scripts).";\n\n$jsContents\n\n\$(document).ready(function(){commonReady();$onReady});";
 }
 
 // TODO: find the right cache for images
@@ -95,4 +86,34 @@ header('Content-type: text/javascript');
 die("$jsOutput");
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
+
+function addJsContents($js)
+{
+    $settings = Settings::get();
+
+    // Prepare the single output js file.
+    $jsContents = '';
+    foreach($js as $k => $filename)
+    {
+        // If in vendor.
+        if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
+        {
+            $jsContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
+        }
+        // If in normal js folder.
+        elseif ($filename && is_file(ROOT."kernel/js/$filename.js"))
+        {
+            $jsContents .=  ($k?"\n\n\n":'').file_get_contents(ROOT."kernel/js/$filename.js");
+        }
+
+        // If in theme/css folder.
+        if ($filename && is_file(ROOT."themes/$settings->theme/js/$filename.js"))
+        {
+            $jsContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."themes/$settings->theme/js/$filename.js");
+        }
+    }
+
+    return $jsContents;
+}
+
 ?>
