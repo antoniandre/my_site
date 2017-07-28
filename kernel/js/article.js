@@ -123,22 +123,4 @@ likesHandler = function()
         }
     };
     this.init();
-},
-
-figureEvents =
-{
-    a19fig27:
-    {
-        event: 'click',
-        handler: function()
-        {
-            $(this)
-                .css('background-color', '#0b0')
-                .find('figcaption').css('color', '#fff').end()
-            .prev().css('background-color', '#c00')
-                .find('figcaption').css('color', '#fff');
-            $('#a19fig28, #a19fig29').delay(1500).slideDown(1000, function(){$("#a19fig28 img").lazyload('update')});
-        },
-        one: true
-    }
 };

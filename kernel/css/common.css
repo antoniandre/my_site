@@ -1443,7 +1443,8 @@ margin-left: -2.5em;
  font-family: dinnext, Arial, Helvetica, sans-serif;}
  #debug div code, #error div code
  {margin:5px;
- display:block;}
+ display:block;
+ overflow: auto;}
  #debug div code hr, #error div code hr
  {border:dashed rgba(0,0,0,.1);border-width:1px 0 0;
  margin:5px -5px;}
