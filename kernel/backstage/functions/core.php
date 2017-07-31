@@ -43,6 +43,42 @@ else
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
+function mainRouter()
+{
+	$page = Page::getCurrent();
+
+	// Webservice call from Localhost. We are now on distant side.
+	// So run the code to emit and return to localhost.
+	if (strpos($_SERVER['QUERY_STRING'], 'ws='))
+	{
+		includeClass('webservice');
+		new Webservice();
+	}
+
+	elseif ($page->isArticle())
+	{
+		$article     = Page::get('article');
+		$includePath = checkInTheme("kernel/$article->path$article->page.php");
+	}
+
+	else// All the other pages (ending with .php).
+	{
+		$includePathKernel = "kernel/$page->path$page->page.php";
+		$includePath       = checkInTheme($includePathKernel);
+
+		// Fallback to 'not-found' if no matching page was found in theme.
+		if ($includePath === $includePathKernel && !is_file(ROOT.$includePathKernel))
+		{
+			$page = Page::get('not-found');
+			$includePath = "kernel/$page->path$page->page.php";
+			// Also check if the not-found page has an override.
+			$includePath = checkInTheme($includePath);
+		}
+	}
+
+	return $includePath;
+}
+
 function newPageTpl($tplName = '')
 {
     $page    = Page::getCurrent();
