@@ -2,24 +2,38 @@
 
 /**
  * Idea: give an array of page ids (e.g ['site-map', 'home', 'contact-us']) and it will generate the menu html markup.
- * @todo To develop and use.
- * @param  array  $items     [description]
- * @param  string $class     [description]
- * @param  string $ariaLabel [description]
+ *
+ * @param  array  $params    [description]
  * @return [type]            [description]
  */
-function doMenu($items = [], $class = '', $ariaLabel = '')
+function doMenu($items = [], $params)
 {
-	$html = '';
+    global $language;
+    $pages         = Page::getAllPages();
+	$html          = '';
+    $defaults      = ['class' => '', 'ariaLabel' => '', 'showChildren' => true, 'showIcons' => false];
+    $params        = array_merge($defaults, $params);
+    $class         = $params['class'];
+    $ariaLabel     = $params['ariaLabel'];
+    $showChildren  = $params['showChildren'];
+    $showIcons     = $params['showIcons'];
 
-	if (count($items))
-	{
-		foreach ($items as $pageId => $thePage)
-		{
-			$html .= "<li><a href=\"".url($thePage['id'])."\">$thePage[title]</a></li>";
+    if (count($items))
+    {
+        foreach ($items as $pageId)
+        {
+            $page = $pages[$pageId];
+            $submenu = '';
+            $linkIconClass = $showIcons ? " class=\"$page->icon\"" : '';
+
+            if ($showChildren && $sub = displayTree(getChildrenPages($pageId)))
+            {
+                $submenu = '<ul>' . $sub . '</ul>';
+            }
+			$html .= "<li class=\"$pageId".($submenu ? ' parent' : '')."\"><a href=\"".url($pageId)."\"$linkIconClass><span>{$pages[$pageId]->title->$language}</span></a>$submenu</li>";
 		}
 
-		return "<nav class='menu' role='navigation' aria-label=''><ul>$html</ul></nav>";
+        return "<nav class='menu $class' role='navigation' aria-label='$ariaLabel'><ul>$html</ul></nav>";
 	}
 }
 ?>

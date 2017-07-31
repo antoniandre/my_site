@@ -1,7 +1,8 @@
 <?php
 
-function getTree($page = 'sitemap', $exclude = [])
+function getTree($page = 'sitemap', $exclude = [], $params)
 {
+	$showIcons = isset($params['showIcons']) ? $params['showIcons'] : false;
 	$defaultSkipPages = ['sitemap', 'not-found', 'forbidden', 'article', '[article]'];
 	$exclude = array_merge($defaultSkipPages, $exclude);
 
@@ -9,11 +10,11 @@ function getTree($page = 'sitemap', $exclude = [])
 
 	// Put home page at the same level as home page descendents.
 	$pagesTree = array_merge(
-		['home' => ['id' => $pagesTree['home']['id'], 'title' => $pagesTree['home']['title']]],
+		['home' => ['id' => $pagesTree['home']['id'], 'title' => $pagesTree['home']['title'], 'icon' => $pagesTree['home']['icon']]],
 		$pagesTree['home']['children']
 	);
 
-	return '<ul class="lvl0 glyph">'.displayTree($pagesTree, 1).'</ul>';
+	return '<ul class="lvl0 '.($showIcons ? 'icons' : 'glyph').'">'.displayTree($pagesTree, 1).'</ul>';
 }
 
 /**
@@ -42,6 +43,7 @@ function getChildrenPages($page, $exclude = [])
 		{
 			if ($excludeArticles !== false && $thePage->article) continue;
 			$pagesTree[$pageId]['id'] = $pageId;
+			$pagesTree[$pageId]['icon'] = $thePage->icon;
 			$pagesTree[$pageId]['title'] = $thePage->title->$language;
 			$count = count($children = getChildrenPages($pageId, $exclude));
 			if ($count) $pagesTree[$pageId]['children'] = $children;
@@ -64,7 +66,10 @@ function displayTree($tree, $depth = 0)
 	foreach ($tree as $pageId => $thePage)
 	{
 		$count = isset($thePage['children']) ? count($thePage['children']) : 0;
-		$html .= "<li class=\"$thePage[id]".($count ? ' parent' : '')."\"><a href=\"".url($thePage['id'])."\">$thePage[title]</a>";
+		$html .= "<li class=\"$thePage[id]".($count ? ' parent' : '')."\">"
+               . "<a href=\"".url($thePage['id'])."\""
+			   . (isset($thePage['icon']) ? " class=\"$thePage[icon]\"" : '')
+			   . ">$thePage[title]</a>";
 		if ($count)
 		{
 			$html .= "<ul class=\"lvl$depth\">";
