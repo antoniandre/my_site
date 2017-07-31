@@ -8,7 +8,7 @@
 class User
 {
 	private static $instance = null;
-	private $id;
+	public $id;
 	public $type;
 	public $login;
 	private $settings;
