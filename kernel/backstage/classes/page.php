@@ -387,6 +387,14 @@ class Page
 		$cookies  = Userdata::get('cookie');
 		$language = Language::getCurrent();
 
+        // includeFunction('menu');
+        // $mainMenu = doMenu
+        // (
+        //     ['page1', 'page2',...],
+        //     ['class' => 'main-menu', 'showIcons' => true]
+        // );
+		$mainMenu = '';
+
 		// FINAL RENDER
 		$expires = 60*60*24*7;//1 week.
 		header("Pragma: public");
@@ -458,10 +466,10 @@ class Page
 					   'languageFull'      => Language::getCurrentFull(),
 					   'author'            => $settings->author,
 					   'siteUrl'           => $settings->siteUrl,
-					   'pageTitle'         => htmlentities($page->title->$language, ENT_NOQUOTES, 'utf-8').$settings->titleSuffix,
+					   'pageTitle'         => htmlentities($page->getTitle(), ENT_NOQUOTES, 'utf-8').$settings->titleSuffix,
 					   'socialImgSrc'      => $this->socialImage ? $this->socialImage : url('images/?i='.$settings->logoSrc),
 					   'noCrawl', strpos(SELF, 'backstage') !== false ? 'no' : '',
-				       'page'              => $page->page,
+				       'page'              => $this->page,
 
 					   'newsletter'        => $newsletter->render(),
 
@@ -469,24 +477,25 @@ class Page
 					   'headerImgSrc'      => url('images/?i=home-slides/sailing_xl.jpg'),
 					   'footerImgSrc'      => url('images/?i=sunset_l.jpg'),
 					   'backToHomeText'    => text(45),
-					   'homeUrl'           => url(self::get('home', $language)->page.'.php'),
-					   'homeText'          => self::get('home', $language)->title->$language,
-					   'h1'                => ucfirst($this->h1 ? $this->h1 : $page->title->$language),
+					   'homeUrl'           => url('home'),
+					   'homeText'          => self::get('home', $language)->getTitle(),
+					   'h1'                => ucfirst($this->h1 ? $this->h1 : $page->getTitle()),
 					   // If h1 is explicitly set to null then set an h1 with the site name for SEO.
 					   'headerHeight'      => $this->headerHeight,
 					   'topZoneContent'    => $this->topZoneContent ? $this->topZoneContent : '',
+					   'mainMenu'          => $mainMenu,
 					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
 					   'sitemapTree'       => getTree('sitemap', ['[article]']),
 					   'articlesListText'  => text('Tous les articles'),
 					   'articlesList'      => $this->renderArticlesList(),
 					   'strongOrH1'        => $this->h1 === null ? 'h1' : 'strong',
-					   'icon'              => $page->icon ? " class=\"$page->icon\"" : '',
+					   'icon'              => $this->icon ? " class=\"$this->icon\"" : '',
 					   'breadcrumbs'       => $this->showBreadcrumbs ? "<div id=\"breadcrumbs\">{$this->renderBreadcrumbs()}</div>" : '',
 					   'goDownLink'        => $this->headerHeight >= 60 ? "<a href=\"#top\" class=\"go-down i-chevron-d\">".text(99).'</a>' : '',
 
 					   // 'social'       => $this->social ? '<div class="social clearfix"></div>' : '',// Moved inside article only.
-					   'contactUrl'        => url(self::get('contact', $language)->page.'.php'),
-					   'contactText'       => self::get('contact', $language)->title->$language,
+					   'contactUrl'        => url('contact'),
+					   'contactText'       => self::get('contact', $language)->getTitle(),
 					   'classEn'           => $language == 'en' ? ' active' : '',
 					   'classFr'           => $language == 'fr' ? ' active' : '',
 					   'error'             => Cerror::getCount() && $showErrors ? "<div id=\"error\"><p><span class=\"i-alert\"></span> ERROR</p>".Cerror::show()."</div>" : '',
@@ -494,10 +503,10 @@ class Page
 					   'headerMessage'     => ($headerMessage = Message::show('header')) ? "<div id=\"header-message\">$headerMessage</div>" : '',
 					   'contentMessage'    => ($contentMessage = Message::show('content')) ? "<div id=\"content-message\">$contentMessage</div>" : '',
 					   'copyright'         => textf(19, $settings->siteName, date('Y')),
-					   'sitemapUrl'        => url(self::get('sitemap', $language)->page.'.php'),
-					   'sitemapText'       => self::get('sitemap', $language)->title->$language,
-					   'legalTermsUrl'     => url(self::get('legalTerms', $language)->page.'.php'),
-					   'legalTermsText'    => self::get('legalTerms', $language)->title->$language
+					   'sitemapUrl'        => url('sitemap'),
+					   'sitemapText'       => self::get('sitemap', $language)->getTitle(),
+					   'legalTermsUrl'     => url('legalTerms'),
+					   'legalTermsText'    => self::get('legalTerms', $language)->getTitle()
 					  ]);
 
 		//----------------- Google Analytics ----------------//
