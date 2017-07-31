@@ -5,11 +5,10 @@
 font-size: 130%;
 color: #000;}
 #sitemap-page #page .lvl1 {margin-left:18px;}
-#sitemap-page #page .lvl2 {margin-left:60px;}
 #sitemap-page #page .articles .lvl2 {margin-left: 18px;}
 #sitemap-page #page .lvl3 {margin-left:90px;}
 #sitemap-page #page .home {margin: 0 0 10px -42px;}
-#sitemap-page #page .home > a:before {content:'d ';font-size:3em;}
+#sitemap-page #page .home > a:before {content:'H ';font-size:3em;}
 #sitemap-page #page .home > a > span,
 #sitemap-page #page .home:before {display:none;}
 #sitemap-page #page ul.glyph li:before {top: .4em;}
