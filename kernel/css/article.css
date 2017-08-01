@@ -436,39 +436,5 @@ left: 0.05em;}
  /*========================================================================*/
 
 
- /*=========================== Today quotation ============================*/
- .todayQuotation {float:right;right:50%;position: relative;text-align: left;}
- .todayQuotation div.inner
- {padding: 0 1em .5em 8.5em;
- border: 1px solid #eee;
- position: relative;
- background-color: #F0F8FF;
- float:right;
- right:-50%;
- margin:30px 0 40px;}
- .todayQuotation h2 {margin: 1em 0 .5em;}
- .todayQuotation .inner:before
- {position: absolute;
- top: -.1em;
- left: -.2em;
- display: inline-block;
- color: #D9F3FF;
- text-shadow: 0 0 1px #a9c3cF;
- font-size: 9em;
- -webkit-transform: rotate(-25deg);
- -ms-transform: rotate(-25deg);
- -o-transform: rotate(-25deg);
- transform: rotate(-25deg);}
- .todayQuotation p {color: #999;font-style: italic;padding:10px;}
- .todayQuotation p :before {color: #D9F3FF;font-size: 2em;position: relative;}
- .todayQuotation p .i-quote-l:before {top: -8px;left: -8px;}
- .todayQuotation p .i-quote-r:before {bottom: -8px;right: -8px;}
-/*========================================================================*/
-
-
 /*======================== SPECIFIC ARTICLE RULES ========================*/
-
-
-
-/*======================== SPECIFIC ARTICLE RULES ========================*/
-/*========================================================================*/
+/*==================== End of SPECIFIC ARTICLE RULES =====================*/

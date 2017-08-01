@@ -1,14 +1,14 @@
-#sitemap-page #page .lvl0 {margin-left:40px;line-height: 1.6em;}
-#sitemap-page #page .lvl0 > li > a,
-#sitemap-page #page .lvl0 > li > span
+#page .lvl0 {margin-left:40px;line-height: 1.6em;}
+#page .lvl0 > li > a,
+#page .lvl0 > li > span
 {font-family: dinnext, Arial, Helvetica, sans-serif;
 font-size: 130%;
 color: #000;}
-#sitemap-page #page .lvl1 {margin-left:18px;}
-#sitemap-page #page .articles .lvl2 {margin-left: 18px;}
-#sitemap-page #page .lvl3 {margin-left:90px;}
-#sitemap-page #page .home {margin: 0 0 10px -42px;}
-#sitemap-page #page .home > a:before {content:'H ';font-size:3em;}
-#sitemap-page #page .home > a > span,
-#sitemap-page #page .home:before {display:none;}
-#sitemap-page #page ul.glyph li:before {top: .4em;}
+#page .lvl1 {margin-left:18px;}
+#page .articles .lvl2 {margin-left: 18px;}
+#page .lvl3 {margin-left:90px;}
+#page .home {margin: 0 0 10px -42px;}
+#page .home > a:before {content:'H ';font-size:3em;}
+#page .home > a > span,
+#page .home:before {display:none;}
+#page ul.glyph li:before {top: .4em;}

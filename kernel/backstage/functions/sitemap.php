@@ -1,6 +1,6 @@
 <?php
 
-function getTree($page = 'sitemap', $exclude = [], $params)
+function getTree($page = 'sitemap', $exclude = [], $params = [])
 {
 	$showIcons = isset($params['showIcons']) ? $params['showIcons'] : false;
 	$defaultSkipPages = ['sitemap', 'not-found', 'forbidden', 'article', '[article]'];
