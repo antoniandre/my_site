@@ -125,7 +125,7 @@ elseif ($article && $article->status === 'published')
 	$page->addSocial($image);
 
     // Render the previous and next article buttons at the end of the article.
-    list($articlePrevLink, $articleNextLink) = Article::getPrevNext($page->article->id);
+    list($articlePrevLink, $articleNextLink) = Article::getPrevNext($page->article->id, $article->category);
 }
 
 

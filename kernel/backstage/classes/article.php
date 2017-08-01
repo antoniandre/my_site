@@ -128,7 +128,8 @@ Class Article
 				   $q->col('image'),
                    $q->col('status'),
 				   $q->colIn("url_$language", 'pages')->as('url'),
-				   $q->colIn("title_$language", 'pages')->as('title')];
+				   $q->colIn("title_$language", 'pages')->as('title'),
+				   $q->colIn("name", 'article_categories')->as('category')];
 
         // If content fetching.
         if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
@@ -209,25 +210,25 @@ Class Article
         return $q->run()->loadObjects();
 	}
 
-	public static function getPrevNext($articleId, $returnHtml = true)
+	public static function getPrevNext($articleId, $categoryName = null, $returnHtml = true)
 	{
-		$db = Database::getInstance();
-		$language = Language::getCurrent();
+		$prev = null;
+		$next = null;
+		$db   = Database::getInstance();
+		$q    = $db->query();
 
-		$q = $db->query();
-		$q  ->select('articles',
-				   [$q->colIn('id', 'articles'),
-				    $q->col('page')])
-			->relate('pages.article', 'articles.id')
-			->relate('articles.category', 'article_categories.id')
-			->orderBy('articles.created', 'desc')
-			->where()
-				->colIn('name', 'article_categories')->eq('travel')
-		  		->and()->col('status')->eq('published');
+		$q->select('articles', [$q->colIn('id', 'articles'), $q->col('page')])
+		  ->relate('pages.article', 'articles.id')
+		  ->relate('articles.category', 'article_categories.id')
+		  ->orderBy('articles.created', 'desc');
+		$w = $q->where()->col('status')->eq('published');
+
+		if ($categoryName) $w->and()->colIn('name', 'article_categories')->eq($categoryName);
 
 		$articles = $q->run()->loadObjects();
 
-		foreach ($articles as $k => $article)
+		// The previous query may return no article.
+		if ($articles) foreach ($articles as $k => $article)
 		{
 			if ($article->id == $articleId)
 			{
