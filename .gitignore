@@ -30,4 +30,5 @@ uploads/temp/*
 !uploads/index.php
 kernel/cache/
 vendor/
-kernel/backstage/logs/*.log
+kernel/backstage/logs/debug.log
+kernel/backstage/logs/error.log
