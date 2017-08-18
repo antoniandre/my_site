@@ -3,25 +3,27 @@
  * Encryption class to encrypt and decrypt things securely.
  *
  * Example of use:
- * $member= new StdClass();
- * $member->id= 141;
- * $member->mail= 'disadb1@gmail.com';
- * echo $encrypted= urlencode(base64_encode(encrypt(json_encode($member))));
+ * $member = new StdClass();
+ * $member->id = 141;
+ * $member->mail = 'disadb1@gmail.com';
+ * echo $encrypted = urlencode(base64_encode(encrypt(json_encode($member))));
  * echo "\n".print_r(decrypt(base64_decode(urldecode($encrypted))),1);
- * echo "\n".$url= url("links/members/become-member.php?activate=$encrypted");
+ * echo "\n".$url = url("links/members/become-member.php?activate=$encrypted");
  * die;
  */
 
 class Encryption
 {
 	private static $instance = null;
-	private $passwordSalt = '$@lTy-prefix';
+	private $passwordSalt;
 
 	/**
 	 * Class constructor.
 	 */
 	public function __construct()
 	{
+		$settings     = Settings::get();
+		$passwordSalt = $settings->passwordSalt;
 	}
 
 	/**
