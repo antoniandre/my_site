@@ -270,20 +270,24 @@ Class Utility
 
 
 	/*
-		generates an alphabetic index
-		TODO:
-		if showDigits=1 displays digits links such as '... X Y Z 0-9'
-		TODO: use parse_str and http_build_query
+		Generates an alphabetic index.
 	*/
-	/*function alphaIndex($showDigits= 0)
+	public static function alphaIndex($showDigits = false, $enableLetters= [])
 	{
-		$alphaIndex= '';
-		define(URI, QUERY_STRING?preg_replace("/(?:&|&amp;)*index=\w/i",'',URI):URI);
-		$alphabet= str_split('abcdefghijklmnopqrstuvwxyz');
-		foreach($alphabet as $index)
-			$alphaIndex.= '<a href="'.url(URI.(QUERY_STRING?'&amp;':'?')."index=$index")."\">$index</a>";
-		return '<div><div id="indexAlphaWrapper"><div id="indexAlpha">'.$alphaIndex.'</div></div><br class="clear" /></div>';
-	}*/
+		$page       = Page::getCurrent();
+		$urlBase    = str_replace('.html', '', url($page->page));
+		$alphaIndex = '';
+		$alphabet   = str_split('abcdefghijklmnopqrstuvwxyz');
+		if ($showDigits) $alphabet[] = '#0-9';
+
+		foreach($alphabet as $letter)
+		{
+			if (!count($enableLetters) || array_key_exists($letter, $enableLetters)) $alphaIndex.= '<a href="' . "$urlBase/" .text('letter') . "/$letter.html" . "\">$letter</a>";
+			else $alphaIndex .= "<span>$letter</span>";
+		}
+
+	    return '<div class="index-alpha">'.$alphaIndex.'</div>';
+	}
 
 	/*
 		$totalItems is the $mysqli->num_rows of the query displaying all items.
