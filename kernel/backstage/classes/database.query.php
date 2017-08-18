@@ -18,7 +18,7 @@
  *
  *		$q->select('articles', $fields)
  *		  ->relate('articles.author', 'users.id')
- *		  ->relate('pages.article', 'articles.id')
+ *		  ->relate('pages.typeId', 'articles.id')
  *		  ->relate('articles.category', 'article_categories.id')
  *		  ->orderBy('articles.created', 'desc');
  *

@@ -115,12 +115,12 @@ Class Article
 			// contents on same page.
 			// Use getContent() method to get the content of one article at a time.
 		];
-		$params = array_merge($defaults, $params);
+		$params   = array_merge($defaults, $params);
 		if (!$params['dateRange'][1]) $params['dateRange'][1] = 'NOW()';
-		$db = Database::getInstance();
+		$db       = Database::getInstance();
 		$language = $params['language'] && Language::exists($params['language']) ? $params['language'] : Language::getCurrent();
 
-		$q = $db->query();
+		$q      = $db->query();
 		$fields = [$q->colIn('id', 'articles'),
 				   $q->colIn('created', 'articles'),
 				   $q->colIn('firstName', 'users')->as('author'),
@@ -129,18 +129,18 @@ Class Article
                    $q->col('status'),
 				   $q->colIn("url_$language", 'pages')->as('url'),
 				   $q->colIn("title_$language", 'pages')->as('title'),
-				   $q->colIn("name", 'article_categories')->as('category')];
+				   $q->colIn('name', 'article_categories')->as('category')];
 
         // If content fetching.
         if ($params['fetchContent']) $fields[] = $q->col("content_$language")->as('content');
 
         $q->select('articles', $fields)
 		  ->relate('articles.author', 'users.id')
-          ->relate('pages.article', 'articles.id')
+          ->relate('pages.typeId', 'articles.id')
           ->relate('articles.category', 'article_categories.id')
 		  ->orderBy('articles.created', 'desc');
 
-		$w = $q->where(1);
+		$w = $q->where()->colIn('type', 'pages')->eq('article');
 
 		// If a list of article ids is provided.
 		if (is_array($params['idList']) && count($params['idList']))
@@ -218,7 +218,7 @@ Class Article
 		$q    = $db->query();
 
 		$q->select('articles', [$q->colIn('id', 'articles'), $q->col('page')])
-		  ->relate('pages.article', 'articles.id')
+		  ->relate('pages.typeId', 'articles.id')
 		  ->relate('articles.category', 'article_categories.id')
 		  ->orderBy('articles.created', 'desc');
 		$w = $q->where()->col('status')->eq('published');

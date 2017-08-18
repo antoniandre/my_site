@@ -32,7 +32,18 @@ class Page
 	public $metaDescription;
 	public $metaKeywords;
 	public $parent;// The parent page for breadcrumbs.
+
+	// A special page type [page_type] like 'article' or any other entity that the developer can create.
+	// If you create a special page type (not equal to 'page') you have to add a page entry
+	// in the database 'pages' table. (Take 'article' as a model).
+	// Then your php page that will treat all those specific pages must be named the same and placed in pages folder.
+	// E.g. '/pages/[page_type].php'.
+	// Then you can use a shared template for all your pages of the same type with:
+	//     $tpl = newPageTpl('[page_type]');
+	public $type;// Default: 'page'.
+	public $typeId;// A page type integer id if any. E.g. article id = 3.
 	public $article;// An article id if any.
+
 	private $breadcrumbs;
 	private $showBreadcrumbs;
 
@@ -62,7 +73,9 @@ class Page
 		$this->metaDescription   = isset($page->metaDesc) ? $page->metaDesc : '';
 		$this->metaKeywords      = isset($page->metaKey) ? $page->metaKey : '';
 		$this->parent            = $page->parent;
-		$this->article           = $page->article ? (object)['id' => $page->article] : null;
+		$this->type              = $page->type;
+		$this->typeId            = $page->typeId;
+		$this->article           = $page->type === 'article' ? (object)['id' => $page->typeId] : null;
 		self::$language          = Language::getCurrent();
 		$this->showBreadcrumbs   = true;
 		$this->breadcrumbs       = [];
@@ -92,7 +105,7 @@ class Page
 		$language = self::$language;
 
 		$allowedLanguages = array_keys(Language::allowedLanguages);
-		$pageId = null;
+		$pageId   = null;
 
 		// REQUEST_URI has the whole path including the query string
 		// REDIRECT_URL has the whole path except the query string but is not accessible without rewrite engine on.
@@ -111,7 +124,7 @@ class Page
 			if (!$path) $pageId = 'home';
 			elseif (preg_match('~^('.implode('|', $allowedLanguages).')/?~', $path, $match))
 			{
-				$language = $match[1];
+				$language     = $match[1];
 				$remainingUrl = str_replace(array("$language/", '.html'), '', $path);
 
 				// Detect if nothing is after the language in the path.
@@ -123,10 +136,10 @@ class Page
 		else
 		{
 			$urlParts = parse_url($_SERVER['REQUEST_URI']);
-			$path = str_replace('/'.dirname(SELF).'/', '', $urlParts['path']);
+			$path     = str_replace('/'.dirname(SELF).'/', '', $urlParts['path']);
 
 			// Get the page from $gets if any.
-			$gets = Userdata::get();
+			$gets     = Userdata::get();
 			if (isset($gets->page)) $page = self::getByProperty('page', $gets->page, $language);
 			elseif (!$path || $path == 'index.php') $pageId = 'home';
 		}
@@ -387,13 +400,8 @@ class Page
 		$cookies  = Userdata::get('cookie');
 		$language = Language::getCurrent();
 
-        // includeFunction('menu');
-        // $mainMenu = doMenu
-        // (
-        //     ['page1', 'page2',...],
-        //     ['class' => 'main-menu', 'showIcons' => true]
-        // );
-		$mainMenu = '';
+        includeFunction('do-menu');
+		$mainMenu = includeFunction('menu');
 
 		// FINAL RENDER
 		$expires = 60*60*24*7;//1 week.

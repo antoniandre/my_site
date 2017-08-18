@@ -21,6 +21,7 @@ $language = Language::getCurrent();
 // $aliases  = getPagesAlias($pages);
 $page     = Page::getCurrent();
 
+// If required file is JS or CSS Include it and die.
 if (isset(UserData::get()->js)) include ROOT . 'kernel/js/index.php';
 elseif (isset(UserData::get()->css)) include ROOT . 'kernel/css/index.php';
 else
@@ -55,10 +56,16 @@ function mainRouter()
 		new Webservice();
 	}
 
-	elseif ($page->isArticle())
+    // Following code is similar to this commented code (for article case) but extended to any type of page.
+    //     elseif ($page->isArticle())
+	//     {
+	//     	   $article     = Page::get('article');
+	//     	   $includePath = checkInTheme("kernel/$article->path$article->page.php");
+	//     }
+	elseif ($page->type !== 'page')
 	{
-		$article     = Page::get('article');
-		$includePath = checkInTheme("kernel/$article->path$article->page.php");
+		$type        = Page::get($page->type);
+		$includePath = checkInTheme("kernel/$type->path$type->page.php");
 	}
 
 	else// All the other pages (ending with .php).
@@ -69,7 +76,7 @@ function mainRouter()
 		// Fallback to 'not-found' if no matching page was found in theme.
 		if ($includePath === $includePathKernel && !is_file(ROOT.$includePathKernel))
 		{
-			$page = Page::get('not-found');
+			$page        = Page::get('not-found');
 			$includePath = "kernel/$page->path$page->page.php";
 			// Also check if the not-found page has an override.
 			$includePath = checkInTheme($includePath);
@@ -268,13 +275,13 @@ function redirectTo($url, $httpCode = 200)
  *         ]
  * @return string
  */
-function text($id, $parameters = ['htmlentities' => 1, 'contexts'=> [], 'languages'=> []])
-{
-    $text = new Text($id, $parameters);
+ function text($id, $parameters = ['htmlentities' => 1, 'contexts'=> [], 'languages'=> []])
+ {
+     $text = new Text($id, $parameters);
 
-    if (isset($parameters['formats'])) $text->format($parameters['formats']);
-    return $text->get();
-}
+     if (isset($parameters['formats'])) $text->format($parameters['formats']);
+     return $text->get();
+ }
 
 /**
  * Shorthand function to retrieve a text from DB and apply a sprintf on it.
@@ -309,6 +316,8 @@ function textf()
  */
 function foreachLang($callback)
 {
+    $return = null;
+
     if (is_callable($callback)) foreach (Language::allowedLanguages as $lang => $fullLang)
     {
         $return = $callback($lang, $fullLang);
@@ -355,7 +364,7 @@ function dbgd()
     // 'Apply' concept: apply the arguments 'func_get_args()' to the method 'add' of the object 'Debug::getInstance()'
     // Doing only 'Debug::getInstance()->add(func_get_args())' would wrap the args into an array...
     call_user_func_array(array(Debug::getInstance(), 'add'), func_get_args());
-    die(Debug::getInstance()->setLevel3caller()->show());
+    die(Debug::getInstance()->setLevel2caller()->show());
 }
 //========================================== end of FUNCTIONS ==========================================//
 //======================================================================================================//

@@ -70,20 +70,21 @@ function distantCode($data)
 
     // Page.
     $q = $db->query();
-    $q->insert('pages', ['page' => $page->page,
-                         'path' => $page->path ? text($page->path, ['formats' => ['sef']]) : '',
-                         'url_en' => text($page->url_en, ['formats' => ['sef']]),
-                         'url_fr' => text($page->url_fr, ['formats' => ['sef']]),
-                         'title_en' => $page->title_en,
-                         'title_fr' => $page->title_fr,
+    $q->insert('pages', ['page'        => $page->page,
+                         'path'        => $page->path ? text($page->path, ['formats' => ['sef']]) : '',
+                         'url_en'      => text($page->url_en, ['formats' => ['sef']]),
+                         'url_fr'      => text($page->url_fr, ['formats' => ['sef']]),
+                         'title_en'    => $page->title_en,
+                         'title_fr'    => $page->title_fr,
                          'metaDesc_en' => $page->metaDesc_en,
                          'metaDesc_fr' => $page->metaDesc_fr,
-                         'metaKey_en' => $page->metaKey_en,
-                         'metaKey_fr' => $page->metaKey_fr,
-                         'parent' => $page->parent,
-                         'aliases' => $page->aliases,
-                         'icon' => $page->icon,
-                         'article' => isset($articleId) ? $articleId : null]);
+                         'metaKey_en'  => $page->metaKey_en,
+                         'metaKey_fr'  => $page->metaKey_fr,
+                         'parent'      => $page->parent,
+                         'aliases'     => $page->aliases,
+                         'icon'        => $page->icon,
+                         'type'        => 'article',
+                         'typeId'      => isset($articleId) ? $articleId : null]);
     $q->run();
 
     if (!$q->info()->affectedRows)

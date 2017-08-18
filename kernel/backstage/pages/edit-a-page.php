@@ -200,7 +200,7 @@ function afterValidateForm($result, $form)
 	$pageNameInDB = $form->getPostedData('page[nameInDB]');
 
 	// Do not perform a page update if page not found in DB.
-	$q->select('pages', [$q->col('article')])->relate('pages.article', 'articles.id')->where()->col('page')->eq($pageNameInDB);
+	$q->select('pages', [$q->col('article')])->relate('pages.typeId', 'articles.id')->where()->col('page')->eq($pageNameInDB);
 	$isInDB = $q->run()->info()->numRows;
 
 	if (!$isInDB)
