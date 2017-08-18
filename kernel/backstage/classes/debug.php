@@ -47,14 +47,22 @@ Class Debug
 	 */
 	public function add()
 	{
-		$trace = debug_backtrace();// print_r($trace);die;
+		$trace   = debug_backtrace();// print_r($trace);die;
+		// Remove the first trace as it will be the dbg() or dbgd() function (initial caller) from core.php.
+		$trace   = array_slice($trace, 1);
+
 		$message = new StdClass();
 		$message->file = isset($trace[0]['file']) ? $trace[0]['file'] : '';
 		$message->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$message->file2 = $trace[1]['file'];
 		$message->line2 = $trace[1]['line'];
-		$message->file3 = $trace[2]['file'];
-		$message->line3 = $trace[2]['line'];
+
+		if (isset($trace[2]))
+		{
+			$message->file3 = $trace[2]['file'];
+			$message->line3 = $trace[2]['line'];
+		}
+
 		$message->text = '';
 
 		foreach(func_get_args() as $k => $mixed)

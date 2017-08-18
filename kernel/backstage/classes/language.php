@@ -119,12 +119,20 @@ Class Language
 	 */
 	public static function isAllowed($language)
 	{
-		return array_key_exists($language, self::allowedLanguages);
+		return !is_array($language) && !is_object($language) && array_key_exists((string)$language, self::allowedLanguages);
 	}
 	// Function alias.
 	public static function exists($language)
 	{
-		return self::getInstance()->isAllowed($language);
+		return self::isAllowed($language);
+	}
+
+	/**
+	 * Check if the given language is valid and return it or return the current language otherwise.
+	 */
+	public static function check($language)
+	{
+		return self::isAllowed($language) ? $language : self::getCurrent();
 	}
 
 

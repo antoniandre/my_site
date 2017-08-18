@@ -54,14 +54,19 @@ elseif ($article && $article->status === 'published')
 	{
 		$translations = Article::getTranslations($page->article->id);
 
-		$content = '<p>'.textf(75).'</p><ul>';
-		foreach ($translations as $lang => $translation)
+		$content = '';
+		if (count($translations))
 		{
-			$content .= "<li>In $translation->languageLabel: <a href=\""
-						.url($translation->article->page, ['language' => $lang])
-						."\">{$translation->article->title}</a></li>";
+			$content = '<p>'.text(75).'</p><ul>';
+			foreach ($translations as $lang => $translation)
+			{
+				$content .= "<li>In $translation->languageLabel: <a href=\""
+							.url($translation->article->page, ['language' => $lang])
+							."\">{$translation->article->title}</a></li>";
+			}
+			$content .= '</ul>';
 		}
-		$content .= '</ul>';
+		else dbg(text('This article is empty and there is no other translations.'));
 	}
 
 
@@ -109,7 +114,7 @@ elseif ($article && $article->status === 'published')
 	$articleCreated = text(21,
 					  [
 						    'contexts' => 'article',
-							'formats' =>
+							'formats'  =>
 							[
 								'sprintf' =>
 								[

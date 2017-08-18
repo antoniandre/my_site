@@ -95,7 +95,7 @@ Class Cerror
 		$error = new StdClass();
 		$error->number = null;
 		$error->type = "$errorType ERROR";
-		$error->file = isset($trace[0]['file']) ? self::getInstance()->pathFromSiteRoot($trace[0]['file']) : '';
+		$error->file = isset($trace[0]['file']) ? '/' . self::getInstance()->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$error->backtrace = $backtrace ? $trace : null;
 		$error->text = $errorMessage;
@@ -123,17 +123,17 @@ Class Cerror
 		    if ($hidden) $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
 			else
 			{
-				$output.= "<div><p><strong>$error->type</strong> in file <em>/$error->file</em> at line $error->line:</p><code style=\"white-space:pre-wrap;\">$error->text";
+				$output.= "<div><p><strong>$error->type</strong> in file <em>$error->file</em> at line $error->line:</p><code style=\"white-space:pre-wrap;\">$error->text";
 				// Show the error backtrace if it was requested when error was added.
 				if ($error->backtrace)
 				{
 					$output .= "\n<div class=\"backtrace\"><strong class=\"i-triangle-r\">BACKTRACE</strong>\n<ol reversed=\"reversed\">";
 						foreach($error->backtrace as $k => $step) if ($k)
 						{
-							$what= '';
+							$what = '';
 							$step['file'] = $step['file'] ? $step['file'] : '?';
 							$previousCaller = $k+1< count($error->backtrace) ? $error->backtrace[$k+1]['file'] : null;
-							$caller = $step['file'] == $previousCaller ? 'the same file' : "$step[file]";
+							$caller = $step['file'] == $previousCaller ? 'the same file' : "/$step[file]";
 							$line = $step['line'] ? $step['line'] : '#?';
 							if (isset($step['function']))
 							{
@@ -173,7 +173,7 @@ Class Cerror
 								$what = str_replace('<', '&lt;', "$class$function($args);");
 							}
 
-							$output .= "<li>Called from <strong>/".self::getInstance()->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";
+							$output .= "<li>Called from <strong>".self::getInstance()->pathFromSiteRoot($caller)."</strong> at <strong>line $line</strong>: <em>$what</em></li>";
 						}
 						$output .= "</ol></div>";
 				}
@@ -193,12 +193,12 @@ Class Cerror
 	 */
 	public static function log()
 	{
-		$settings = \Settings::get();
+		$settings = Settings::get();
 
 		$output = date('Y-m-d H:i:s')."\n";
 		foreach (self::getInstance()->stack as $i => $error)
 		{
-		    $output .= "- $error->type in file /$error->file at line $error->line:\n  $error->text\n";
+		    $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n";
 		}
 		$output .= "\n";
 
@@ -213,14 +213,14 @@ Class Cerror
      */
 	public static function logTheLast()
 	{
-		$settings = \Settings::get();
+		$settings = Settings::get();
         $self = self::getInstance();
 
 		// Extract the last error from the stack.
 		$error = $self->stack[count($self->stack)-1];
 
 		$output = date('Y-m-d H:i:s')."\n"
-				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\n\n";
+				 ."- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
 
 		error_log($output, 3, ROOT.$settings->errorLogFile);
 
@@ -237,18 +237,18 @@ Class Cerror
      */
 	public static function logAndDie($logMessage, $dieMessage)
 	{
-		$settings = \Settings::get();
+		$settings = Settings::get();
 		$self = self::getInstance();
 
 		$trace = debug_backtrace();
 		$error = new StdClass();
 		$error->type = 'USER CUSTOM ERROR';
-		$error->file = isset($trace[0]['file']) ? $self->pathFromSiteRoot($trace[0]['file']) : '';
+		$error->file = isset($trace[0]['file']) ? '/' . $self->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$error->text = $logMessage;
 
 		$output = date('Y-m-d H:i:s')."\n"
-				 ."- $error->type in file /$error->file at line $error->line:\n  $error->text\nBacktrace:\n"
+				 ."- $error->type in file $error->file at line $error->line:\n  $error->text\nBacktrace:\n"
 				 // Array splice to limit backtrace to last 2 files.
 				 .print_r(array_splice($trace, 0, 2), 1)."\n";
 
@@ -270,7 +270,7 @@ Class Cerror
 		$output = '';
 		foreach (self::getInstance()->stack as $i => $error)
 		{
-		    $output .= "- $error->type in file /$error->file at line $error->line:\n  $error->text\n";
+		    $output .= "- $error->type in file $error->file at line $error->line:\n  $error->text\n";
 		}
 
 		return $output;
