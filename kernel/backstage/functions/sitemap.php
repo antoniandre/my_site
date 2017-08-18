@@ -2,7 +2,7 @@
 
 function getTree($page = 'sitemap', $exclude = [], $params = [])
 {
-	$showIcons = isset($params['showIcons']) ? $params['showIcons'] : false;
+	$showIcons = isset($params['showIcons']) ? (bool)$params['showIcons'] : false;
 	$defaultSkipPages = ['sitemap', 'not-found', 'forbidden', 'article', '[article]'];
 	$exclude = array_merge($defaultSkipPages, $exclude);
 
@@ -28,8 +28,8 @@ function getTree($page = 'sitemap', $exclude = [], $params = [])
 function getChildrenPages($page, $exclude = [])
 {
 	global $user;
-	$pages = Page::getAllPages();
-	$language = Language::getCurrent();
+	$pages     = Page::getAllPages();
+	$language  = Language::getCurrent();
 	$pagesTree = [];
 
 	// If '[article]' is in exclude, exclude all the articles.
@@ -41,11 +41,13 @@ function getChildrenPages($page, $exclude = [])
 		if ($thePage->parent === $page && (!in_array($pageId, $exclude)
 			&& ($pageId !== 'backstage' || ($pageId == 'backstage' && $user->isAdmin()))))
 		{
-			if ($excludeArticles !== false && $thePage->article) continue;
-			$pagesTree[$pageId]['id'] = $pageId;
-			$pagesTree[$pageId]['icon'] = $thePage->icon;
+			if ($excludeArticles !== false && $thePage->typeId === 'article') continue;
+
+			$pagesTree[$pageId]['id']    = $pageId;
+			$pagesTree[$pageId]['icon']  = $thePage->icon;
 			$pagesTree[$pageId]['title'] = $thePage->title->$language;
-			$count = count($children = getChildrenPages($pageId, $exclude));
+			$count                       = count($children = getChildrenPages($pageId, $exclude));
+
 			if ($count) $pagesTree[$pageId]['children'] = $children;
 		}
 	}
