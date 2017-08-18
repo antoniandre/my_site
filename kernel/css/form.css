@@ -4,6 +4,12 @@
 .buttons {float:right;}
 .buttons button {float:left;}
 
+input[type="checkbox"].hidden {
+    z-index: -100;
+    position: fixed;
+    left: -3em;
+}
+
 .robot-check {float: right;margin-top: 10px;max-height: 28px;overflow: hidden;}
 .robot-check *, .robot-check :before, .robot-check :after {line-height: 2.3em;vertical-align: middle;display: inline-block;}
 .robot-check span {
