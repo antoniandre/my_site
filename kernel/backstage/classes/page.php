@@ -132,6 +132,22 @@ class Page
 				elseif (strrpos($path, '.html') !== false) $page = self::getByProperty('url', $remainingUrl, $language);
 				elseif (array_key_exists($remainingUrl, $aliases)) $pageId = $aliases[$remainingUrl];
 			}
+
+			// If there is a themeRouter() function found in theme/[current_theme]/router.php,
+			// Then override current page with the one matched and returned by the themeRouter().
+			if (includeFunction('router') && function_exists('themeRouter'))
+			{
+				$url    = str_replace('.html', '', $_SERVER['REQUEST_URI']);
+				$url    = explode('?', $url)[0];
+				$pageId = themeRouter($url);
+
+				// If url is matched in themeRouter().
+				if ($pageId)
+				{
+					$page = self::get($pageId);
+					self::set($pageId);
+				}
+			}
 		}
 		else
 		{
@@ -160,6 +176,18 @@ class Page
 		$pageId = isset(self::$allPages[$pageId]) ? $pageId : 'not-found';
 
 		return isset(self::$instances[$pageId]) ? self::$instances[$pageId] : new self($pageId);
+	}
+
+	/**
+	 * Force using a certain page as the current page. Useful if page is different than url
+	 * via the themeRouter in functions/router.php.
+	 *
+	 * @return Page object.
+	 */
+	public static function set($pageId)
+	{
+		//!\ Update the global var.
+		return $GLOBALS['page'] = self::$current = self::get($pageId);
 	}
 
 	public static function exists($pageId)
@@ -468,6 +496,7 @@ class Page
 					   'SELF'              => url('SELF'),
 					   'language'          => $language,
 					   'pageId'            => $page->id,
+					   'pageClass'         => $page->type,
 					   'metaDesc'          => $page->metaDescription->$language ? $page->metaDescription->$language : '',
 					   'metaKey'           => $page->metaKeywords->$language ? $page->metaKeywords->$language : '',
 					   'siteName'          => $settings->siteName,
@@ -493,7 +522,7 @@ class Page
 					   'topZoneContent'    => $this->topZoneContent ? $this->topZoneContent : '',
 					   'mainMenu'          => $mainMenu,
 					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
-					   'sitemapTree'       => getTree('sitemap', ['[article]']),
+					   'sitemapTree'       => getTree('sitemap', ['[article]'], ['showIcons' => $settings->mobileMenuIcons]),
 					   'articlesListText'  => text('Tous les articles'),
 					   'articlesList'      => $this->renderArticlesList(),
 					   'strongOrH1'        => $this->h1 === null ? 'h1' : 'strong',

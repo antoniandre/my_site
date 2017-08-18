@@ -26,7 +26,7 @@ class Userdata
     private function __construct()
     {
         $this->post = $this->secureVars($_POST);
-        $this->get = $this->secureVars($_GET);
+        $this->get  = $this->secureVars($_GET);
         $this->cookie = $this->secureVars($_COOKIE);
         $this->files = $_FILES;// Be careful with how you use, $_FILES is not a secure array...
 
@@ -166,6 +166,22 @@ class Userdata
     public static function setOnloadTasksTreated()
     {
         self::getInstance()->onloadTasksTreated = true;
+    }
+
+    public static function setGet($key, $value)
+    {
+        if (!$key) return Cerror::add('You must provide a $key in order to register the $value in $_GET.');
+
+        $_GET[$key] = $value;
+        self::getInstance()->get->$key = $value;
+    }
+
+    public static function setPost($key, $value)
+    {
+        if (!$key) return Cerror::add('You must provide a $key in order to register the $value in $_POST.');
+
+        $_POST[$key] = $value;
+        self::getInstance()->post->$key = $value;
     }
 
     public static function setSession($key, $value, $overwrite = true)
