@@ -1,11 +1,25 @@
 <?php
+/**
+ * This file is not accessible directly, it is included from functions/core.php.
+ * The classes and vars Settings, Userdata, $page are defined in functions/core.php.
+ * The folder css/ and its content are not accessible from the site.
+ */
+
+if (!class_exists('Userdata') || !class_exists('Settings')) die('You can\'t access this file directly.');
 
 //======================= VARS ========================//
-$min = $settings->useMinified ? '.min' : '';
-$js  = ['jquery', 'form', 'common'.$min, 'jquery.lazyload', 'vendor/slick/slick.min.js'];// JS files to load.
-$css = ['common'];// CSS files to load
+$settings = Settings::get();
+$gets     = Userdata::get();
+
+define('KERNEL_PATH', ROOT . 'kernel/js/');
+define('THEME_PATH',  ROOT . "themes/$settings->theme/js/");
+define('VENDOR_PATH', ROOT . "vendor/");
+define('INIT_ACTION', !isset($gets->get));
+
+// $getJs can be array or string. E.g: 'get[]=js1&get[]=js2' or 'get=js'.
+$getJs = INIT_ACTION ? $gets->get : null;
 $readyFunctions = [];
-$get = UserData::get();
+$loadedJs       = [];
 //=====================================================//
 
 
@@ -15,105 +29,177 @@ $get = UserData::get();
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-if ($get->get)
-{
-    $filename = basename($get->get, '.js');
-    $path = ROOT."kernel/js/$filename.js";
-    $pathInTheme = ROOT."themes/$settings->theme/js/$filename.js";
+if (!$page && !$getJs) die('// No JS requested.');
 
-    if (file_exists($path)) $jsOutput = file_get_contents($path);
-    if (file_exists($pathInTheme)) $jsOutput .= file_get_contents($pathInTheme);
-}
-else
-{
-    if ($page->isArticle())
-    {
-        $js[] = 'article';
-        $readyFunctions[] = 'article';
-    }
+list($files, $fileLocations) = getAllFiles();
+$requestedFiles              = getRequestedFiles();
+$contents                    = getFilesContents($requestedFiles);
 
-    elseif ($page->isBackstage())
-    {
-        $js[] = 'backstage.common';
-        $readyFunctions[] = 'backstage';
-    }
-
-    // Prepare an array that lists all the scripts available and whether they have an associated CSS or not
-    // and whether they are loaded or not.
-    $scripts = [];
-    $existingJsFiles = array_diff(scandir(__DIR__), ['.', '..']);
-    foreach ($existingJsFiles as $file) if (substr($file, -3, 3) === '.js')
-    {
-        // Do not list backstage js files if user is not admin.
-        if ((!$user->isAdmin() && strpos($file, 'backstage') !== false)) continue;
-
-        $filename = basename($file, '.js');
-        $scripts[$filename] = ['loaded' => in_array($filename, $js), 'css' => is_file(ROOT."kernel/css/$filename.css")];
-    }
-
-    // This file (index.php) is called with a requested page JS behavior in param.
-    $requestedJs = ($page->isBackstage() ? 'backstage.' : '').$page->page;
-    // Only add the requested JS if it exists.
-    // TODO: Should better secure this with an array of allowed scripts.
-    if (array_key_exists($requestedJs, $scripts))
-    {
-        $js[] = $requestedJs;
-        $readyFunctions[] = str_replace('-', '', $page->page);
-    }
-
-    $jsContents = addJsContents($js);
-
-
-    // Create an array of functions to call when DOM is ready.
-    $onReady = '';
-    if (count($readyFunctions)) foreach ($readyFunctions as $function)
-    {
-        $onReady .= "{$function}Ready();";
-    }
-
-    // Append few vars and array of ready functions to the output.
-    $jsOutput = "var l = '$language',\n    localhost= ".(int)IS_LOCAL.",\n    page = '$page',\n    scripts = ".json_encode($scripts).";\n\n$jsContents\n\n\$(document).ready(function(){commonReady();$onReady});";
-}
-
-// TODO: find the right cache for images
-// header("Pragma: public");
-// header("Cache-Control: maxage=$expires");
-// header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
-// header('Content-Type: text/html; charset=utf-8');
-// header('Content-language: '.strtolower($language));
-
-header('Content-type: text/javascript');
-die("$jsOutput");
+doOutput(INIT_ACTION ? addJsVars($contents) : $contents);
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 
-function addJsContents($js)
+
+function getAllFiles()
+{
+    $files = [];
+    $fileLocations = [];
+
+    foreach (scandir(KERNEL_PATH) as $file) if (substr($file, -3, 3) === '.js')
+    {
+        $fileName = str_replace('.min', '', basename($file, '.js'));
+        $files[$fileName] = 1;
+        $fileLocations["$fileName:k"] = 1;
+    }
+    foreach (scandir(THEME_PATH) as $file) if (substr($file, -3, 3) === '.js')
+    {
+        $fileName = str_replace('.min', '', basename($file, '.js'));
+        $files[$fileName] = 1;
+        $fileLocations["$fileName:t"] = 1;
+    }
+
+    return [array_keys($files), array_keys($fileLocations)];
+}
+
+function getRequestedFiles()
 {
     $settings = Settings::get();
+    $getJs    = INIT_ACTION ? null : Userdata::get()->get;
 
-    // Prepare the single output js file.
+    return $getJs ? $getJs : array_merge($settings->commonJsList, getPageRelatedFiles());
+}
+
+function getPageRelatedFiles()
+{
+    global $readyFunctions;
+
+    $page       = Page::getCurrent();
+    $language   = Language::getCurrent();
+    $user       = User::getInstance();
+    $files      = [];
+
+    // If page is in backstage load the backstage.common script.
+    if ($page->isBackstage())  $files[] = 'backstage.common';
+
+    // If page is an article load the article script.
+    elseif ($page->isArticle()) $files[] = 'article';
+	elseif ($page->type !== 'page') $files[] = $page->type;
+
+    // Load the current page script if existing.
+    $files[] = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '') . $page->page;
+
+    $readyFunctions = array_merge($readyFunctions, (array)$files);
+
+    return $files;
+}
+
+function getFilesContents($files)
+{
+    global $loadedJs;
+
     $jsContents = '';
-    foreach($js as $k => $filename)
-    {
-        // If in vendor.
-        if (strpos($filename, 'vendor') === 0 && is_file(ROOT.$filename))
-        {
-            $jsContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT.$filename);
-        }
-        // If in normal js folder.
-        elseif ($filename && is_file(ROOT."kernel/js/$filename.js"))
-        {
-            $jsContents .=  ($k?"\n\n\n":'').file_get_contents(ROOT."kernel/js/$filename.js");
-        }
 
-        // If in theme/css folder.
-        if ($filename && is_file(ROOT."themes/$settings->theme/js/$filename.js"))
+    foreach ($files as $file)
+    {
+        $v = null;
+        $k = null;
+        $t = null;
+        $c = null;
+        list($file, $from) = array_pad(explode(':', $file), 2, null);
+
+        if ($file)
         {
-            $jsContents .=  ($k ? "\n\n\n" : '').file_get_contents(ROOT."themes/$settings->theme/js/$filename.js");
+            if (!$from && ($c = getContents($file, null))) $jsContents .= $c;
+            if (strpos($from, 'v') !== false && ($v = getContents($file, 'v'))) $jsContents .= $v;
+            if (strpos($from, 'k') !== false && ($k = getContents($file, 'k'))) $jsContents .= $k;
+            if (strpos($from, 't') !== false && ($t = getContents($file, 't'))) $jsContents .= $t;
+
+            if ($v || $k || $t || $c) $loadedJs = array_merge($loadedJs, (array)$file);
         }
     }
 
     return $jsContents;
+}
+
+function getContents($fileName, $from = null)
+{
+    global $fileLocations;
+
+    $settings = Settings::get();
+    $min      = $settings->useMinified ? '.min' : '';
+    $k        = KERNEL_PATH;
+    $t        = THEME_PATH;
+    $v        = VENDOR_PATH;
+    $fallback = null;
+
+    $ok =  ($from && in_array("$fileName:$from", $fileLocations))
+        || (!$from && ($fallback = 't') && in_array("$fileName:t", $fileLocations))
+        || (!$from && ($fallback = 'k') && in_array("$fileName:k", $fileLocations))
+        || ($from === 'v' && is_file($$from . "$fileName$min.js"));
+
+    $from = $from ? $from : $fallback;
+
+    return $ok ? "\n\n\n" . file_get_contents($$from . "$fileName$min.js") : null;
+}
+
+
+function addJsVars($jsContents)
+{
+    global $readyFunctions, $loadedJs, $files;
+
+    $settings = Settings::get();
+    $page     = Page::getCurrent();
+    $language = Language::getCurrent();
+    $user     = User::getInstance();
+
+    // Create an array of functions to call when DOM is ready.
+    $onReady  = '';
+    if (count($readyFunctions)) foreach ($readyFunctions as $function)
+    {
+        if (in_array($function, $files)) $onReady .= str_replace('-', '', $function).'Ready();';
+    }
+
+    // Prepare an array that lists all the scripts available and whether they have an associated CSS or not
+    // and whether they are loaded or not.
+    // E.g.
+    // scripts = {
+    //    jquery:  {loaded: true,  css: false},
+    //    common:  {loaded: true,  css: true},
+    //    contact: {loaded: true,  css: true},
+    //    home:    {loaded: false, css: true},
+    //    ... List all the existing JS files.
+    // }
+    $scripts = [];
+    foreach ($files as $file)
+    {
+        // Do not list backstage js files if user is not admin.
+        if ((!$user->isAdmin() && strpos($file, 'backstage') !== false)) continue;
+
+        $fileName = basename($file, '.js');
+        $scripts[$fileName] = ['loaded' => in_array($fileName, $loadedJs), 'css' => is_file(ROOT."kernel/css/$filename.css")];
+    }
+
+    // Append few vars and array of ready functions to the output.
+    $jsOutput = "var l         = '$language',\n"
+              . "    ROOT      = '$settings->root',\n"
+              . "    localhost = ".(int)IS_LOCAL.",\n"
+              . "    page      = '$page->page',\n"
+              . "    scripts   = ".json_encode($scripts).";\n\n"
+              . "$jsContents\n\n"
+              . "\$(document).ready(function(){commonReady();$onReady});";
+
+    return $jsOutput;
+}
+
+function doOutput($jsContents)
+{
+    // The right caching is done in the main .htaccess.
+    // header("Pragma: public");
+    // header("Cache-Control: maxage=$expires");
+    // header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
+
+    header('Content-type: text/javascript; charset=utf-8');
+    die("$jsContents");
 }
 
 ?>
