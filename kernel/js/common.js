@@ -36,18 +36,23 @@ var // General vars. (g for general)
 
 	loadScript = function(scriptName, callback)
 	{
-		if (!g.scripts[scriptName].loaded && !g.scripts[scriptName].loading)
-		{
-			if (g.scripts[scriptName].css) loadStyleSheet(scriptName);
-			$.getScript('?js=1&get='+scriptName, function()
-			{
+        var fullName = scriptName.split(':');
+        scriptName = fullName[0];
+        var from = fullName[1] ? ':' + fullName[1] : '';
+
+        if (g.scripts[scriptName] === undefined) g.scripts[scriptName] = {};
+        if (!g.scripts[scriptName].loaded && !g.scripts[scriptName].loading)
+        {
+            if (g.scripts[scriptName].css) loadStyleSheet(scriptName);
+            $.getScript('?js=1&get=' + scriptName + from, function()
+            {
 				g.scripts[scriptName].loaded = true;
 				g.scripts[scriptName].loading = false;
-				callback();
+				if (callback) callback();
 			});
 			g.scripts[scriptName].loading = true;
 		}
-		else callback();
+		else if (callback) callback();
 	},
 
 	// Load a defered css file.

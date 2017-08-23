@@ -98,8 +98,7 @@ function getFilesContents($files)
     global $loadedJs;
 
     $jsContents = '';
-
-    foreach ($files as $file)
+    foreach ((array)$files as $file)
     {
         $v = null;
         $k = null;
@@ -118,7 +117,7 @@ function getFilesContents($files)
         }
     }
 
-    return $jsContents;
+    return trim($jsContents);
 }
 
 function getContents($fileName, $from = null)
