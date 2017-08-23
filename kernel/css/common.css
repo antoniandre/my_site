@@ -27,7 +27,7 @@
 
  #top-zone {position: relative;}
  .main-slideshow-wrapper {
-    height: 100%;
+    height: inherit;
     position: fixed;
     top: 0;
     left: 0;
@@ -35,12 +35,6 @@
     /* Put a base64 encoded lightweight version of the background image supposed to show up first while loading bigger version. */
     background: no-repeat left center;
     background-size: cover;
- }
- .main-slideshow-wrapper {
-    height: 60vh;
- }
- body.home .main-slideshow-wrapper {
-    height: 100%;
  }
  .main-slideshow {height: 100%;}
  .main-slideshow-wrapper .slick-arrow {
@@ -166,9 +160,9 @@
     border-color: #fb5151;
  }
  .main-slideshow .slick-dots li button {display: none;}
- #bottom-zone {position: absolute;height: 50%;}
+ #bottom-zone {}
  div.logo a, a.logo
- {font-family: "dinnext";
+ {font-family: dinnext, Arial, Helvetica, sans-serif;
  line-height: 0.9;
  display: block;}
  div.logo a
@@ -224,7 +218,7 @@
  {position: fixed;
  bottom: 20vh;
 color: inherit;
-font-family: dinnext;
+font-family: dinnext, Arial, Helvetica, sans-serif;
 opacity: .8;
 text-transform: uppercase;
 left: 50%;
