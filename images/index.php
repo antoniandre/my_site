@@ -8,29 +8,48 @@
 $imagePath = '';
 // $static = isset($_GET['s']) && $_GET['s'];// If static image domain.
 $useImagickCLI = true;
+
+define('IMAGES_PATH',  './');
+define('UPLOADS_PATH', __DIR__ . '/../uploads/');
+define('THEME_PATH',   __DIR__ . '/../themes/' . trim(file_get_contents('../themes/active')) . '/');
+define('THEME_IMAGES', THEME_PATH . 'images/');
+
+// Strlen < 120 for more security.
+$t = isset($_GET['t']) && strlen($_GET['t']) < 120 ? $_GET['t'] : null;
+$u = isset($_GET['u']) && strlen($_GET['u']) < 120 ? $_GET['u'] : null;
+$i = isset($_GET['i']) && strlen($_GET['i']) < 120 ? $_GET['i'] : null;
+
+// f = fallback if main image fails to load.
+$imageFallback = isset($_GET['f']) && strlen($_GET['f']) < 120 ? addslashes($_GET['f']) : null;
+$imageFallbackSrc = $imageFallback && isset($_GET['fs']) && strlen($_GET['fs']) === 1 ? $_GET['fs'] : null;
 //=====================================================//
 
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')? 'ob_gzhandler' : null);
+ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ? 'ob_gzhandler' : null);
 
-
-// Strlen < 120 for more security.
-if (isset($_GET['u']) && strlen($_GET['u']) < 120) $imagePath = '../uploads/'.addslashes($_GET['u']);
-elseif (isset($_GET['i']) && strlen($_GET['i']) < 120) $imagePath = addslashes($_GET['i']);
-
+if ($t)     $imagePath = THEME_IMAGES . addslashes($_GET['t']);
+if ($u)     $imagePath = UPLOADS_PATH . addslashes($_GET['u']);
+elseif ($i) $imagePath = addslashes($_GET['i']);
 
 // The file is existing on the server, just output the file to the browser with correct mime type.
-if (is_file(__DIR__."/$imagePath")) list($image, $mimeType) = displayExistingFile($imagePath);
-
+if (is_file($imagePath)) list($image, $mimeType) = displayExistingFile($imagePath);
 
 // The requested file is an image with a size that does not exist on the server:
 // Generate new image size on the fly if asked image does not exist but original does.
-elseif (preg_match('~(.*)_(xs|s|m|l|xl|xxl)\.(jpe?g|png|gif)~', $imagePath, $matches) && is_file(__DIR__."/$matches[1]_o.$matches[3]"))
+elseif (preg_match('~(.*)_(xs|s|m|l|xl|xxl)\.(jpe?g|png|gif)~', $imagePath, $matches)
+        && is_file(IMAGES_PATH . "$matches[1]_o.$matches[3]"))
 {
     list(, $name, $size, $extension) = $matches;
     resizeAndOutputImage($name, $size, $extension);
+}
+
+elseif ($imageFallback
+        && ($fs = $imageFallbackSrc === 't' ? THEME_IMAGES : ($imageFallbackSrc === 'u' ? UPLOADS_PATH : IMAGES_PATH))
+        && is_file("$fs$imageFallback"))
+{
+    list($image, $mimeType) = displayExistingFile("$fs$imageFallback");
 }
 
 // The requested file is not found on the server. Display an empty image.
