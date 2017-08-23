@@ -22,7 +22,8 @@ class Page
 
 	// A number between 0 and 100 to set the <header> html tag height making the
 	// page to start from this same point.
-	private $headerHeight;
+    private $headerHeight;
+	private $parallax;// Enable/disable the effect on the header background. Enabled by default.
 	private $topZoneContent;
 	private $bottomZoneContent;
 
@@ -64,7 +65,8 @@ class Page
 		$this->path              = $page->path;
 		$this->title             = isset($page->title) ? $page->title : '';
 		$this->h1                = '';//!\ Empty string is distinct from null in later var use.
-		$this->headerHeight      = 60;
+        $this->headerHeight      = 60;
+		$this->parallax          = true;
 		$this->topZoneContent    = null;
 		$this->bottomZoneContent = null;
 		$this->social            = false;
@@ -288,9 +290,18 @@ class Page
 	 *
 	 * @param Integer $height: the height of the <header> tag.
 	 */
-	public function setHeaderHeight($height)
+    public function setHeaderHeight($height)
+    {
+        $this->headerHeight = (int)$height;
+    }
+
+	/**
+	 * Disable the effect on the header background.
+	 * The effect is enabled by default.
+	 */
+	public function disableParallax()
 	{
-		$this->headerHeight = (int)$height;
+		$this->parallax = false;
 	}
 
 	/**
@@ -518,7 +529,8 @@ class Page
 					   'homeText'          => self::get('home', $language)->getTitle(),
 					   'h1'                => ucfirst($this->h1 ? $this->h1 : $page->getTitle()),
 					   // If h1 is explicitly set to null then set an h1 with the site name for SEO.
-					   'headerHeight'      => $this->headerHeight,
+                       'headerHeight'      => $this->headerHeight,
+					   'parallax'          => $this->parallax ? 'parallax' : '',
 					   'topZoneContent'    => $this->topZoneContent ? $this->topZoneContent : '',
 					   'mainMenu'          => $mainMenu,
 					   'bottomZoneContent' => $this->bottomZoneContent ? $this->bottomZoneContent : '',
