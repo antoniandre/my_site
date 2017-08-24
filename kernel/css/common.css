@@ -1309,7 +1309,9 @@ margin-left: -2.5em;
  background:rgba(0,0,0,.05);
  border-bottom:1px solid rgba(0,0,0,.05);
  font-size: 120%;
- font-family: dinnext, Arial, Helvetica, sans-serif;}
+ font-family: dinnext, Arial, Helvetica, sans-serif;
+ word-break: break-word;
+ hyphens: auto;}
  #debug div code, #error div code
  {margin:5px;
  display:block;
