@@ -10,8 +10,8 @@ $imagePath = '';
 $useImagickCLI = true;
 
 define('IMAGES_PATH',  './');
-define('UPLOADS_PATH', __DIR__ . '/../uploads/');
-define('THEME_PATH',   __DIR__ . '/../themes/' . trim(file_get_contents('../themes/active')) . '/');
+define('UPLOADS_PATH', '../uploads/');
+define('THEME_PATH',   '../themes/' . trim(file_get_contents('../themes/active')) . '/');
 define('THEME_IMAGES', THEME_PATH . 'images/');
 
 // Strlen < 120 for more security.
@@ -93,8 +93,8 @@ function displayExistingFile($imagePath)
 function resizeAndOutputImage($name, $size, $extension)
 {
     global $useImagickCLI;
-    $originalImagePath = __DIR__."/{$name}_o.$extension";
-    $newImagePath = __DIR__."/{$name}_$size.$extension";
+    $originalImagePath = "./{$name}_o.$extension";
+    $newImagePath = "./{$name}_$size.$extension";
     // Sizes by total number of pixels.
     /*$sizes = ['xs' => 152100,// 450*338
               's'  => 270000,// 600*3/4
@@ -105,7 +105,7 @@ function resizeAndOutputImage($name, $size, $extension)
     // To use with '@':
     // exec("$convertPath '$originalImagePath' -resize $sizes[$size]@ -unsharp 2x0.5+0.6+0 -quality 90 '$newImagePath';");
     // Sizes by width.
-    $sizes = ['xs' => 220*1.3334,// 1.3334 for retina display (should be *2 but too costy).
+    $sizes = ['xs' => 220*1.3334,// 1.3334 for retina display (should be x2 but too costy).
               's'  => 300*1.3334,
               'm'  => 450*1.3334,
               'l'  => 700*1.3334,
