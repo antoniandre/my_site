@@ -62,9 +62,10 @@ function checkInTheme($path)
  */
 function includeClass($class)
 {
-    $ok = include checkInTheme(ROOT."kernel/backstage/classes/$class.php");
-    if (!$ok)
-        Cerror::add("The class '$class' was not found in '".ROOT."kernel/backstage/classes/$class.php'.", 'NOT FOUND');
+    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/classes/$class.php"));
+
+    if ($ok) include $file;
+    else Cerror::add("The class '$class' was not found in '$file'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -75,11 +76,12 @@ function includeClass($class)
  * @param string $function: the php function to include.
  * @return void.
  */
-function includeFunction($function)
+function includeFunction($function, $haltOnError = true)
 {
-    $ok = include checkInTheme(ROOT."kernel/backstage/functions/$function.php");
-    if (!$ok)
-        Cerror::add("The function '$function' was not found in '".ROOT."kernel/backstage/functions/$function.php'.", 'NOT FOUND');
+    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
+
+    if ($ok) include $file;
+    elseif ($haltOnError) Cerror::add("The function '$function' was not found in '$file'.", 'NOT FOUND');
 
     return $ok;
 }
@@ -93,17 +95,19 @@ function includeFunction($function)
  */
 function includeWebservice($ws)
 {
-    $ok = include checkInTheme(ROOT."kernel/backstage/webservices/$ws.php");
-    if (!$ok)
-        Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
+    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
+
+    if ($ok) include $file;
+    else Cerror::add("The web service '$ws' was not found in '$file'.", 'NOT FOUND');
 
     return $ok;
 }
 function includeOnceWebservice($ws)
 {
-    $ok = include_once checkInTheme(ROOT."kernel/backstage/webservices/$ws.php");
-    if (!$ok)
-        Cerror::add("The web service '$ws' was not found in '".ROOT."kernel/backstage/webservices/$ws.php'.", 'NOT FOUND');
+    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
+
+    if ($ok) include_once $file;
+    else Cerror::add("The web service '$ws' was not found in '$file", 'NOT FOUND');
 
     return $ok;
 }
