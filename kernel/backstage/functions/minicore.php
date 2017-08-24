@@ -58,7 +58,7 @@ function checkInTheme($path)
  * Shortcut function to simply include a php class.
  *
  * @param string $class: the php class to include.
- * @return void.
+ * @return: true/false according to inclusion success or failure..
  */
 function includeClass($class)
 {
@@ -74,16 +74,17 @@ function includeClass($class)
  * Shortcut function to simply include a php function.
  *
  * @param string $function: the php function to include.
- * @return void.
+ * @return: true/false according to inclusion success or failure. And whatever is returned by the file if any.
  */
 function includeFunction($function, $haltOnError = true)
 {
-    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
+    $return = null;
+    $ok     = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
 
-    if ($ok) include $file;
+    if ($ok) $return = include $file;
     elseif ($haltOnError) Cerror::add("The function '$function' was not found in '$file'.", 'NOT FOUND');
 
-    return $ok;
+    return $return;
 }
 
 
@@ -91,25 +92,27 @@ function includeFunction($function, $haltOnError = true)
  * Shortcut function to simply include a php web service.
  *
  * @param string $ws: the php web service to include.
- * @return void.
+ * @return: true/false according to inclusion success or failure. And whatever is returned by the file if any.
  */
 function includeWebservice($ws)
 {
+    $return = null;
     $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
 
-    if ($ok) include $file;
+    if ($ok) $return = include $file;
     else Cerror::add("The web service '$ws' was not found in '$file'.", 'NOT FOUND');
 
-    return $ok;
+    return $return;
 }
 function includeOnceWebservice($ws)
 {
+    $return = null;
     $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
 
-    if ($ok) include_once $file;
+    if ($ok) $return = include_once $file;
     else Cerror::add("The web service '$ws' was not found in '$file", 'NOT FOUND');
 
-    return $ok;
+    return $return;
 }
 
 /**
