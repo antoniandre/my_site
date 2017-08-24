@@ -137,7 +137,7 @@ class Page
 
 			// If there is a themeRouter() function found in theme/[current_theme]/router.php,
 			// Then override current page with the one matched and returned by the themeRouter().
-			if (includeFunction('router') && function_exists('themeRouter'))
+			if (includeFunction('router', false) && function_exists('themeRouter'))
 			{
 				$url    = str_replace('.html', '', $_SERVER['REQUEST_URI']);
 				$url    = explode('?', $url)[0];
