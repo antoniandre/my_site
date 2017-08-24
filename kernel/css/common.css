@@ -216,7 +216,7 @@
  }
  header .go-down
  {position: fixed;
- bottom: 20vh;
+ bottom: 9em;
 color: inherit;
 font-family: dinnext, Arial, Helvetica, sans-serif;
 opacity: .8;
