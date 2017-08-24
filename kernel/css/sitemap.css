@@ -1,3 +1,6 @@
+/* If class glyph, disable all icons. */
+#page .glyph li h4:before, #page .glyph li a:before, #page .glyph li li a:before {display: none;}
+
 #page .lvl0 {margin-left:40px;line-height: 1.6em;}
 #page .lvl0 > li > a,
 #page .lvl0 > li > span

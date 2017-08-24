@@ -41,7 +41,7 @@ function getChildrenPages($page, $exclude = [])
 		if ($thePage->parent === $page && (!in_array($pageId, $exclude)
 			&& ($pageId !== 'backstage' || ($pageId == 'backstage' && $user->isAdmin()))))
 		{
-			if ($excludeArticles !== false && $thePage->typeId === 'article') continue;
+			if ($excludeArticles !== false && $thePage->type === 'article') continue;
 
 			$pagesTree[$pageId]['id']    = $pageId;
 			$pagesTree[$pageId]['icon']  = $thePage->icon;
@@ -74,9 +74,9 @@ function displayTree($tree, $depth = 0)
 			   . ">$thePage[title]</a>";
 		if ($count)
 		{
-			$html .= "<ul class=\"lvl$depth\">";
-			$html .= displayTree($thePage['children'], $depth+1);
-			$html .= "</ul>";
+			$html .= "<ul class=\"lvl$depth\">"
+				   . displayTree($thePage['children'], $depth+1)
+				   . "</ul>";
 		}
 		$html .= "</li>";
 	}
