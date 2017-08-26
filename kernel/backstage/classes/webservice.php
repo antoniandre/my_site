@@ -136,7 +136,7 @@ class Webservice
 		$data = isset($posts->data) ? json_decode(stripslashes(urldecode($posts->data))) : null;
         $returnMessage = 'No return message provided by the webservice.';
 
-		if (($wsID = $this->checkPass()) && includeOnceWebservice($wsID)) $returnMessage = (string)distantCode($data);
+		if (($wsID = $this->checkPass()) && includeWebserviceOnce($wsID)) $returnMessage = (string)distantCode($data);
         die($returnMessage);
 	}
 }

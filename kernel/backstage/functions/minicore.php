@@ -86,6 +86,16 @@ function includeFunction($function, $haltOnError = true)
 
     return $return;
 }
+function includeFunctionOnce($function, $haltOnError = true)
+{
+    $return = null;
+    $ok     = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
+
+    if ($ok) $return = include_once $file;
+    elseif ($haltOnError) Cerror::add("The function '$function' was not found in '$file'.", 'NOT FOUND');
+
+    return $return;
+}
 
 
 /**
@@ -104,7 +114,7 @@ function includeWebservice($ws)
 
     return $return;
 }
-function includeOnceWebservice($ws)
+function includeWebserviceOnce($ws)
 {
     $return = null;
     $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
