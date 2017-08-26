@@ -155,7 +155,7 @@ function addJsVars($jsContents)
     $onReady  = '';
     if (count($readyFunctions)) foreach ($readyFunctions as $function)
     {
-        if (in_array($function, $files)) $onReady .= str_replace('-', '', $function).'Ready();';
+        if (in_array($function, $files)) $onReady .= str_replace(['-', '.'], '', $function).'Ready();';
     }
 
     // Prepare an array that lists all the scripts available and whether they have an associated CSS or not
