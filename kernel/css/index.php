@@ -12,10 +12,11 @@ $settings = Settings::get();
 $gets     = Userdata::get();
 // $oneCss & $extraCss can both be array or string. E.g: 'o[]=css1&o[]=css2' or 'o=css'.
 $oneCss   = isset($gets->o) ? $gets->o : '';
+$font     = isset($gets->font) ? $gets->font : '';
 
 define('KERNEL_PATH', ROOT . 'kernel/css/');
 define('THEME_PATH',  ROOT . "themes/$settings->theme/css/");
-define('VENDOR_PATH', ROOT . "vendor/");
+define('VENDOR_PATH', ROOT . 'vendor/');
 //=====================================================//
 
 
@@ -25,7 +26,8 @@ define('VENDOR_PATH', ROOT . "vendor/");
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-if (!$page && !$oneCss) die('/* No CSS requested. */');
+if ($font) doFontOutput($font);
+elseif (!$page && !$oneCss) die('/* No CSS requested. */');
 
 // If only one css file is needed.
 $cssContents = $oneCss ? addCssContents((array)$oneCss) : (addCommonCss() . addSpecificCss());
@@ -51,6 +53,7 @@ function addSpecificCss()
 {
     $page        = Page::getCurrent();
     $gets        = Userdata::get();
+    $user        = User::getInstance();
     $extraCss    = isset($gets->e) ? $gets->e : '';
     $cssContents = '';
 
@@ -160,4 +163,22 @@ function doOutput($cssContents)
     header('Content-type: text/css; charset=utf-8');
     die((string)($useCompress ? compress($cssOutput) : $cssOutput));
 }
+
+
+function getFont($font)
+{
+    $src = null;
+    if     (is_file($k = KERNEL_PATH . "fonts/$font")) $src = $k;
+    elseif (is_file($t = THEME_PATH . "fonts/$font"))  $src = $t;
+
+    return $src ? file_get_contents($src) : '';
+}
+
+
+function doFontOutput($font)
+{
+    header('Content-type: application/font-woff; charset=utf-8');
+    die((string)getFont($font));
+}
+
 ?>
