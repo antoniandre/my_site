@@ -24,6 +24,7 @@ $page     = Page::getCurrent();
 // If required file is JS or CSS Include it and die.
 if (isset(UserData::get()->js)) include ROOT . 'kernel/js/index.php';
 elseif (isset(UserData::get()->css)) include ROOT . 'kernel/css/index.php';
+elseif (isset(UserData::get()->font)) include ROOT . 'kernel/css/index.php';
 else
 {
     if (Language::getTarget()) $page->refresh();
@@ -267,20 +268,21 @@ function redirectTo($url, $httpCode = 200)
  * @param string/int $id: The id of the text to retrieve from DB or a string to apply text functions on.
  * @param array $parameters: an array of options to perform extra tasks on string if any:
  *         [
- *             'contexts' => [],   Array: The multiple contexts to look into.
- *             'formats' => [],   Array: An array of format-params pairs to apply to the string, among: htmlentities=>true/false, sprintf=>[params,...], sef=>true/false.
+ *             'contexts'  => [], Array: The multiple contexts to look into.
+ *             'formats'   => [], Array: An array of format-params pairs to apply to the string, among: htmlentities=>true/false, sprintf=>[params,...], sef=>true/false.
  *             'languages' => [], Array: the array of languages codes you want to retrieve the text in.
  *                                Allowed languages are set in Language class.
  *                                Defaults to the current language only if none is provided.
  *         ]
  * @return string
  */
- function text($id, $parameters = ['htmlentities' => 1, 'contexts'=> [], 'languages'=> []])
+ function text($id, $parameters = ['htmlentities' => 1, 'contexts' => [], 'languages' => []])
  {
-     $text = new Text($id, $parameters);
+     if (is_string($id) && !is_numeric($id)) $text = Text::_use($id);
+     else $text = Text::get($id);
 
      if (isset($parameters['formats'])) $text->format($parameters['formats']);
-     return $text->get();
+     return is_object($text) ? $text->toString() : '';
  }
 
 /**
@@ -290,11 +292,15 @@ function redirectTo($url, $httpCode = 200)
  * @param mixed [any following param]: A param to provide to the sprintf function.
  * @return string: the sprintf-formated string.
  */
-function textf()
+function textf($text)
 {
     $parameters = func_get_args();
     unset($parameters[0]);
     return text(func_get_arg(0), ['formats' => ['sprintf' => $parameters]]);
+}
+function textu($text)
+{
+    // return text(func_get_arg(0), ['formats' => ['sprintf' => $parameters]]);
 }
 
 /**

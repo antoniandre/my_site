@@ -2,96 +2,75 @@
 
 /**
  * Class Text.
+ * Each text string is identified by a numeric ID and is contain in a context which represent a semantic group of texts.
+ * For instance each page of the site represents a context holding multiple strings.
  */
-Class Text
+class Text
 {
-	const NOT_FOUND = 'NOT_FOUND_IN_DB';
+	const NONE = 'NONE';
 
-	// An array of contexts in which are stored "ID => String" pairs.
-	// (Context = place of a text in the site E.g. 'general', 'sitemap')
-	// That array is extended each time a new text is requested from an ID.
-	public static $texts = null;
+    // An array of text strings.
+	private static $texts    = null;
+    // An array of contexts each containing a text id list.
+	private static $contexts = null;
 
-	// Array of ID => 'context' pairs, to look for a text in the static $texts array from its ID.
-	private static $textContexts = null;
+    private $id;
+    private $string;
+    private $context;
+    private $formats;
+	private $requested;
 
-	// Store the formatted strings until they are outputed with ->get();
-	private $tempStrings = [];
 
-	/**
-	 * Class constructor.
-	 * Construct the object with a list of text IDs to retrieve or direct strings to work on.
-	 * Retrieve the texts of the current page and the 'general' context from the database.
-	 *
-	 * @param  array $parameters: an array of options to perform extra tasks on string if any:
-	 *         [
-	 *         	   'id' => [],       Array: list of text IDs to retrieve from DB.
-	 *         	   'context' => [],  Array: The multiple contexts to look into.
-	 *             'language' => [], Array: the array of languages codes you want to retrieve the text in.
-	 *                               Allowed languages are set in Language class.
-	 *                               Defaults to the current language only if none is provided.
-	 *         ]
-	 */
-	public function __construct($mixed)
+	private function __construct($textRow, $language = null)
 	{
-		// If only using new Text($string).
-		if ($mixed && is_string($mixed)) $this->tempStrings[] = (object)[Language::getInstance()->getCurrent() => $mixed];
+		$language = Language::check($language);
 
-		// If only using new Text($text_id).
-		elseif ($mixed && is_numeric($mixed)) $this->getTextFromId($mixed);
+		$this->string     = new stdClass();
+		$this->formats    = [];
+		$this->requested  = 'string';
 
-		// If using new Text((array)$parameters).
-		elseif ($mixed && is_array($mixed) && (isset($mixed['id']) || isset($mixed['contexts'])))
+		if (is_string($textRow))
 		{
-			$language = isset($mixed['languages']) ? $mixed['languages'] : [];
-			if (isset($mixed['contexts'])) $this->getContext($mixed['contexts'], $language);
-			if (isset($mixed['id'])) $this->getTextFromId($mixed['id'], $language);
+			$this->id                = self::NONE;
+			$this->string->$language = $textRow;
+			$this->context           = self::NONE;
+		}
+		elseif (is_object($textRow))
+		{
+			$this->id                = $textRow->id;
+			$this->string->$language = $textRow->{"text_$language"};
+			$this->context           = $textRow->context;
+
+			// Add the new created text to the static array for reuse without DB query.
+			self::$texts[$this->id]  = $this;
+			self::$contexts[$this->context][] = $this->id;
 		}
 
-		// Add the current page context + general context to the array.
-		if (Text::$texts === null) $this->getContext(['general', Page::getCurrent()->page]);
 	}
 
-	/**
-	 * If some contexts are given in parameters, also fetch the texts of those contexts from the database.
-	 * Store the multidimensional array in static attribute Text::$texts.
-	 *
-	 * Usage: $t = new Text();$t->getContext('create-new-text');
-	 *
-	 * @param  array/string $contextList: the context list you want to look the text into.
-	 *         Can provide a simple string if only one context.
-	 * @param  string $languages: the optional languages list you want the text in.
-	 * @return void
-	 */
-	public function getContext($contextList, $languages = [])
-	{
-		$db = database::getInstance();
-		$q = $db->query();
+	// Add the current page context + general context to the array.
+    private static function init()
+    {
+        self::$texts = [];
+		self::getContext(['general', Page::getCurrent()->page]);
+	}
 
-		// Check the requested context list.
-		// Convert possible one-string to an array of string.
-		$contextList = (array)$contextList;
-		if (!count($contextList)) return;
+    /**
+     * Get a whole context (group) of text strings. Then store them in $texts static array.
+     */
+    public static function getContext($contexts)
+    {
+        if (self::$texts === null) self::init();
 
-		// Convert possible one-string to an array of string.
-		$languages = (array)$languages;
-
-		// Set the requested language to currentLanguage if none.
-		$currentLanguage = Language::getInstance()->getCurrent();
-		if (!count($languages)) $languages = [$currentLanguage];
-
-		// Check each requested language to see if it exists.
-		foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $textFields[] = $q->col("text_$lang")->as($lang);
+		$db       = database::getInstance();
+		$q        = $db->query();
+		$language = Language::getInstance()->getCurrent();
 
 		// Retrieve from DB.
-		$q->select('texts', array_merge([$q->col('id'), $q->col('context')], $textFields));
+		$q->select('texts', [$q->col('id'), $q->col('context'), $q->col('text_'.$language)]);
 
-		// Set the Where clause to `context` IN ($contextList).
-		$w = $q->where()->col('context');
-		// PHP5.6+
-		// $w->in(...$contextList);
-		// PHP5.5-
-		call_user_func_array([$w, 'in'], $contextList);
+		// Set the Where clause to `context` IN ($contexts).
+		$w = $q->where()->col('context')->in(...$contexts);
 
 		$q->run();
 		if ($q->info()->numRows)
@@ -100,318 +79,152 @@ Class Text
 			// Store in Text::$texts the texts for each context.
 			foreach ($textsFromDB as $text)
 			{
-				$context = $text->context;
-				$id = $text->id;
-
-				// Remove unwanted information from the final array.
-				unset($text->context, $text->id);
-
-				Text::$texts[$context][$id] = $text;
-				Text::$textContexts[$id] = $context;
+                new self($text, $language);
 			}
 		}
 	}
 
-	/**
-	 * Function getTextFromId()
-	 * @param array/int $idList: the id list of the texts you want to retrieve. can be an array of ID or one Integer.
-	 * @param array $languages: the array of languages codes you want to retrieve the text in.
-	 *                          Allowed languages are set in Language class.
-	 *                          Defaults to the current language only if none is provided.
-	 * @return (Object) the current instance of this.
-	 */
-	private function getTextFromId($idList, $languages = [])
-	{
-		$db = database::getInstance();
-		$q = $db->query();
+    /**
+     * Get a single text string. Then store it in $texts static array.
+     */
+    public static function get($idList, $language = null)
+    {
+        if (self::$texts === null) self::init();
 
-		// Convert possible one-integer to an array of integer.
-		$idList = (array)$idList;
-		// Convert possible one-string to an array of string.
-		$languages = (array)$languages;
+		$idList       = (array)$idList;
+		$knownTexts   = [];
+		$unknownTexts = [];
 
-		// Set the requested language to currentLanguage if none.
-		$currentLanguage = Language::getInstance()->getCurrent();
-		if (!count($languages)) $languages = [$currentLanguage];
-
-		// Check each requested language to see if it exists.
-		foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $textFields[] = $q->col("text_$lang")->as($lang);
-
-		// Retrieve from DB.
-		$q->select('texts', array_merge([$q->col('id'), $q->col('context')], $textFields));
-		$w = $q->where()->col('id')->in(implode(', ', $idList));// Set the Where clause to `idList` = $idList.
-		$q->run();
-
-		if ($q->info()->numRows)
+		if (count($idList))
 		{
-			$textsFromDB = $q->loadObjects('id');
-		}
-
-		// For each text id,
-		// if text is found in DB Store the texts in Text::$texts
-		// otherwise set $this->tempStrings[$id] to self::NOT_FOUND.
-		foreach ($idList as $id)
-		{
-			$text = self::NOT_FOUND;
-
-			// If text is found in DB.
-			if (isset($textsFromDB[$id]))
+			foreach ($idList as $id)
 			{
-				$text = $textsFromDB[$id];
-				$context = $text->context;
-
-				Text::$texts[$context][$id] = $text;
-				Text::$textContexts[$id] = $context;
-
-				// Remove unwanted information from the final array.
-				unset($text->context, $text->id);
+				if (isset(self::$texts[$id])) $knownTexts[$id] = self::$texts[$id];
+				else $unknownTexts[] = $id;
 			}
-			else Cerror::getInstance()->add("The text id #$id is not found in database.", 'WRONG DATA', true);
-
-			$this->tempStrings[$id] = $text;
 		}
-	}
 
-	/**
-	 * Function get(): returns the treated final text.
-	 *
-	 * @see classes/language.php for allowed languages.
-	 * @param int $id (optionnnal): the id of the text you want to retrieve.
-	 * @param array $languages (optionnnal): the array of languages codes you want to retrieve the text in.
-	 *                                       Allowed languages are set in Language class.
-	 *                                       Defaults to the current language only if none is provided.
-	 * @return StdClass Object/string: the object of strings or one string if only one language requested.
-	 */
-	public function get()// Expect at most 2 params: $id, $languages = [].
-	{
-		$object = null;
-		$id = null;
-		$languages = [];
-
-		// Case of call like: get($id, $languages).
-		if (func_num_args() == 2) list($id, $languages) = func_get_args();
-
-		// Case of call like: get($id).
-		elseif (func_num_args() == 1 && is_integer(func_get_arg(0))) $id = func_get_arg(0);
-
-		// Case of call like: get($languages).
-		elseif (func_num_args() == 1) $languages = func_get_arg(0);
-
-		// If no id is provided, look into $this->tempStrings and take the first found.
-		// The purpose is to allow only $t = new Text(33);$t->get();
-		$id = $id ? $id : array_keys($this->tempStrings)[0];
-
-		if ($id !== null)
+		if (count($unknownTexts))
 		{
-			if ($this->tempStrings[$id] !== self::NOT_FOUND)
+			$db       = database::getInstance();
+			$q        = $db->query();
+			$language = Language::check($language);
+
+			// Retrieve from DB.
+			$q->select('texts', [$q->col('id'), $q->col('context'), $q->col('text_'.$language)]);
+
+			// Set the Where clause to `id` IN ([id_list]).
+			$q->where()->col('id')->in(...$unknownTexts);
+
+			$q->run();
+			if ($q->info()->numRows)
 			{
-				if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
-				$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
-
-				// Convert possible one-string to an array of strings.
-				$languages = (array)$languages;
-				// Set the requested language to currentLanguage if none.
-				$currentLanguage = Language::getInstance()->getCurrent();
-				if (!count($languages)) $languages = [$currentLanguage];
-
-				// Check each requested language to see if it exists.
-				if (count($languages) > 1)
+				$textsFromDB = $q->loadObjects();
+				// Store in Text::$texts the texts for each context.
+				foreach ($textsFromDB as $text)
 				{
-					$object = new StdClass();
-					foreach ($languages as $lang) if (array_key_exists($lang, Language::allowedLanguages)) $object->$lang = $textObject->$lang;
+					$text = new self($text, $language);
+					$knownTexts[$text->id] = $text;
+
+					// Now remove found text from unfound array.
+					unset($unknownTexts[array_flip($unknownTexts)[$text->id]]);
 				}
-				else {$object = $textObject->{$languages[0]};}
-
-				$this->tempStrings[$id] = null;// Empty the current text Id.
 			}
-		}
 
-		return $object;
-	}
-
-	/**
-	 * Format method.
-	 * Usage:
-	 *     $t = new Text(33);
-	 *     echo $t->format(['htmlentities' => false, 'sprintf' => ['hello', 'word!'], 'sef' => true])
-	 *       	  ->get();
-	 *
-	 * @param  int $id the ID of the string to format
-	 * @param  array $formats: An array of format-params pairs to apply to the string.
-	 *                         possible pairs:
-	 *                             htmlentities => true/false,
-	 *                             sprintf => [params,...],
-	 *                             sef => true/false,
-	 *                             bb2html => true/false,
-	 *                             html2bb => true/false,
-	 *                             striptags => true/false,
-	 *                             stripbbtags => true/false.
-	 * @return Object: the current instance of this.
-	 */
-	public function format()// Expect at most 2 params: $id, $formats = []. at least one param: $formats.
-	{
-		list($id, $formats) = func_num_args() == 2 ? func_get_args() : [null, func_get_arg(0)];
-		// If no id is provided, look into $this->tempStrings and take the first found.
-		// The purpose is to allow only $t = new Text(33);$t->get();
-		$id = $id ? $id : array_keys($this->tempStrings)[0];
-
-		// Convert possible one-integer to an array of integer.
-		$formats = (array)$formats;
-
-		if ($id !== null && count($formats))
-		{
-			// If tempString is set then we are currently treating a direct string with no context.
-			if (!isset($this->tempStrings[$id])) $context = Text::$textContexts[$id];
-
-			// Check requested formats and set htmlentities to true if no format is specified.
-			$formats = (array)$formats;
-			if (!count($formats)) $formats = ['htmlentities' => true];
-
-			foreach ($formats as $formatName => $formatArg)
+			if ($cnt = count($unknownTexts))
 			{
-				// If in the format array strings are found (e.g 'sef') they are converted to key-value pairs (e.g 'sef' => true)
-				if (is_integer($formatName))
+				if ($cnt === 1) Cerror::add("The text id #$unknownTexts[0] is not found in database.", 'WRONG DATA', true);
+				else
 				{
-					$formatName = $formatArg;
-					$formatArg = true;
-				}
-
-				// Get each string to convert (in each available language).
-				$textObject = isset($this->tempStrings[$id]) ? $this->tempStrings[$id] : Text::$texts[$context][$id];
-
-				// Check each requested language to see if it exists.
-				foreach ($textObject as $lang => $str)
-				{
-					switch ($formatName)
-					{
-						case 'htmlentities':
-							if ($formatArg) $str = htmlentities($str, ENT_NOQUOTES, 'utf-8');
-							break;
-						case 'sef':
-							if ($formatArg)
-							{
-								/* NEW WAY: (does not work on OVH)
-								@todo: must investigate why and use it.
-								// exemple string:
-								// $str = 'お早うございます A æ      Übérmensch på høyeste nivå! И я люблю PHP! есть. ﬁ ¦ yé måß∂ƒà sœur & sœur&sœurîüýçñ∑´éèàûôêï`~ !µ³Ø Žluťoučký kůň !'
-								// 		.'¦∑´®†¥„´‰ˇØ∏”’˝»¸˛◊ı˜¯˘¿¡™£¢¤∞§¶•ªº`øπ“‘ß∂ƒ˙∆˚¬…«`Ω≈√∫˜µ≤≥÷⁄€‹›ﬁﬂ‡°·‚±~¼½¾×/|\\\'"()[]{}#$%@!?.,;:+=<>';
-								$str = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower(); [\u0080-\u7fff] remove', $str);*/
-
-								/* SAFER OLD WAY : */
-								if (mb_strlen($str) !== strlen($str))
-								{
-									$pattern = '/&(\w{1,2})(?:grave|acute|circ|cedil|uml|ring|lig|tilde);/';
-									$str = preg_replace($pattern, '$1', htmlentities($str, ENT_NOQUOTES, 'UTF-8'));
-								}
-
-								// Replace '&', remove special chars, reduce any space length to 2 max.
-								$str = preg_replace(['/ ?& ?/', '/[^A-Za-z0-9 -]/', '/[- ]{3,}/'], [' and ', '', '  '], $str);
-
-								// Remove preceding and trailing dashes after the previous cleanup.
-								$str = rtrim(trim($str));
-
-								// Finally replace spaces with dashes and lower the case.
-								$str = strtolower(str_replace(' ', '-', $str));
-							}
-							break;
-						case 'sprintf':
-							// PHP5.6+
-							// $str = sprintf($str, ...$formatArg);
-							// PHP5.5-
-							$str = call_user_func_array('sprintf', array_merge([$str], $formatArg));
-							break;
-						case 'bb2html':
-							$str = $this->BBcode2html($str);
-							break;
-						/*case 'html2bb':
-							$str = $this->html2BBcode($str);
-							break;*/
-						case 'striptags':
-							$str = strip_tags($str);
-							break;
-						case 'stripbbtags':
-							$str = $this->stripBBtags($str);
-							break;
-					}
-					$this->tempStrings[$id]->$lang = $str;
+					$texts = implode(', #', $unknownTexts);
+					Cerror::add("The texts #$texts are not found in database.", 'WRONG DATA', true);
 				}
 			}
 		}
 
-		return $this;
+        return count($knownTexts) === 1 ? array_values($knownTexts)[0] : $knownTexts;
+    }
+
+	// Use the given text to create a text object and benefit from the class methods.
+    public static function _use($text)
+	{
+		return new self($text);
 	}
 
-	/*
-		BBcode syntax:  [tag=value 1|param2=value 2]innerHTML[/tag]
-						[tag=value 1|param2=value 2]
-						[tag param1=value 1|param2=value 2] for auto-ending tags like img
-	*/
-	private function BBcode2html($str)
-	{
-		$str= preg_replace_callback("~\[(/?)([^=\s|\]]+)(?:=?([^|\]]+))?(\|?[^\]]*)\]~", [$this, 'BBcode2html_callback'], $str);
-		// nl2br does not remove \n, it only adds <br />, the bbcode js code also checks <br /> and \n to make sure,
-		// So if we don't do str_replace(["\r", "\n"], ''... we will have 2 line breaks!
-		$str= stripslashes(str_replace("\n", '', nl2br(str_replace("\r", '', $str))));
+    /**
+     * Format a text string.
+     * Possible formats:
+	 *     htmlentities
+	 *     sprintf
+	 *     urlize
+	 *     bb2html
+	 *     html2bb
+	 *     striptags
+	 *     stripbbtags
+     */
+    public function format($format)
+    {
+		$languages = array_keys(get_object_vars($this->string));
+		$this->requested = is_array($format) ? array_keys($format)[0] : $format;
+		$args = is_array($format) ? $format[$this->requested] : null;
 
-		return $str;
-	}
-
-	private function BBcode2html_callback($matches)
-	{
-		$closingTag = @$matches[1];// Detects if it is the closing tag or not. E.g. '/' in '[/b]'
-		$tag =		  @$matches[2];// Detects the tag. E.g. 'b' in '[b]'
-		$param1 =	  @$matches[3];// Detects the first param if any. E.g 'src' in '[img=src|alt=image]'
-		$rawParams =  @$matches[4];// Detects all the other parameters
-
-		$params= $autoEndingTag= $forceClosingTag= '';
-		if ($rawParams) foreach(explode('|', $rawParams) as $v) if ($v) $params.= ' '.str_replace('=', '="', $v).'"';
-
-		switch($tag)
+		foreach($languages as $language)
 		{
-			case 'b': $tag= 'strong';break;
-			case 'i': $tag= 'em';break;
-			case 'u': $tag= 'span';$params.=' style="text-decoration:underline"';break;
-			case 'url': $tag= 'a';if (!$closingTag) $params.=' href="'.url($param1).'"';break;
-			case 'img':
-				$params.= ' src="'.url($param1).'"'.(strpos($params, ' alt="')===false ? ' alt="image"' : '');
-				$autoEndingTag= 1;
-				break;
-			case 'color': $tag= 'span';$params.=" style=\"color:$param1\"";break;
-			case 'emo': $tag= 'span';$params.=" class=\"emo $param1\"";$forceClosingTag= 1;break;
-			case 'br': break;
-			case 'div': break;
-			case 'span': break;
-			case 'br':
-				$autoEndingTag= 1;
-				break;
-			case 'h2':
-			case 'h3':
-			case 'h4': break;
-			default:$tag= '';// If the tag is not listed above it means it is not allowed so remove it.
+			if (!isset($this->formats[$this->requested]->$language)) $this->formats[$this->requested] = new stdClass();
+
+			switch($this->requested)
+			{
+				case 'htmlentities':
+					$this->formats[$this->requested]->$language = htmlentities($this->string->$language, ENT_NOQUOTES, 'utf-8');
+					break;
+				case 'url':
+					$this->formats[$this->requested]->$language = $this->urlize($this->string->$language);
+					break;
+				case 'sprintf':
+					if ($args) $this->formats[$this->requested]->$language = sprintf($this->string->$language, ...$args);
+					break;
+			}
+
+		};
+
+        return $this;
+    }
+
+	private function urlize($str)
+	{
+		/* NEW WAY: (does not work on OVH)
+		@todo: must investigate why and use it.
+		// exemple string:
+		// $str = 'お早うございます A æ      Übérmensch på høyeste nivå! И я люблю PHP! есть. ﬁ ¦ yé måß∂ƒà sœur & sœur&sœurîüýçñ∑´éèàûôêï`~ !µ³Ø Žluťoučký kůň !'
+		// 		.'¦∑´®†¥„´‰ˇØ∏”’˝»¸˛◊ı˜¯˘¿¡™£¢¤∞§¶•ªº`øπ“‘ß∂ƒ˙∆˚¬…«`Ω≈√∫˜µ≤≥÷⁄€‹›ﬁﬂ‡°·‚±~¼½¾×/|\\\'"()[]{}#$%@!?.,;:+=<>';
+		$str = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower(); [\u0080-\u7fff] remove', $str);*/
+
+		/* SAFER OLD WAY : */
+		if (mb_strlen($str) !== strlen($str))
+		{
+			$pattern = '/&(\w{1,2})(?:grave|acute|circ|cedil|uml|ring|lig|tilde);/';
+			$str = preg_replace($pattern, '$1', htmlentities($str, ENT_NOQUOTES, 'UTF-8'));
 		}
-		if ($autoEndingTag) $htmlOutput= "<$tag$params />";
-		else $htmlOutput= !$closingTag?"<$tag$params>":"</$tag>";
-		if ($forceClosingTag) $htmlOutput= "<$tag$params></$tag>";
-		if ($tag) return $htmlOutput;
+
+		// Replace spaces with dashes and lower the case.
+		$str = strtolower(str_replace(' ', '-', $str));
+
+		// Replace '&', remove special chars, reduce any space length to 2 max.
+		$str = preg_replace(['/-?&-?/', '/[^a-z0-9-]/', '/-{3,}/'], ['-and-', '', '--'], $str);
+
+		// Remove preceding and trailing dashes after the previous cleanup.
+		return trim($str, '-');
 	}
 
+    /**
+     * Return the string from the Text object.
+     */
+    public function toString($language = null)
+    {
+		// return foreachLang(function($lang){if (isset($this->string->$lang)) return $this->string->$lang;});
+		$language = Language::check($language);
 
-	private function stripBBtags($string)
-	{
-		return preg_replace('/\[(.*?)\]/i', '', $string);
-	}
-
-
-	/*private function str_split_unicode($str, $l= 0)
-	{
-	    if ($l > 0)
-		{
-	        $ret= array();
-	        $len= mb_strlen($str, "UTF-8");
-	        for ($i= 0; $i< $len; $i+= $l) $ret[]= mb_substr($str, $i, $l, "UTF-8");
-	        return $ret;
-	    }
-	    return preg_split("//u", $str, -1, PREG_SPLIT_NO_EMPTY);
-	}*/
+		return $this->requested === 'string' ? $this->string->$language : $this->formats[$this->requested]->$language;
+    }
 }
 ?>
