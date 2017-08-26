@@ -6,7 +6,7 @@
 /**
  * backstageReady.
  */
-var backstageReady = function()
+var backstagecommonReady = function()
 {
 	// Create a new text.
 	if ($('#create-new-text-page').length)
