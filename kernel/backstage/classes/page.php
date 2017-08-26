@@ -137,16 +137,17 @@ class Page
 
 			// If there is a themeRouter() function found in theme/[current_theme]/router.php,
 			// Then override current page with the one matched and returned by the themeRouter().
-			if (includeFunction('router', false) && function_exists('themeRouter'))
+			if (includeFunctionOnce('router', false) && function_exists('themeRouter'))
 			{
 				$url    = str_replace('.html', '', $_SERVER['REQUEST_URI']);
 				$url    = explode('?', $url)[0];
-				$pageId = themeRouter($url);
+				$return = themeRouter($url);
 
 				// If url is matched in themeRouter().
-				if ($pageId)
+				if (!empty($return))
 				{
-					$page = self::get($pageId);
+					$pageId = $return;
+					$page   = self::get($pageId);
 					self::set($pageId);
 				}
 			}
@@ -163,7 +164,8 @@ class Page
 		}
 
 		if ($pageId) self::$current = new self($pageId);
-		elseif ($page) self::$current = new self($page->page);
+		elseif (!empty($page)) self::$current = new self($page->page);
+		else self::$current = new self('not-found');
 
 		return self::$current;
 	}
