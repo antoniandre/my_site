@@ -617,12 +617,31 @@ Class Query extends DatabaseEntity
 	 */
 	public function orderBy($column, $direction = 'ASC')
 	{
-		$arr = explode('.', $column);
-		$column = isset($arr[1]) ? $arr[0].'`.`'.$arr[1] : $arr[0];
-		$direction = strtoupper($direction);
-		$direction = in_array($direction, ['ASC', 'DESC'])? $direction : 'ASC';
-		$this->orderBy = " ORDER BY `$column` $direction";
-		return $this;
+        $orderBy = '';
+
+        if (is_array($column)) foreach ($column as $col)
+        {
+            list($col, $direction) = array_pad((array)$col, 2, 'ASC');
+            $arr       = explode('.', $col);
+
+            $col       = isset($arr[1]) ? $arr[0].'`.`'.$arr[1] : $arr[0];
+            $direction = strtoupper($direction);
+            $direction = in_array($direction, ['ASC', 'DESC']) ? $direction : 'ASC';
+            $orderBy  .= ", `$col` $direction";
+        }
+
+        else
+        {
+            $arr       = explode('.', $column);
+            $column    = isset($arr[1]) ? $arr[0] . '`.`' . $arr[1] : $arr[0];
+            $direction = strtoupper($direction);
+            $direction = in_array($direction, ['ASC', 'DESC']) ? $direction : 'ASC';
+            $orderBy   = "`$column` $direction";
+        }
+
+        $this->orderBy = ' ORDER BY ' . trim($orderBy, ',');
+
+        return $this;
 	}
 
 	// @todo: finish this.
