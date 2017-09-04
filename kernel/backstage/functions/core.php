@@ -279,9 +279,9 @@ function redirectTo($url, $httpCode = 200)
  function text($id, $parameters = ['htmlentities' => 1, 'contexts' => [], 'languages' => []])
  {
      if (is_string($id) && !is_numeric($id)) $text = Text::_use($id);
-     else $text = Text::get($id);
+     else {$text = Text::get($id);}
+     if (isset($parameters['formats']) && is_object($text)) $text->format($parameters['formats']);
 
-     if (isset($parameters['formats'])) $text->format($parameters['formats']);
      return is_object($text) ? $text->toString() : '';
  }
 
@@ -296,11 +296,11 @@ function textf($text)
 {
     $parameters = func_get_args();
     unset($parameters[0]);
-    return text(func_get_arg(0), ['formats' => ['sprintf' => $parameters]]);
+    return text($text, ['formats' => ['sprintf' => $parameters]]);
 }
 function textu($text)
 {
-    // return text(func_get_arg(0), ['formats' => ['sprintf' => $parameters]]);
+    return text($text, ['formats' => 'url']);
 }
 
 /**
