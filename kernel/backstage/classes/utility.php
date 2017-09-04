@@ -282,7 +282,8 @@ Class Utility
 
 		foreach($alphabet as $letter)
 		{
-			if (!count($enableLetters) || array_key_exists($letter, $enableLetters)) $alphaIndex.= '<a href="' . "$urlBase/" .text('letter') . "/$letter.html" . "\">$letter</a>";
+			if (!count($enableLetters) || array_key_exists($letter, $enableLetters))
+                $alphaIndex.= '<a href="' . "$urlBase/" . text(100) . "/$letter.html\">$letter</a>";
 			else $alphaIndex .= "<span>$letter</span>";
 		}
 
