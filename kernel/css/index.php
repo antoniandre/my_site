@@ -53,7 +53,7 @@ function addSpecificCss()
 {
     $page        = Page::getCurrent();
     $gets        = Userdata::get();
-    $user        = User::getInstance();
+    $user        = User::getCurrent();
     $extraCss    = isset($gets->e) ? $gets->e : '';
     $cssContents = '';
 

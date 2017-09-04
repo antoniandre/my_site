@@ -217,7 +217,7 @@ function convertSmilies($articleContent)
  */
 function getAllLikes($articleId)
 {
-	$user = User::getInstance();
+	$user = User::getCurrent();
 	$ip = $user->getIp();
 	$items = [];// Pictures or comments.
 
@@ -251,7 +251,7 @@ function likeItem($item)
 {
 	global $article;
 	$likes = 0;
-	$ip = User::getInstance()->getIp();
+	$ip = User::getCurrent()->getIp();
 
 	$item = urldecode($item);
 

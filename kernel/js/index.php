@@ -75,7 +75,7 @@ function getPageRelatedFiles()
 
     $page       = Page::getCurrent();
     $language   = Language::getCurrent();
-    $user       = User::getInstance();
+    $user       = User::getCurrent();
     $files      = [];
 
     // If page is in backstage load the backstage.common script.
@@ -149,7 +149,7 @@ function addJsVars($jsContents)
     $settings = Settings::get();
     $page     = Page::getCurrent();
     $language = Language::getCurrent();
-    $user     = User::getInstance();
+    $user     = User::getCurrent();
 
     // Create an array of functions to call when DOM is ready.
     $onReady  = '';

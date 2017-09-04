@@ -357,7 +357,7 @@ function saveArticleInDB($form)
     $q = $db->query();
     $q->insert('articles', ['content_en' => $contentEn,
                             'content_fr' => $contentFr,
-                            'author'     => User::getInstance()->getId(),
+                            'author'     => User::getCurrent()->getId(),
                             'category'   => (int)$form->getPostedData('article[category]'),
                             'image'      => $form->getPostedData('article[image]'),
                             'status'     => (string)$form->getPostedData('article[status]')]);

@@ -35,7 +35,7 @@ $error = Cerror::getInstance();
 
 // By default, the secured vars are converted to objects and they do not allow HTML.
 UserData::getInstance();
-$user = User::getInstance();
+$user = User::getCurrent();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
 

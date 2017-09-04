@@ -9,7 +9,7 @@ class User
 {
 	private static $instance = null;
 	public $id;
-	public $type;
+	public $type;// Member, admin or guest.
 	public $login;
 	private $settings;
 	private $ip;
@@ -26,25 +26,30 @@ class User
 	 */
 	function __construct()
 	{
-		$settings = Settings::get();
+        if (IS_LOCAL)
+        {
+            $this->id = 1;
+            $this->type = 'member';
+        }
+        else
+        {
+            $this->id = 2;
+            $this->type = 'guest';
+        }
+        return;
 
-		if (IS_LOCAL)
-		{
-			$this->id = 1;
-			$this->type = 'member';
-		}
-		else
-		{
-			$this->id = 2;
-			$this->type = 'guest';
-		}
+        // First check if user has a session.
+        $this->checkSession();
+
+        // Check if user is logging in.
+        if (!$this->id) $this->checkLogIn();
+
+        // Check if user is logging out.
+        $this->checkLogOut();
+
+        $settings = Settings::get();
 		/*
 		$language = Language::getCurrent();
-		$posts = Userdata::get('post');
-
-		// First look in session to check if the user is already logged in or guest.
-		//!\\ The session var 'user' is already taken by ovh. Use 'usr' to avoid conflict.
-		if (isset($sessions->usr)) $this->retrieveUserFromSession($sessions);
 
 		// Check if user attempts to log in.
 		if (isset($posts->connection)) $this->login($posts->login, $posts->password);
@@ -73,7 +78,7 @@ class User
 	 *
 	 * @return User object: the only instance of this class.
 	 */
-	public static function getInstance()
+	public static function getCurrent()
 	{
 		if (!isset(self::$instance)) self::$instance = new self;
 		return self::$instance;
@@ -85,29 +90,71 @@ class User
 	 *
 	 * @return void.
 	 */
-	/*private function retrieveUserFromSession($sessions)
-	{
-		// Decrypt the session var, unserialize it and obtain this object: $user= {id: an_id, login: "a login"}.
-		// Store the user id + user login in session for stronger security (cannot guess the matching id-login pair).
-		$user = unserialize(Encryption::decrypt($sessions->usr));
+    private function checkSession()
+    {
+        $sessions = Userdata::get('session');
 
-		// Check in database if the user userId-login pair exists.
-		// "SELECT `id`, `login`, `type` FROM `users` WHERE CONCAT(`id`,LOWER(`login`))='$user->id$user->login'"
-		$db= Database::getInstance();
-		$q= $db->query();
-		$q->select('users', [$q->col('id'), $q->col('login'), $q->col('type')]);
-		$w= $q->where();
-		$w->concat($w->col('id'), $w->lower($w->col('login')));
-		$user= $q->run()
-			     ->loadObject();
-		if (is_object($user))
-		{
-			$this->id= $user->id;
-			$this->login= $user->login;
-			$this->type= $user->type;
-		}
-		else $this->startGuestSession();
-	}*/
+        if (isset($sessions->usr))
+        {
+            // Decrypt the session var, unserialize it and obtain this object: $user= {id: an_id, login: "a login"}.
+            // Store the user id + user login in session for stronger security (cannot guess the matching id-login pair).
+            $user = unserialize(Encryption::decrypt($sessions->usr));
+
+            // Check in database if the user userId-login pair exists.
+            // "SELECT `id`, `login`, `type` FROM `users` WHERE CONCAT(`id`,LOWER(`login`))='$user->id$user->login'"
+            $db = Database::getInstance();
+            $q  = $db->query->select('users', [$q->col('id'), $q->col('login'), $q->col('type')]);
+            $w  = $q->where();
+            $w->concat($w->col('id'), $w->lower($w->col('login')));
+            $user = $q->run()->loadObject();
+
+            if (is_object($user))
+            {
+                $this->id    = $user->id;
+                $this->login = $user->login;
+                $this->type  = $user->type;
+            }
+        }
+	}
+
+
+    private function checkLogIn()
+    {
+        $posts = Userdata::get('post');
+
+        if (!empty($posts->userLogin) && !empty($posts->userPassword))
+        {
+            $settings = Settings::get();
+            $pair     = strtolower($login.$password);
+
+            if (strpos($pair,"'") !== false || strpos($pair,'"') !== false) setError(744);//error: found " or '
+            else $member = loadObject("SELECT `memberId`,`activated`,`visitsNumber` FROM `members`
+                                       WHERE LOWER(CONCAT(`login`,`password`))='$pair'");
+
+            if (!is_object($member)) return setError(569);//did not found user in DB (invalid login or password)
+            elseif (!$member->activated) return setError(getTexts(593).'<br />'.getTexts(594));//block unactiv. accounts
+            else
+            {
+                update('members',array('lastVisit','visitsNumber'),
+                                 array(date('Y-m-d H:i:s'),$member->visitsNumber+1),
+                                 "`memberId`='$member->memberId'");
+                $this->id = $member->memberId;
+                $this->login = $GLOBALS['memberLogin'] = $login;
+                $this->type = 'member';
+                $this->message = filter(getTexts(date('H')<12?561:(date('H')<$settings->eveningStartsAt?562:563)));
+                $this->storeInSession();//whatever the type of user, store the userId-login pair in session
+            }
+        }
+    }
+
+
+    private function checkLogOut()
+    {
+        $return = null;
+        $posts = Userdata::get('post');
+
+        return $return;
+    }
 
 
 	/*
@@ -220,7 +267,7 @@ class User
 	*/
 	public function isMember()
 	{
-		return $this->type== 'member' || $this->isAdmin() ? 1 : 0;
+		return $this->type === 'member' || $this->isAdmin();
 	}
 
 

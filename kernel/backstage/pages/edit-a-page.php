@@ -235,7 +235,7 @@ function afterValidateForm($result, $form)
 
 			$q->update('articles', ['content_en' => $GLOBALS["content_en"],
 	                                'content_fr' => $GLOBALS["content_fr"],
-	                                'author'     => User::getInstance()->getId(),
+	                                'author'     => User::getCurrent()->getId(),
 	                                'category'   => (int)$form->getPostedData('article[category]'),
 	                                'image'      => $form->getPostedData('article[image]'),
 	                                'status'     => $form->getPostedData('article[status]')]);
