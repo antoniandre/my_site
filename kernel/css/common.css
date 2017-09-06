@@ -277,17 +277,21 @@ margin-left: -2.5em;
  left:0;
  display:block;
  display:none;}
+
  .content ul {margin:10px 0 10px 20px;}
  ul.glyph li,
+ ul.checklist li,
  ul.icons li {list-style-type:none;position: relative;padding-left: 10px;}
- ul.glyph li:before {
+ ul.glyph li:before,
+ ul.checklist li:before {
     content:'> ';
     position: absolute;
     top: .3em;
     left: -1em;
     line-height: inherit;
 }
- ul.glyph li.parent:before {content:'v ';}
+ul.glyph li.parent:before {content:'v ';}
+ul.checklist li:before {content:'y ';}
 
  h1#title {margin-bottom:45px;font-size: 40px;}
  h1#title:before {

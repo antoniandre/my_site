@@ -22,7 +22,7 @@
 
  [class^="i-"]:before, [class*=" i-"]:before, [data-icon]:before,
  #breadcrumbs .home:before, #breadcrumbs .sitemap:before, #sitemap-page .home a:before, #sitemap-page #title:before,
- #sitemap-page #page li:before, ul.glyph li:before, .required:after, .valid:after, .invalid:after, .newsletter .error:before,
+ #sitemap-page #page li:before, ul.glyph li:before, ul.checklist li:before, .required:after, .valid:after, .invalid:after, .newsletter .error:before,
  article h2:before, article h3:before, #sticky-bar:after, .dz-remove:before, figure.postcard:before, #mobile-menu li a:before,
  #mobile-menu li h4:before, #a28fig16.play:before
  {font-family: "template-site", "arial black", arial, sans-serif !important;
