@@ -114,11 +114,8 @@ Class Where extends DatabaseEntity
 	{
 		$args = $this->gatherArgs(func_get_args());
 
-        if (count($args))
-        {
-    		$this->tempPieces[] = (count($args) > 1) ? (' ('.implode(" AND ", $args).')') : (' AND '.(isset($args[0]) ? $args[0] : ''));
-    		$this->where = implode("\n", $this->tempPieces);
-        }
+		$this->tempPieces[] = (count($args) > 1) ? (' AND ('.implode(" AND ", $args).')') : (' AND '.(isset($args[0]) ? $args[0] : ''));
+		$this->where = implode("\n", $this->tempPieces);
 
 		return $this;
 	}
@@ -146,11 +143,8 @@ Class Where extends DatabaseEntity
 	{
 		$args = $this->gatherArgs(func_get_args());
 
-        if (count($args))
-        {
-    		$this->tempPieces[] = (count($args) > 1) ? (' ('.implode(" OR ", $args).')') : (' OR '.(isset($args[0]) ? $args[0] : ''));
-    		$this->where = implode("\n", $this->tempPieces);
-        }
+        $this->tempPieces[] = (count($args) > 1) ? (' OR ('.implode(" OR ", $args).')') : (' OR '.(isset($args[0]) ? $args[0] : ''));
+    	$this->where = implode("\n", $this->tempPieces);
 
 		return $this;
 	}
