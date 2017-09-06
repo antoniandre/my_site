@@ -49,7 +49,8 @@ Class Where extends DatabaseEntity
 		// If where is initiated with 1 E.g. $q->where(1); then add it to the array of tempPieces.
 		if ($condition === [1] && isset(self::$instance)) self::$instance->tempPieces[] = 1;
 		if (!isset(self::$instance)) self::$instance = new self($condition);
-		return self::$instance;
+
+        return self::$instance;
 	}
 
 	/**
@@ -77,7 +78,8 @@ Class Where extends DatabaseEntity
         	default:
 	        	break;
         }
-		if (!method_exists($this, $method)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
+
+        if (!method_exists($this, $method)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
         else return call_user_func_array(array(self::$instance, $method), $args);
     }
 
@@ -156,57 +158,63 @@ Class Where extends DatabaseEntity
 	 * @return Where: the current instance.
 	 *
 	 * Usage:
-     * $q= $db->query()->select('pages', '*');
-     * $q->where()->col('page')->in("sitemap", "home");
+     * $db->query()->select('pages', '*')
+     *    ->where()->col('page')->in("sitemap", "home");
 	 */
 	public function in()
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
+
 		$this->tempPieces[$currIndex] .= ' IN ('.implode(', ', $this->gatherArgs(func_get_args())).')';
-		$this->where = implode("\nAND ", $this->tempPieces);
-		return $this;
+		$this->where = implode("\n", $this->tempPieces);
+
+        return $this;
 	}
 
 	/**/
 	public function eq($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 
 		$this->tempPieces[$currIndex] .= ' = '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**/
 	public function lt($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' < '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**/
 	public function lte($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' <= '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**/
 	public function gt($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' > '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -216,11 +224,12 @@ Class Where extends DatabaseEntity
 	 */
 	public function gte($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' >= '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -230,11 +239,12 @@ Class Where extends DatabaseEntity
 	 */
 	public function ne($rightHandArg)
 	{
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' <> '.$this->gatherArgs(func_get_args())[0];
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 	// Different of sth. Alias for ne() method.
 	public function dif($rightHandArg)
@@ -256,7 +266,8 @@ Class Where extends DatabaseEntity
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to get a date range on no column.');
 		else $this->tempPieces[$currIndex] .= " BETWEEN '$start' AND $end";
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -272,7 +283,8 @@ Class Where extends DatabaseEntity
 		// PHP5.5-
 		call_user_func_array(['parent', __FUNCTION__], func_get_args());
 		$this->where = implode("\nAND ", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -285,7 +297,8 @@ Class Where extends DatabaseEntity
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
 		$this->where = implode("\nAND ", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -298,7 +311,8 @@ Class Where extends DatabaseEntity
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
 		$this->where = implode("\n", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
@@ -322,7 +336,8 @@ Class Where extends DatabaseEntity
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
 		$this->where = implode("\nAND ", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**/
@@ -330,7 +345,8 @@ Class Where extends DatabaseEntity
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
 		$this->where = implode("\nAND ", $this->tempPieces);
-		return $this;
+
+        return $this;
 	}
 
 	/**
