@@ -113,16 +113,16 @@ elseif ($article && $article->status === 'published')
 	// Add "Article created on [date] by [author]" on top right and format the date.
 	$articleCreated = text(21,
 					  [
-						    'contexts' => 'article',
-							'formats'  =>
-							[
-								'sprintf' =>
-								[
-									$article->author,
-								  	$created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
-								 	$created->format($language == 'fr' ? 'H\hi' : 'H:i')
-								]
-							]
+	                      'contexts' => 'article',
+                          'formats'  =>
+                          [
+                              'sprintf' =>
+                              [
+                                  "<span class=\"author\"> $article->author</span>",
+                                  '<span class="date i-calendar"> ' . $created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
+                                  $created->format($language == 'fr' ? 'H\hi' : 'H:i') . '</span>'
+                              ]
+                          ]
 					  ]);
 
 	// Now get the image representing the article for Facebook.
@@ -256,9 +256,8 @@ function likeItem($item)
 	$item = urldecode($item);
 
 	$q = database::getInstance()->query();
-	$q->select('likes', [$q->col('ip')]);
-	$w = $q->where();
-	$w->col('item')->eq($item)->and($w->col('article')->eq($article->id));
+	$q->select('likes', [$q->col('ip')])
+	  ->where()->col('item')->eq($item)->and()->col('article')->eq($article->id);
 	$dbRow = $q->run()->loadObject();
 
 	// Update.

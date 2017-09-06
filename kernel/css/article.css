@@ -1,7 +1,10 @@
 /* prevent rotated pic with negative margin-right to overflow and cause scrollbar. */
 @media screen and (max-width: 880px) {#page {overflow-x: hidden;}}
 
-.created-by-on {text-align: right;color:#bbb;font-style: italic;}
+.created-by-on {text-align: right;color:#bbb;font-size: 1.1em;font-family: dinnext, Arial, Helvetica, sans-serif;}
+.created-by-on :before {font-size: 1em;vertical-align: text-top;line-height: 1;margin-left: .5em;}
+.created-by-on .date {font-size: .9em;}
+.author {color:#999;}
 .article-tags
 {float: right;
 z-index: 1;

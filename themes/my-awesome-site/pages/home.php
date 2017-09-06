@@ -84,9 +84,9 @@ function renderArticles($articles, $lazyload = null, $tpl)
 								   						[
 								   							'sprintf' =>
 								   							[
-						   										$article->author,
-															  	$created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
-															 	$created->format($language == 'fr' ? 'H\hi' : 'H:i')
+																"<span class=\"author\"> $article->author</span>",
+																'<span class="date i-calendar"> ' . $created->format($language == 'fr' ? 'd/m/Y' : 'Y-m-d'),
+															 	$created->format($language == 'fr' ? 'H\hi' : 'H:i') . '</span>'
 															]
 														]
 													   ])
