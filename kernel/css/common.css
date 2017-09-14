@@ -293,8 +293,8 @@ margin-left: -2.5em;
 ul.glyph li.parent:before {content:'v ';}
 ul.checklist li:before {content:'y ';}
 
- h1#title {margin-bottom:45px;font-size: 40px;}
- h1#title:before {
+ .page-title {margin-bottom:45px;font-size: 40px;}
+ .page-title:before {
     font-size:85%;
     margin-right:15px;
     margin-bottom: 8px;
