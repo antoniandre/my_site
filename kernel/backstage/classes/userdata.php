@@ -261,7 +261,7 @@ class Userdata
         // First check the data source.
         if (!in_array($dataSource, self::knownSources))
         {
-            Cerror::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
+            Cerror::add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
             return false;
         }
 
@@ -295,7 +295,7 @@ class Userdata
     {
         if (!in_array($dataSource, self::knownSources))
         {
-            Cerror::getInstance()->add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
+            Cerror::add(__CLASS__.'::'.__FUNCTION__."(): The requested data source is unknown: \"$dataSource\". Please choose among: ".implode(', ', self::knownSources).'.', null, true);
             return;
         }
         $return = null;

@@ -64,7 +64,7 @@ class Text
 
 		$db       = database::getInstance();
 		$q        = $db->query();
-		$language = Language::getInstance()->getCurrent();
+		$language = Language::getCurrent();
 
 		// Retrieve from DB.
 		$q->select('texts', [$q->col('id'), $q->col('context'), $q->col('text_'.$language)]);
@@ -110,7 +110,7 @@ class Text
 			$q        = $db->query();
 			$language = Language::check($language);
 
-			// Retrieve from DB.
+            // Retrieve from DB.
 			$q->select('texts', [$q->col('id'), $q->col('context'), $q->col('text_'.$language)]);
 
 			// Set the Where clause to `id` IN ([id_list]).
