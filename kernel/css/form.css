@@ -4,6 +4,7 @@
 .buttons {float:right;}
 .buttons button {float:left;}
 
+input[type="radio"].hidden,
 input[type="checkbox"].hidden {
     z-index: -100;
     position: fixed;
