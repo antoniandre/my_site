@@ -29,8 +29,9 @@
  */
 includeClass('database.entity');
 includeClass('database.query.where');
+includeClass('database.query.having');
 
-Class Query extends DatabaseEntity
+class Query extends DatabaseEntity
 {
 	private static $instance = null;
 	private $mysqli;
@@ -40,7 +41,9 @@ Class Query extends DatabaseEntity
 	private $table;
 	private $join;
 	private $where;// Where object handling the current query WHERE clause.
+	private $having;// Having object handling the current query HAVING clause if any.
 	private $orderBy;
+	private $groupBy;
 	private $limit;
 	private $info;// After-run information on query.
 	private $lastQuery;
@@ -53,19 +56,21 @@ Class Query extends DatabaseEntity
 	protected function __construct($mysqli)
 	{
 		parent::__construct();
-		$this->mysqli = $mysqli;
+		$this->mysqli             = $mysqli;
 		$this->secureInternalData = false;
-		$this->currentQuery = null;
-		$this->currentQueryType = null;
-		$this->table = null;
-		$this->join = [];
-		$this->where = null;
-		$this->orderBy = '';
-		$this->limit = '';
-		$this->info = null;
-		$this->lastQuery = null;
-		$this->lastQueryType = null;
-		$this->error = false;
+		$this->currentQuery       = null;
+		$this->currentQueryType   = null;
+		$this->table              = null;
+		$this->join               = [];
+		$this->where              = null;
+		$this->having             = null;
+		$this->orderBy            = '';
+		$this->groupBy            = '';
+		$this->limit              = '';
+		$this->info               = null;
+		$this->lastQuery          = null;
+		$this->lastQueryType      = null;
+		$this->error              = false;
 	}
 
 	/**
@@ -76,7 +81,12 @@ Class Query extends DatabaseEntity
 	public static function getInstance($mysqli = null)
 	{
 		if (!isset(self::$instance)) self::$instance = new self($mysqli);
-		return self::$instance;
+
+        // Reinit error if called from $db->query();
+        $bt = debug_backtrace(2, 2);
+        if (isset($bt[1]) && $bt[1]['class'] === 'Database') self::clearError();
+
+        return self::$instance;
 	}
 
 	/**
@@ -90,7 +100,8 @@ Class Query extends DatabaseEntity
 	 */
     function __call($method, $args)
     {
-    	$return= null;
+        $return = $this;
+
         switch ($method)
         {
         	case 'as':
@@ -100,9 +111,12 @@ Class Query extends DatabaseEntity
         	default:
 	        	break;
         }
-		if (!method_exists($this, $method)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): Method "'.__CLASS__."::$method()\" does not exist.");
-        else return call_user_func_array(array(self::$instance, $method), $args);
-        return $this;
+
+        if (self::hasError()) {}
+        elseif (!method_exists($this, $method)) $return = self::abort('Mysqli ' . __CLASS__ . ": Method \"$method()\" does not exist.");
+        else $return = call_user_func_array(array(self::$instance, $method), $args);
+
+        return $return;
     }
 
 	/**
@@ -266,6 +280,34 @@ Class Query extends DatabaseEntity
 		return $this;
 	}
 
+    /**
+     *
+     */
+    public function freeQuery($query)
+    {
+        $result = $this->mysqli->query($query);
+
+        $info = new StdClass();
+		$info->error = false;
+		$info->errorMessage = '';
+		$info->insertId = $this->mysqli->insert_id;
+		$info->affectedRows = $this->mysqli->affected_rows;
+		$info->numRows = $result ? $result->num_rows : 0;
+
+        if ($result) $info->mysqliResult = $result;
+        else
+        {
+            $info->errorMessage = $this->setError();
+            $info->error = true;
+        }
+
+
+        $this->lastQuery = $query;
+        $this->info = $info;
+
+        return $this;
+    }
+
 	/**
 	 * Check the key-value pairs provided in insert and update functions.
 	 *
@@ -394,16 +436,24 @@ Class Query extends DatabaseEntity
 			if (!$this->error)
 			{
 				// Add the WHERE clause to the query if any and reset class attributes to null.
-				if ($this->where !== null && $this->where->get()) $this->currentQuery .= " WHERE ({$this->where->get()})";
+                $where = $this->where !== null && $this->where->get() ? " WHERE ({$this->where->get()})" : '';
 
-				$this->currentQuery .= $this->orderBy.$this->limit;
-				$this->table = null;
+                $having = $this->having !== null && $this->having->get() ?  " HAVING ({$this->having->get()})" : '';
+
+                $this->currentQuery .= $where . $this->groupBy . $having . $this->orderBy . $this->limit;
+                $this->table = null;
 				$this->tempPieces = null;
 
 				if ($this->where instanceof Where)
 				{
 					$this->where->kill();
 					$this->where = null;
+				}
+
+				if ($this->having instanceof Having)
+				{
+					$this->having->kill();
+					$this->having = null;
 				}
 			}
 		}
@@ -428,8 +478,7 @@ Class Query extends DatabaseEntity
 		$info->affectedRows = 0;
 		$info->numRows = null;
 		$info->mysqliResult = null;
-
-		if ($this->assemble())
+        if (!self::hasError() && $this->assemble())
 		{
 			$result = $this->mysqli->query($this->currentQuery);
 			if (!$result) $info->errorMessage = $this->setError();
@@ -472,12 +521,23 @@ Class Query extends DatabaseEntity
 	 * @param  string $message: the message to forward to the Error class.
 	 * @return The current Query instance.
 	 */
-	private function abort($message)
+	public static function abort($message)
 	{
-		$this->error = true;
-		Cerror::getInstance()->add('Mysqli '.__CLASS__."::$message\n<strong>Query was aborted.</strong>", null, true);
-		return $this->end();
+		self::getInstance()->error = true;
+		Cerror::add('Mysqli ' . __CLASS__ . "::$message\n<strong>Query was aborted.</strong>", null, true);
+		return self::getInstance()->end();
 	}
+
+    public static function clearError()
+    {
+        self::getInstance()->error = false;
+        return self::getInstance();
+    }
+
+    public static function hasError()
+    {
+        return self::getInstance()->error;
+    }
 
 	/**
 	 * Perform tasks when beginning a query.
@@ -501,17 +561,23 @@ Class Query extends DatabaseEntity
 		$this->join = [];
 		$this->tempPieces = [];
 		$this->orderBy = '';
-		$this->limit = '';
-		// Comment because we need the mysqli result after run() when loadObjects() and other after-run functions.
-		// $this->info->mysqliResult = null;
-		return $this;
+		$this->groupBy = '';
+        $this->limit = '';
+
+        // Clean generated where and having for next queries in case of an abortion.
+        if ($this->where) $this->where->kill();
+        if ($this->having) $this->having->kill();
+
+        // Don't reinit $this->info->mysqliResult because we need the mysqli result after run() when loadObjects() and other after-run functions.
+
+        return $this;
 	}
 
 	/**
 	 * Gather function args: if args are instanceOf Query, they are treated previously and
 	 * appended to the $this->tempPieces attribute. So This function get the treated args from this array
 	 * and return all the params in the right order.
-	 * If a param is non-database-entity-object (Query or Where) it is treated as a simple string.
+	 * If a param is non-database-entity-object (Query or Where or Having) it is treated as a simple string.
 	 *
 	 * @example
 	 * $q->select('pages', [
@@ -552,7 +618,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function concat()
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(...func_get_args());
 	}
 
@@ -564,7 +630,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function _count($string)
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(func_get_arg(0));
 	}
 
@@ -576,7 +642,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function col($column)
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(func_get_arg(0));
 	}
 
@@ -590,21 +656,21 @@ Class Query extends DatabaseEntity
 	 */
 	public function colIn($column, $table)
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(...func_get_args());
 	}
 
 	/**/
 	protected function lower($string)
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(func_get_arg(0));
 	}
 
 	/**/
 	protected function upper($string)
 	{
-        // Shared method between Query and Where.
+        // Shared method between Query, Where and Having.
 		return parent::{__FUNCTION__}(func_get_arg(0));
 	}
 
@@ -644,12 +710,27 @@ Class Query extends DatabaseEntity
         return $this;
 	}
 
-	// @todo: finish this.
-	public function groupBy($column)
-	{
-		// Do sth.
-		return $this;
-	}
+    /**
+     * groupBy.
+     *
+     * @param string/array $column:
+     * @return The current Query instance.
+     */
+    public function groupBy($column)
+    {
+        $column    = $this->gatherArgs(func_get_args());
+        $groupBy = '';
+
+        if (!is_array($column)) $column = [$column];
+
+        foreach ($column as $col)
+        {
+            $groupBy .= ", $col";
+        }
+
+        $this->groupBy = ' GROUP BY ' . trim($groupBy, ', ');
+        return $this;
+    }
 
 	/**
      * Group concat.
@@ -748,11 +829,11 @@ Class Query extends DatabaseEntity
 	public function postpone()
 	{
         // @todo: Should the query be assembled here first?
-		if (!$this->currentQuery) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): There is currently no query to postpone.');
-		elseif (!$this->currentQueryType == 'select') Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You can\'t postpone a select query.');
+		if (!$this->currentQuery) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): There is currently no query to postpone.');
+		elseif (!$this->currentQueryType == 'select') Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You can\'t postpone a select query.');
 		elseif (!$this->where && in_array($this->currentQueryType, array('update', 'delete')))
 		{
-			Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): omitted WHERE clause.\n"
+			Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): omitted WHERE clause.\n"
 									 ."You may have forgotten the WHERE clause for the $this->currentQueryType query.\n"
 									 ."If you intend to impact all the table rows, please set a WHERE clause to 1: "
 									 ."\"\$query->where(1);\".");
@@ -809,6 +890,26 @@ Class Query extends DatabaseEntity
 	}
 
 	/**
+	 * Create the HAVING clause instance. The having class is a specialization of the Where class.
+	 * /!\ /!\ WARNING! the result of $q->Having() in a query is the Having instance not the Query instance!
+	 * Doing so, you can add things to the Having clause by chaining methods if you need to.
+	 * So this won't work:
+	 *     $q->select('articles', [$q->colIn('id', 'articles')])->Having(1)->run();
+	 * but this will:
+	 *     $q->select('articles', [$q->colIn('id', 'articles')]);
+	 *     $h = $q->Having(1);
+	 *     $q->run();
+	 *
+     * @param string $condition: the first HAVING clause condition.
+	 */
+     public function having()
+	{
+		$this->having = Having::getInstance(func_get_args());
+
+        return $this->having;
+	}
+
+	/**
 	 * Proceed to real_escape_string().
 	 *
 	 * @param the string to escape.
@@ -818,7 +919,7 @@ Class Query extends DatabaseEntity
 	{
 		if (is_array($string) || is_object($string))
 		{
-			Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): Expecting parameter to be a string.');
+			Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): Expecting parameter to be a string.');
 			return $string;
 		}
 		return $this->mysqli->real_escape_string($string);
@@ -840,7 +941,7 @@ Class Query extends DatabaseEntity
 		 	case 'increment':// ['increment' => (int/float)]
 		 		if (is_numeric($key))
 		 		{
-		 			Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): you can\'t increment an unknown column.');
+		 			Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): you can\'t increment an unknown column.');
 		 			$error = 1;
 		 		}
 		 		else $value = "`$key`+{$value[1]}";
@@ -852,7 +953,7 @@ Class Query extends DatabaseEntity
 		 		}
 		 		else
 		 		{
-		 			Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$value[1]\".");
+		 			Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$value[1]\".");
 		 			$error = 1;
 				}
 		 		break;
@@ -869,7 +970,7 @@ Class Query extends DatabaseEntity
 					 		}
 					 		else
 					 		{
-								Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$v[1]\".");
+								Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the column name must be a string not \"$v[1]\".");
 								$error = 1;
 								break 2;
 					 		}
@@ -883,7 +984,7 @@ Class Query extends DatabaseEntity
 		 		if (is_array($value[1])) $value = "COUNT(`".implode("`,`", $value[1])."`)";
 		 		break;
 		 	default:
-		 		Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): This case does not exist: ".strtolower($value[0]).'. Given array was: '.print_r($value, true));
+		 		Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): This case does not exist: ".strtolower($value[0]).'. Given array was: '.print_r($value, true));
 		 		$error = 1;
 		 		break;
 		}
@@ -946,7 +1047,7 @@ Class Query extends DatabaseEntity
 	{
 		$return = null;
 
-		if (!$this->info) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
+		if (!$this->info) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
 			$result = $this->info->mysqliResult;
@@ -966,7 +1067,7 @@ Class Query extends DatabaseEntity
 	{
 		$return = null;
 
-		if (!$this->info) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
+		if (!$this->info) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
 			$result = $this->info->mysqliResult;
@@ -993,7 +1094,7 @@ Class Query extends DatabaseEntity
 	{
 		$return = [];
 
-		if (!$this->info) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
+		if (!$this->info) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
 			$result = $this->info->mysqliResult;
@@ -1030,14 +1131,14 @@ Class Query extends DatabaseEntity
 	{
 		$return = [];
 
-		if (!$this->info) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
+		if (!$this->info) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): there is currently no query result to exploit.");
 		elseif (isset($this->info->mysqliResult))
 		{
 			$result = $this->info->mysqliResult;
 			if ($result->num_rows)
 			{
 				$firstRow = $result->fetch_assoc();
-				if ($key && !isset($firstRow->$key)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the key '$key' is not available from the database query result.");
+				if ($key && !isset($firstRow->$key)) Cerror::add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__)."(): the key '$key' is not available from the database query result.");
 
 				$array = array();
 			    if ($key) $array[$firstRow[$key]] = $firstRow;
@@ -1065,7 +1166,7 @@ Class Query extends DatabaseEntity
 	 */
 	public function setError()
 	{
-		Cerror::getInstance()->add(__CLASS__.'::'.ucfirst($this->currentQueryType)."(): {$this->mysqli->error}\n  SQL = \"$this->currentQuery\".", 'MYSQLI');
+		Cerror::add(__CLASS__.'::'.ucfirst($this->currentQueryType)."(): {$this->mysqli->error}\n  SQL = \"$this->currentQuery\".", 'MYSQLI');
 		return $this->mysqli->error;
 	}
 

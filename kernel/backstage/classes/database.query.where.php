@@ -21,8 +21,8 @@
  **/
 Class Where extends DatabaseEntity
 {
-	private static $instance = null;
-	private $where;
+	protected static $instance = null;
+	protected $string;// The where generated string.
 
 	/**
 	 * Class constructor.
@@ -34,7 +34,7 @@ Class Where extends DatabaseEntity
 		if (count($args))
 		{
 			$this->tempPieces = $this->gatherArgs($args);
-			$this->where = implode(' ', $this->tempPieces);
+			$this->string = implode(' ', $this->tempPieces);
 		}
 	}
 
@@ -64,7 +64,7 @@ Class Where extends DatabaseEntity
 	 */
     function __call($method, $args)
     {
-    	$return= null;
+    	$return = $this;
 
         switch ($method)
         {
@@ -79,8 +79,10 @@ Class Where extends DatabaseEntity
 	        	break;
         }
 
-        if (!method_exists($this, $method)) Cerror::getInstance()->add('Mysqli '.__CLASS__.'::'.ucfirst(__FUNCTION__).'(): method "'.__CLASS__."::$method()\" does not exist.");
-        else return call_user_func_array(array(self::$instance, $method), $args);
+        if (!method_exists($this, $method)) Query::abort('Mysqli ' . __CLASS__ . ": method \"$method()\" does not exist.");
+        else $return = call_user_func_array(array(self::$instance, $method), $args);
+
+        return $return;
     }
 
 	/**
@@ -90,7 +92,7 @@ Class Where extends DatabaseEntity
 	 */
 	public function get()
 	{
-		return $this->where;
+		return $this->string;
 	}
 
 	/**
@@ -117,7 +119,7 @@ Class Where extends DatabaseEntity
 		$args = $this->gatherArgs(func_get_args());
 
 		$this->tempPieces[] = (count($args) > 1) ? (' AND ('.implode(" AND ", $args).')') : (' AND '.(isset($args[0]) ? $args[0] : ''));
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
 		return $this;
 	}
@@ -146,7 +148,7 @@ Class Where extends DatabaseEntity
 		$args = $this->gatherArgs(func_get_args());
 
         $this->tempPieces[] = (count($args) > 1) ? (' OR ('.implode(" OR ", $args).')') : (' OR '.(isset($args[0]) ? $args[0] : ''));
-    	$this->where = implode("\n", $this->tempPieces);
+    	$this->string = implode("\n", $this->tempPieces);
 
 		return $this;
 	}
@@ -166,7 +168,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 
 		$this->tempPieces[$currIndex] .= ' IN ('.implode(', ', $this->gatherArgs(func_get_args())).')';
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -179,7 +181,7 @@ Class Where extends DatabaseEntity
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 
 		$this->tempPieces[$currIndex] .= ' = '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -190,7 +192,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' < '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -201,7 +203,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' <= '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -212,7 +214,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' > '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -227,7 +229,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex< 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' >= '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -242,7 +244,7 @@ Class Where extends DatabaseEntity
 		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to compare nothing on the left hand.');
 		else $this->tempPieces[$currIndex] .= ' <> '.$this->gatherArgs(func_get_args())[0];
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -262,10 +264,20 @@ Class Where extends DatabaseEntity
 	{
 		$start = !$start ? '0000-00-00' : $start;
 		$end = !$end || 'NOW()' ? 'NOW()' : "'$end'";
-		$currIndex = count($this->tempPieces)-1;
+		$currIndex = count($this->tempPieces) - 1;
 		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__).'(): You are trying to get a date range on no column.');
 		else $this->tempPieces[$currIndex] .= " BETWEEN '$start' AND $end";
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
+
+        return $this;
+	}
+
+	public function regexp($regex)
+	{
+        $currIndex = count($this->tempPieces) - 1;
+		if ($currIndex < 0) return $this->abort(ucfirst(__FUNCTION__) . '(): Your regexp is empty.');
+        else $this->tempPieces[$currIndex] .= " REGEXP " . $this->gatherArgs(func_get_args())[0];
+        $this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -282,7 +294,7 @@ Class Where extends DatabaseEntity
 		// parent::{__FUNCTION__}(...func_get_args());
 		// PHP5.5-
 		call_user_func_array(['parent', __FUNCTION__], func_get_args());
-		$this->where = implode("\nAND ", $this->tempPieces);
+		$this->string = implode("\nAND ", $this->tempPieces);
 
         return $this;
 	}
@@ -296,7 +308,7 @@ Class Where extends DatabaseEntity
 	public function _count($string)
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
-		$this->where = implode("\nAND ", $this->tempPieces);
+		$this->string = implode("\nAND ", $this->tempPieces);
 
         return $this;
 	}
@@ -310,7 +322,7 @@ Class Where extends DatabaseEntity
 	public function col($column)
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
-		$this->where = implode("\n", $this->tempPieces);
+		$this->string = implode("\n", $this->tempPieces);
 
         return $this;
 	}
@@ -335,7 +347,7 @@ Class Where extends DatabaseEntity
 	protected function lower($string)
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
-		$this->where = implode("\nAND ", $this->tempPieces);
+		$this->string = implode("\nAND ", $this->tempPieces);
 
         return $this;
 	}
@@ -344,7 +356,7 @@ Class Where extends DatabaseEntity
 	protected function upper($string)
 	{
 		parent::{__FUNCTION__}(func_get_arg(0));
-		$this->where = implode("\nAND ", $this->tempPieces);
+		$this->string = implode("\nAND ", $this->tempPieces);
 
         return $this;
 	}
@@ -397,7 +409,7 @@ Class Where extends DatabaseEntity
 	 */
 	public function kill()
 	{
-		$this->where = '';
+		$this->string = '';
 		$this->tempPieces = [];
 	}
 }
