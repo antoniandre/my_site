@@ -22,7 +22,7 @@ $db = database::getInstance();
 $q = $db->query();
 $tags_options = [];
 $tags = $q->select('tags', [$q->col('id'), $q->col("text$language")->as('text')])->run()->loadObjects('id');
-foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
+if ($tags) foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 
 // @TODO: new request:
 // SELECT id, name, textEn, textFr, GROUP_CONCAT(DISTINCT article) AS articles FROM `tags` as t left join article_tags on t.id = tag group by id.
