@@ -1,10 +1,29 @@
 <?php
-
+/**
+ * Design pattern: singleton.
+ * The Having class works the exact same way as the Where class and benefits from the same methods.
+ *
+ * @example 1
+ * $having = $db->having("column_name1 ='value1'");
+ * $having->and("column_name2='value2'")
+ *        ->or("column_name3 LIKE 'value3'", $having->or("column_name4<=4"), $having->or("column_name5<=5"), $having->or("column_name6<=6"))
+ *        ->and("column_name7='value7'", $having->or("column_name8<=8", $having->and("column_name9='value9'", $having->and("column_name10 IN (1,2,3,4,5)"))));
+ *
+ * Will produce:
+ * column_name1 ='value1'
+ * AND column_name2='value2'
+ * OR (column_name3 LIKE 'value3' OR column_name4<=4 OR column_name5<=5 OR column_name6<=6)
+ * AND (column_name7='value7' OR (column_name8<=8 AND column_name9='value9' AND column_name10 IN (1,2,3,4,5))))
+ *
+ * @example 2
+ * $q->select('article_tags', $q->count('tag'));
+ * $h = $q->having()->col('tag')->eq(2)->and()->col('article')->eq(1);
+ * $count = $q->run()->loadResult();
+ **/
 class Having extends Where
 {
 	protected static $instance = null;
 	// protected $string;// The having generated string.
-
 
 
 	/**

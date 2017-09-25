@@ -628,8 +628,8 @@ class Page
 		foreach ($this->breadcrumbs as $k => $page)
 		{
 			$title = ucfirst($page->title->{self::$language});
-			if ($k !== count($this->breadcrumbs)-1) $output .= ($k ? '<span class="separator i-play"> </span>' : '').'<a href="'.url("$page->page.php").'" class="'.$page->id.'"><span>'.$title.'</span></a>';
-			else $output .= ($k ? '<span class="separator i-play"> </span>' : '').'<span class="current '.$page->id.'"><span>'.$title.'</span></span>';
+			if ($k !== count($this->breadcrumbs)-1) $output .= ($k ? '<span class="separator i-triangle-r"> </span>' : '').'<a href="'.url("$page->page.php").'" class="'.$page->id.'"><span>'.$title.'</span></a>';
+			else $output .= ($k ? '<span class="separator i-triangle-r"> </span>' : '').'<span class="current '.$page->id.'"><span>'.$title.'</span></span>';
 		}
 		return $output;
 	}

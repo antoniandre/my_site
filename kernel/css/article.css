@@ -55,7 +55,6 @@ article .left, article h2, article h3, article p, article ul {text-align: left;}
 
 article h2:before, article h3:before {content: ">";font-size: 90%;}
 
-form .row * {}
 article a {color: #be4646;}
 article a:hover {color: #999;}
 article .center {display: block;margin-left: auto;margin-right: auto;text-align: center;}
