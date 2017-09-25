@@ -302,6 +302,10 @@ function textu($text)
 {
     return text($text, ['formats' => 'url']);
 }
+function textsa($text)
+{
+    return text($text, ['formats' => 'stripaccents']);
+}
 
 /**
  * Perform a callback function Foreach available language.

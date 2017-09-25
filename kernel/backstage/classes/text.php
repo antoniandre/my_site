@@ -177,6 +177,9 @@ class Text
 				case 'htmlentities':
 					$this->formats[$this->requested]->$language = htmlentities($this->string->$language, ENT_NOQUOTES, 'utf-8');
 					break;
+				case 'stripaccents':
+					$this->formats[$this->requested]->$language = $this->stripAccents($this->string->$language);
+					break;
 				case 'url':
 					$this->formats[$this->requested]->$language = $this->urlize($this->string->$language);
 					break;
@@ -190,7 +193,7 @@ class Text
         return $this;
     }
 
-	private function urlize($str)
+	private function stripAccents($str)
 	{
 		/* NEW WAY: (does not work on OVH)
 		@todo: must investigate why and use it.
@@ -204,7 +207,14 @@ class Text
 		{
 			$pattern = '/&(\w{1,2})(?:grave|acute|circ|cedil|uml|ring|lig|tilde);/';
 			$str = preg_replace($pattern, '$1', htmlentities($str, ENT_NOQUOTES, 'UTF-8'));
-		}
+        }
+
+        return $str;
+    }
+
+	private function urlize($str)
+	{
+        $str = $this->stripAccents($str);
 
 		// Replace spaces with dashes and lower the case.
 		$str = strtolower(str_replace(' ', '-', $str));
