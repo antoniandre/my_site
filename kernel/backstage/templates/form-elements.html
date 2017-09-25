@@ -19,8 +19,8 @@
 	<!-- END uploadItemBlock -->
 	{errorMessage}
 	<div class="buttons">
-	    <div class="discard-all i-x">{discardAll}</div>
-	    <div class="add-images-to-article i-check">{addImagesToArticle}</div>
+	    <div class="discardAll i-x">{discardAll}</div>
+	    <div class="addImagesToArticle i-check">{addImagesToArticle}</div>
 	</div>
 </div>
 <!-- END uploadBlock -->
@@ -36,6 +36,15 @@
 	<input type="number" name="{formId}{name}" id="{formId}{id}" class="text number{class}" value="{value}"{attr} />{errorMessage}
 </span>
 <!-- END numberBlock -->
+
+<!-- BEGIN sliderBlock -->
+<div class="range-slider-wrapper {class}-wrapper {validation}{state}">
+    <div class="range-slider {class}"></div>
+</div>
+<script>
+    new slider('.range-slider.{class}', {value: {value}, graduation: {graduation}, input: "{formId}{name}", onInit: {onInit}, onDrag: {onDrag}, afterDrag: {afterDrag}});
+</script>
+<!-- END sliderBlock -->
 
 <!-- BEGIN emailBlock -->
 <span class="{validation}{state}">

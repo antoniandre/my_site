@@ -211,6 +211,7 @@ discardUpload = function()
 	});
 };
 
+
 var robotCheck = function()
 {
     $('.robot-check label').each(function()
@@ -231,6 +232,7 @@ var robotCheck = function()
 		}
 	});
 }
+
 
 var editPanel = function()
 {
@@ -359,3 +361,126 @@ var editPanel = function()
 	}();
 };
 
+
+var slider = function(targetElement, params)
+{
+    var self     = this,
+        defaults = {value: null, onDrag: null, afterDrag: null, graduation: {}, input: null};
+
+    params = $.extend({}, defaults, params);
+    self.target = $(targetElement);
+    self.width  = self.target.width();
+    self.limits = {left: self.target.offset().left, right: self.target.offset().left + self.width};
+    self.handle = null;// Updated on init.
+    self.hasGraduation = (params.graduation || {}).from || (params.graduation || {}).to;
+    self.position = 0;
+    self.graduatedPosition = 0;
+
+    self.bindEvents = function()
+    {
+        $(window).on('resize', function()
+        {
+            self.width = self.target.width();
+            self.limits = {left: self.target.offset().left, right: self.target.offset().left + self.width};
+        });
+
+        if (typeof touchHandler === 'function') self.target.on("touchstart touchmove touchend touchcancel", touchHandler);
+        self.target
+            .on('click', function(e)
+            {
+                self.updatePosition(e);
+            });
+        self.target
+            .on('mousedown', function(e)
+            {
+                self.target.addClass('dragging');
+                self.updatePosition(e);
+
+                // Attach mouse move event only when first clicked.
+                $(document).on('mousemove', function(e)
+                {
+                    self.updatePosition(e);
+                })
+                .one('mouseup', function(e)
+                {
+                    $(document).off('mousemove');
+                    self.target.removeClass('dragging');
+
+                    if (params.input) self.target.find('input').val(params.graduation.to !== undefined ? self.graduatedPosition : self.position);
+
+                    if (typeof params.afterDrag === 'function') params.afterDrag.call(self.target, self.position);
+                });
+            });
+    };
+
+    self.updatePosition = function(e)
+    {
+        if (e.pageX === undefined && !isNaN(e)) self.position = e;
+        else
+        {
+            var handlePosition = Math.max(Math.min(e.pageX, self.limits.right), self.limits.left);
+            self.position = (handlePosition - self.limits.left) / self.width * 100;// Percentage.
+        }
+
+        var args = [self.position];
+
+        self.handle.css({left: self.position + '%'});
+
+        // If graduation is set, update the current state.
+        if (params.graduation.to !== undefined)
+        {
+            self.graduatedPosition = Math.round(self.position * params.graduation.to / 100);
+            self.handle.find('.graduation').text(self.graduatedPosition);
+            args.push(self.graduatedPosition);
+        }
+
+        // If a callback function is provided then run it with the self.target as 'this' argument for use in the callback function.
+        if (typeof params.onDrag === 'function') params.onDrag.call(self.target, ...args);
+        else if (params.onDrag && typeof window[params.onDrag] === 'function') window[params.onDrag].call(self.target, ...args);
+    };
+
+    self.init = function()
+    {
+        self.target.append
+        (
+            (params.input ? '<input type="hidden" name="' + params.input + '" value="' + (params.value || 0) + '">' : '')
+          + (params.graduation.from !== undefined ? '<span class="graduation from">' + params.graduation.from + '</span>' : '')
+          + (params.graduation.to !== undefined ? '<span class="graduation to" data-unit="' + (params.graduation.unit || '') + '">' + params.graduation.to + '</span>' : '')
+          + '<span class="handle">' + (self.hasGraduation ? '<span class="graduation" data-unit="' + (params.graduation.unit || '') + '">0</span>' : '') + '</span>'
+        );
+        self.handle = self.target.find('.handle');
+
+        // If a callback function is provided then run it with the self.target as 'this' argument for use in the callback function.
+        if (typeof params.onInit === 'function') params.onInit.call(self.target);
+        else if (params.onInit && typeof window[params.onInit] === 'function') window[params.onInit].call(self.target);
+
+        if (params.value !== null)
+        {
+            // Convert from graduated value to percentage for positionning the handle.
+            self.position = params.graduation.to ? params.value * 100 / params.graduation.to : params.value;
+            self.updatePosition(self.position);
+        }
+
+        self.bindEvents();
+    }();
+};
+
+
+var touchHandler = function(event)
+{
+    var touch = event.hasOwnProperty('changedTouches') ? event.changedTouches[0] : event.originalEvent.changedTouches[0];
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+        simulatedEvent.initMouseEvent({
+        touchstart: "mousedown",
+        touchmove: "mousemove",
+        touchend: "mouseup"
+    }[event.type], true, true, window, 1,
+        touch.screenX, touch.screenY,
+        touch.clientX, touch.clientY, false,
+        false, false, false, 0, null);
+
+    touch.target.dispatchEvent(simulatedEvent);
+
+    event.preventDefault();
+};

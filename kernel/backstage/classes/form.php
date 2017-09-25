@@ -18,7 +18,7 @@
  */
 class Form
 {
-	const existingElements = ['select', 'text', 'number', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
+	const existingElements = ['select', 'text', 'number', 'slider', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
 	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
 								 'requiredIf' => ['pattern' => '~.+~', 'message' => 'This field is required if the previous option "%s" is chosen.'],
 								 'alpha' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
@@ -397,11 +397,11 @@ HTML;
 			// Convert subdata names from 'name[subname][subsubname]' to '[name][subname][subsubname]', or 'name' to '[name]'.
 			$name = isset($attributes['name']) ? $this->convertName2subname($attributes['name']) : '';
 
-			$el = (object)['name' => $name,
-						   'id' => text($name ? $name : $type, ['formats' => ['sef']]).((int)$this->elementId++),
-						   'type' => $type,
+			$el = (object)['name'       => $name,
+						   'id'         => textu($name ? $name : $type).((int)$this->elementId++),
+						   'type'       => $type,
 						   'attributes' => (object)$attributes,
-						   'options' => $options];
+						   'options'    => $options];
 
 			switch ($type)
 			{
@@ -733,6 +733,21 @@ HTML;
 		 			$i++;
 		 		}
 		 		break;
+             case 'slider':
+                if (isset($element->options->from)) $graduation['from'] = $element->options->from;
+                if (isset($element->options->to))   $graduation['to']   = $element->options->to;
+                if (isset($element->options->unit)) $graduation['unit'] = $element->options->unit;
+                $onInit    = isset($element->options->onInit)    ? "'{$element->options->onInit}'"    : 'null';
+                $onDrag    = isset($element->options->onDrag)    ? "'{$element->options->onDrag}'"    : 'null';
+                $afterDrag = isset($element->options->afterDrag) ? "'{$element->options->afterDrag}'" : 'null';
+                $value     = isset($element->options->value)     ? $element->options->value           : 'null';
+
+                $tpl->set_var(['graduation' => json_encode($graduation),
+                               'onInit'     => $onInit,
+                               'onDrag'     => $onDrag,
+                               'afterDrag'  => $afterDrag,
+                               'class'      => isset($element->attributes->class) ? $element->attributes->class : $element->id]);
+                break;
 		 	case 'upload':
 		 		$tpl->set_var(['the'.ucfirst($element->type).'ItemBlock' => '',
 		 					   'addImagesToArticle' => text(77),
