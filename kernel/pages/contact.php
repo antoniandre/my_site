@@ -9,23 +9,36 @@
 
 //======================================================================================================//
 //============================================= MAIN ===================================================//
-$form = new Form();
+$form = new Form(['class' => 'contact-form']);
 $form->addElement('header', [], ['level' => 2, 'text' => text(29)]);
-$form->addElement('textarea',
-                  ['name' => 'message', 'placeholder' => text(30),
-                   'cols' => 50, 'rows' => 10, 'required' => 'required', 'pattern' => '[^<>(){}\[\]\\]+'],
-                  ['validation' => ['required', 'alphanum+'], 'label' => text(25)]);
 $form->addElement('text',
-                  ['name' => 'lastName', 'value' => '', 'placeholder' => text(26),
-                   'required' => 'required', 'pattern' => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
-                  ['validation' => ['required', 'alpha+'], 'label' =>  text(26)]);
+                  ['name'        => 'lastName',
+                   'value'       => '',
+                   'placeholder' => text(26),
+                   'required'    => 'required',
+                   'pattern'     => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
+                  ['validation'  => ['required', 'alpha+'], 'label' =>  text(26)]);
 $form->addElement('text',
-                  ['name' => 'firstName', 'placeholder' => text(27),
-                   'required' => 'required', 'pattern' => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
-                  ['validation' => ['required', 'alpha+'], 'label' =>  text(27)]);
+                  ['name'        => 'firstName',
+                   'placeholder' => text(27),
+                   'required'    => 'required',
+                   'pattern'     => '[a-zéäëïöüàèìòùâêîôûçñœæ A-ZÉÄËÏÖÜÀÈÌÒÙÂÊÎÔÛÇÑŒÆ\'-]+'],
+                  ['validation'  => ['required', 'alpha+'], 'label' =>  text(27)]);
 $form->addElement('email',
-                  ['name' => 'email', 'placeholder' => text(28), 'required' => 'required'],
-                  ['validation' => 'required', 'label' =>  text(28)]);
+                  ['name'        => 'email',
+                   'placeholder' => text(28),
+                   'required'    => 'required'],
+                  ['validation'  => 'required', 'label' =>  text(28)]);
+$form->addElement('textarea',
+                  ['name'        => 'message',
+                   'placeholder' => text(30),
+                   'cols'        => 50,
+                   'rows'        => 10,
+                   'required'    => 'required',
+                   'pattern'     => '[^<>(){}\[\]\\]+'],
+                  ['validation'  => ['required', 'alphanum+'],
+                   'label'       => text(25)]);
+$form->addRobotCheck(text(95));
 $form->addButton('cancel', text(17));
 $form->addButton('validate', text(18));
 

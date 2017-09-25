@@ -1,3 +1,15 @@
-#contact-page .row label {vertical-align:middle;text-align:right;width:110px;padding-right:10px;display:inline-block;}
-#contact-page input, #contact-page textarea {width:260px;vertical-align:middle;}
-#captcha-switch {float:left;padding:1px 2px;}
+.contact-form-wrapper {
+    max-width: 30em;
+    margin: auto;
+}
+
+.contact-form-wrapper .row label {
+    width: 10em;
+    padding-right: 1em;
+    display: inline-block;
+    text-align:right;
+    box-sizing: border-box;
+}
+
+.contact-form-wrapper .row.textarea,
+.contact-form-wrapper .buttons {margin-top: 2em;}
