@@ -39,17 +39,17 @@ if ($tags) foreach ($tags as $id => $tag) $tags_options[$id] = $tag->text;
 $form = new Form();
 $form->addElement('wrapper',
 				  ['class'          => 'panes'],
-				  ['numberElements' => 31]);
+				  ['numberElements' => 33]);
 $form->addElement('wrapper',
 				  ['class'          => 'newPage pane'],
-				  ['numberElements' => 19]);
+				  ['numberElements' => 21]);
 $form->addElement('header',
 				  ['class'          => 'title'],
 				  ['level'          => 2,
                   'text'            => text('Create a new page')]);
 $form->addElement('wrapper',
 				  ['class'          => 'inner'],
-				  ['numberElements' => 17]);
+				  ['numberElements' => 19]);
 $form->addElement('paragraph',
 				  ['class'          => 'intro'],
 				  ['text'           => text(1)]);
@@ -58,8 +58,17 @@ $form->addElement('radio',
                    'tabindex'       => 1],
                   ['validation'     => 'required',
                    'inline'         => true,
-                   'options'        => ['php' => text('PHP'), 'article' => text('Article')],
+                   'options'        => ['php' => text('PHP'), 'article' => text('Article'), 'other' => text('Others...')],
                    'label'          => text(14)]);
+$form->addElement('text',
+                  ['name'           => 'page[type_other]',
+                   'placeholder'    => text('A special page type'),
+                   'tabindex'       => 2],
+                  ['validation'     => 'requiredIf(page[type]=other)',
+                   'toggle'         => 'showIf(page[type]=other)',
+                   'toggleEffect'   => 'slide',
+                   'label'          => text('Other page type')]);
+
 $form->addElement('text',
                   ['name'           => 'page[name]',
                    'placeholder'    => text(10),
@@ -75,7 +84,7 @@ $form->addElement('text',
                   ['validation'     => 'requiredIf(page[type]=php)',
                    'toggle'         => 'showIf(page[type]=php)',
                    'toggleEffect'   => 'slide',
-                   'label'          => text(11)]);
+                   'label'          => text(11) . ' (From current theme root)']);
 
 $form->addElement('wrapper',
 				  ['class'          => 'languageBlock first'],
@@ -162,6 +171,12 @@ $form->addElement('select',
                    'rowClass'       => 'clear',
                    'validation'     => 'required',
                    'default'        => 'home']);
+$form->addElement('text',
+                  ['name'           => 'page[icon]',
+                   'placeholder'    => text('E.g: i-plane'),
+                   'tabindex'       => 12],
+                  ['label'          => text('Icon')]);
+
 $form->addElement('wrapper',
 				  ['class'          => 'newArticle pane'],
 				  ['numberElements' => 10,
@@ -250,20 +265,21 @@ $page->setContent($form->render())->render();
 /**
  * validate called internally by the form validate() method if the form has no error.
  *
- * @param StdClass Object $result: the result of the validation process provided by the form validate() method.
  * @param Form Object $form: the current $form object, if you need.
+ * @param StdClass Object $info: the result of the validation process provided by the form validate() method.
  * @return Boolean.
  */
-function validateForm1($result, $form)
+function validateForm1($form, $info)
 {
-	$language = Language::getCurrent();
-	$return = false;
+	$language    = Language::getCurrent();
+	$return      = false;
 	$fileCreated = false;
-	$articleId = null;
-	$db = database::getInstance();
-	$q = $db->query();
-	$pageName = text(($n = $form->getPostedData('page[name]')) ? $n : $form->getPostedData('page[url][en]'),
-					 ['formats' => ['sef']]);
+	$articleId   = null;
+	$db          = database::getInstance();
+	$q           = $db->query();
+	$pageName    = text(($n = $form->getPostedData('page[name]')) ? $n : $form->getPostedData('page[url][en]'),
+                        ['formats' => ['sef']]);
+    $pageType    = $form->getPostedData('page[type]');
 
 	// Do not perform the insertion in db if page found in DB.
 	$q->select('pages', [$q->col('page')])->where()->col('page')->eq($pageName);
@@ -277,18 +293,18 @@ function validateForm1($result, $form)
 	else
 	{
 		// PHP file creation.
-		if ($form->getPostedData('page[type]') === 'php')
+		if ($pageType === 'php')
 		{
 			$fileCreated = createPhpFile($pageName, $form->getPostedData('page[path]'));
 			if (!$fileCreated) new Message('A problem occured while creating the PHP file. Please check you have sufficent privileges and try again.', 'error', 'error', 'content');
 		}
 
         // Article creation.
-        elseif ($form->getPostedData('page[type]') === 'article') $articleId = saveArticleInDB($form);
+        elseif ($pageType === 'article') $articleId = saveArticleInDB($form);
 
-        // In both cases if no error, save the new page in DB.
+        // In both cases if no error, or if page type is custom (page[type] = 'other'), save the new page in DB.
 		// Store a new page entry in DB only if previous steps were successful.
-		if ($articleId || $fileCreated)
+		if ($articleId || $fileCreated || ($pageType === 'other' && $form->getPostedData('page[type_other]')))
 		{
             $pageId = savePageInDB($form, $pageName, $articleId);
 
@@ -323,10 +339,11 @@ function validateForm1($result, $form)
 
 function createPhpFile($fileName, $path)
 {
-	if ($path{strlen($path)-1} === '/') $path = substr($path, 0, -1);
-	if ($path{0} === '/') $path= substr($path, 1);
+    $settings = Settings::get();
+    define('THEME_PATH',  ROOT . "themes/$settings->theme/");
+
+    $path      = trim($path, '/');
     $backstage = strpos($path, 'backstage') === 0 ? '' : 'backstage/';// $path starts with 'backstage'.
-	// Count slashes and climb tree up with '../': str_repeat('../', substr_count($path, '/')+1)
 
 	$fileContents = "<?php\n//======================= VARS ========================//\n"
 				  ."//=====================================================//\n\n\n"
@@ -339,12 +356,12 @@ function createPhpFile($fileName, $path)
 				  ."\$page->setContent(\$tpl->parse('display', \$page->page))->render();\n"
 				  ."//============================================ end of MAIN =============================================//\n"
 				  ."//======================================================================================================//\n?>";
-	$path = ROOT."$path";
+	$path = THEME_PATH . "$path";
 	if (!is_dir($path)) mkdir($path);
 	file_put_contents("$path/$fileName.php", $fileContents);
-	file_put_contents(ROOT."kernel/backstage/templates/$fileName.html", '{content}');
+	file_put_contents(THEME_PATH . "templates/$fileName.html", '{content}');
 
-	return is_file(ROOT."kernel/backstage/templates/$fileName.html");
+	return is_file(THEME_PATH . "templates/$fileName.html");
 }
 
 function saveArticleInDB($form)
@@ -391,10 +408,12 @@ function saveArticleInDB($form)
 
 function savePageInDB($form, $pageName, $articleId)
 {
-    $pageId = null;
+    $db       = database::getInstance();
+    $q        = $db->query();
+    $pageId   = null;
+    $pageType = $articleId ? 'article' : 'page';// Default = 'page'.
+    if ($form->getPostedData('page[type]') === 'other' && $form->getPostedData('page[type_other]')) $pageType = $form->getPostedData('page[type_other]');
 
-    $db = database::getInstance();
-    $q = $db->query();
     $q->insert('pages', ['page'        => $pageName,
                          'path'        => $form->getPostedData('page[path]') ? text($form->getPostedData('page[path]'), ['formats' => ['sef']])                                         : '',
                          'url_en'      => text($form->getPostedData('page[url][en]'), ['formats' => ['sef']]),
@@ -406,7 +425,9 @@ function savePageInDB($form, $pageName, $articleId)
                          'metaKey_en'  => $form->getPostedData('page[metaKey][en]'),
                          'metaKey_fr'  => $form->getPostedData('page[metaKey][fr]'),
                          'parent'      => $form->getPostedData('page[parent]'),
-                         'article'     => isset($articleId) ? $articleId : null]);
+                         'type'        => $pageType,
+                         'typeId'      => $articleId ? $articleId : null,
+                         'icon'        => $form->getPostedData('page[icon]')]);
     $q->run();
     if (!$q->info()->affectedRows) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
     else $pageId = $q->info()->insertId;

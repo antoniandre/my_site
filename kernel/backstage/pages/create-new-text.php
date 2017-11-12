@@ -46,7 +46,7 @@ $page->setContent($form->render())->render();
 
 //======================================================================================================//
 //=========================================== FUNCTIONS ================================================//
-function validateNewText($result, $form)
+function validateNewText($form, $info)
 {
 	$posts = $form->getPostedData();
 
@@ -59,7 +59,7 @@ function validateNewText($result, $form)
 			$q = $db->query();
 
 			// Do not perform the insertion in db if last insert is same (prevent send twice on page refresh).
-			$isInDB = $q->checkLastInsert('texts', [$q->col('text_en'), $q->col('text_fr'), $q->col('context')], $posts->text->en.$posts->text->fr.$posts->context);
+			$isInDB = $q->checkLastInsert('texts', [$q->col('text_en'), $q->col('text_fr'), $q->col('context')], $posts->text->en . $posts->text->fr . $posts->context);
 			if ($isInDB)
 			{
 				new Message(text(42), 'error', 'error', 'content');
