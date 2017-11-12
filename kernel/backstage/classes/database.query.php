@@ -737,10 +737,26 @@ class Query extends DatabaseEntity
      *
      * @param  string $column    [description]
      * @param  string $separator [description]
-     * @example
+     * @example 1
      *     $q->groupConcat($q->colIn('tag', 'article_tags'))->as('tags');
      *     $q->groupConcat($q->colIn('name', 'tags'), '||')->as('tagNames');
      * @return The current Query instance.
+     *
+     * @example 2 (full query)
+     * $db = database::getInstance();
+     * $q  = $db->query();
+     * $q->select('cocktails', [
+     *                             $q->colIn("name_$language", 'cocktails')->as('name'),
+     *                             $q->colIn("name_$language", 'glasses')->as('glass'),
+     *                             $q->colIn('image', 'glasses')->as('glassPic'),
+     *                             $q->groupConcat($q->colIn("name_$language", 'ingredients'), ', ')->as('groupIngredients')
+     *                         ])
+     *   ->relate('cocktails.glass', 'glasses.id')
+     *   ->relate('cocktails.id', 'cocktails_ingredients.cocktail')
+     *   ->relate('ingredients.id', 'cocktails_ingredients.ingredient')
+     *   ->groupBy($q->colIn('id', 'cocktails'));
+     * $w        = $q->where()->colIn('id', 'cocktails')->eq($cocktailId);
+     * $cocktail = $q->run()->loadObject();
      */
 	public function groupConcat($column, $separator = null, $orderBy = [])
 	{

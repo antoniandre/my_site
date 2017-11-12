@@ -18,8 +18,8 @@
  */
 class Form
 {
-	const existingElements = ['select', 'text', 'number', 'slider', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
-	const existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
+	const   existingElements = ['select', 'text', 'number', 'slider', 'checkbox', 'radio', 'textarea', 'wysiwyg', 'hidden', 'email', 'phone', 'wrapper', 'header', 'paragraph', 'upload'];
+	const   existingValidations = ['required' => ['pattern' => '~.+~', 'message' => 'This field is required.'],
 								 'requiredIf' => ['pattern' => '~.+~', 'message' => 'This field is required if the previous option "%s" is chosen.'],
 								 'alpha' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
 								 'alpha+' => ['pattern' => '~^[a-z]+$~i', 'message' => 'This field must contain alphabetic chars only.'],
@@ -29,15 +29,15 @@ class Form
 								 'num+' => ['pattern' => '~^[0-9.,]+$~', 'message' => 'This field must contain numeric chars only.'],
 								 'phone' => ['pattern' => '~^[0-9+ ()-]+$~', 'message' => 'This field must contain phone numbers only.'],
 								 'email' => ['pattern' => '~^[a-z0-9_][a-z0-9._]+@[a-z0-9][a-z0-9._]{1,40}[a-z0-9]$~i', 'message' => 'This field only accept valid emails.']];
-	const uploadsDir = ROOT . 'uploads/';
-	const uploadsDirTemp = ROOT . 'uploads/temp/';
+	const   uploadsDir = ROOT . 'uploads/';
+	const   uploadsDirTemp = ROOT . 'uploads/temp/';
 	static private $idCounter = 1;// Form id counter. incremented on each new form.
 	private $elementId = 1;
 	private $id;// Form id. Useful when multiple forms on a page to know which form is submitted.
-	public $method;// Custom class.
-	public $action;// Custom action.
-	public $class;// Custom class.
-	public $captcha;// Captcha presence.
+	public  $method;// Custom class.
+	public  $action;// Custom action.
+	public  $class;// Custom class.
+	public  $captcha;// Captcha presence.
 	private $enctype;// Add enctype="multipart/form-data" to the form tag if an upload element is found.
 	private $dontClearForm;// If set to true the form will not clear the userdata after a successful submission.
     private $elements = [];
@@ -63,11 +63,11 @@ class Form
 	 */
     public function __construct($options = [])
     {
-        $this->id            = isset($options['id']) ? $options['id'] : ('form'.(self::$idCounter++));
+        $this->id            = isset($options['id'])     ? $options['id'] : ('form'.(self::$idCounter++));
         $this->method        = isset($options['method']) ? $options['method'] : 'POST';
         $this->action        = isset($options['action']) ? $options['action'] : url('SELF');
-        $this->hash          = isset($options['hash']) ? $options['hash'] : null;
-        $this->class         = isset($options['class']) ? $options['class'] : null;
+        $this->hash          = isset($options['hash'])   ? $options['hash'] : null;
+        $this->class         = isset($options['class'])  ? $options['class'] : null;
         $this->enctype       = false;
         $this->dontClearForm = false;
 
@@ -532,13 +532,14 @@ HTML;
 		$tpl->set_block('radioBlock', 'radioOptionBlock', 'theRadioOptionBlock');
 		$tpl->set_block('checkboxBlock', 'checkboxOptionBlock', 'theCheckboxOptionBlock');
 
-		$tpl->set_var(['formId' => $this->id,
-                       'hash' => $this->hash === null ? "#$this->id" : ($this->hash ? "#$this->hash" : ''),
-					   'method' => $this->method,
-					   'action' => $this->action,
-					   'formClass' => $this->class ? " class=\"$this->class\"" : '',
+        $tpl->set_var(['formId'           => $this->id,
+                       // Anchor for url when form is submitted.
+                       'hash'             => $this->hash === null ? "#$this->id" : ($this->hash ? "#$this->hash" : ''),
+					   'method'           => $this->method,
+					   'action'           => $this->action,
+					   'formClass'        => $this->class ? " class=\"$this->class\"" : '',
 					   'formWrapperClass' => $this->class ? " class=\"{$this->class}-wrapper\"" : '',
-					   'enctype' => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
+					   'enctype'          => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
 
 		//========================= ELEMENTS RENDERING =========================//
 		$rowSpan = 0;
@@ -711,8 +712,10 @@ HTML;
 		 	case 'radio':
 		 	case 'checkbox':
 		 		$inline = isset($element->options->inline) && $element->options->inline;
-		 		$tpl->set_var(['the'.ucfirst($element->type).'OptionBlock' => '',
-		 					   'inline' => $inline ? ' inline' : '']);
+
+                // Reset the options for next form element.
+                $tpl->set_var(['the'.ucfirst($element->type).'OptionBlock' => '',
+                               'inline' => $inline ? ' inline' : '']);
 
 		 		// If checkbox has multiple options use array (e.g. name="checkbox[]").
 		 		$multiple = $element->type === 'checkbox' && count($element->options->options) > 1;
@@ -942,7 +945,7 @@ HTML;
 	 *                            This function will be passed 2 parameters:
 	 *                            	$return: the object as shown in @return bellow.
 	 *                            	$this: the current form Object.
-	 *                            So you can declare the callback function like so: function callback($info, $form){...}.
+	 *                            So you can declare the callback function like so: function callback($form, $info){...}.
 	 *
 	 * @return StdClass object / null: {fillable:$countFillableElements, filled:$countFilledElements, invalid:$countInvalidElements}
 	 */
@@ -1152,14 +1155,14 @@ HTML;
             // Overrides the $grantClearing variable.
 			if ($callback && is_string($callback))
 			{
-				if (is_callable($callback)) $grantClearing = $callback($return, $this);
+				if (is_callable($callback)) $grantClearing = $callback($this, $return);
 				else
 				{
 					Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given callback function \"$callback\" does not exist.", 'WRONG DATA', true);
 					return null;
 				}
 			}
-			elseif ($callback && is_callable($callback)) $grantClearing = $callback($return, $this);
+			elseif ($callback && is_callable($callback)) $grantClearing = $callback($this, $return);
 
 			// If all the posts are valid, and unless callback function returns false, clear all the fields.
 			if ($grantClearing) $this->unsetPostedData();
@@ -1222,9 +1225,12 @@ HTML;
 					default:
 						// The element->userdata can be an object in case of checkbox. if it is the case valid = true.
 						// Otherwise perform a preg_match on user posted data with the pattern set in the definition of the validation.
-						// See the existingValidations constant.
-						$isValid = (isset($element->userdata) && is_object($element->userdata))
-								   || preg_match(self::existingValidations[$validation]['pattern'], (string)trim($element->userdata));
+                        // See the existingValidations constant.
+                        $isValid = isset($element->userdata) && (
+                                       is_object($element->userdata)
+                                       || (is_array($element->userdata) && count($element->userdata))
+                                       || preg_match(self::existingValidations[$validation]['pattern'], trim((string)$element->userdata))
+                                   );
 						break;
 				}
 

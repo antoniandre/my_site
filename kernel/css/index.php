@@ -4,7 +4,6 @@
  * The classes and vars Settings, Userdata, $page are defined in functions/core.php.
  * The folder css/ and its content are not accessible from the site.
  */
-
 if (!class_exists('Userdata') || !class_exists('Settings')) die('You can\'t access this file directly.');
 
 //======================= VARS ========================//
@@ -66,6 +65,7 @@ function addSpecificCss()
 	elseif ($page->isArticle()) $cssContents .= getContents('article', 'k') . getContents('article', 't');
 	elseif ($page->type !== 'page') $cssContents .= getContents($page->type, 't');
 
+    // Backstage css files won't be added to generated css if user is not admin.
     $css = ($page->isBackstage() && $user->isAdmin() ? 'backstage.' : '') . $page->page;
     $cssContents .= getContents($css, 'k') . getContents($css, 't');
 
@@ -168,8 +168,8 @@ function doOutput($cssContents)
 function getFont($font)
 {
     $src = null;
-    if     (is_file($k = KERNEL_PATH . "fonts/$font")) $src = $k;
-    elseif (is_file($t = THEME_PATH . "fonts/$font"))  $src = $t;
+    if     (is_file($t = THEME_PATH  . "fonts/$font")) $src = $t;
+    elseif (is_file($k = KERNEL_PATH . "fonts/$font")) $src = $k;
 
     return $src ? file_get_contents($src) : '';
 }

@@ -25,15 +25,14 @@ function distantCode($data)
     //!\ We want to addslashes and secure content before insert in DB.
     $data = Userdata::secureVars($data, true, true);
 
-    $page = $data->page;
+    $page    = $data->page;
     $article = $data->article;
 
-    // dbgd($page, $article);
     if (!is_object($page) || !is_object($article))
     {
         Cerror::logAndDie("ERROR: Missing data. Here are the page and article received data: \n"
-                         .print_r(['page' => $page, 'article' => $article], 1),
-                         'ERROR: Missing data. Please check the page and article data are sent and try again.');
+                         . print_r(['page' => $page, 'article' => $article], 1),
+                         'ERROR: Missing data. Please check that the page and article data are sent and try again.');
     }
 
     $db = database::getInstance();
@@ -63,8 +62,8 @@ function distantCode($data)
 
     if (!$articleId)
     {
-        Cerror::logAndDie("ERROR: A problem occured while saving the article in database. Here is more info from SQL query: \n"
-                         .print_r($q->info(), 1),
+        Cerror::logAndDie("ERROR: A problem occured while saving the article in database. More info from SQL query:\n"
+                         . print_r($q->info(), 1),
                          'ERROR: A problem occured while saving the article in database. Please check your data and try again.');
     }
 
@@ -89,9 +88,9 @@ function distantCode($data)
 
     if (!$q->info()->affectedRows)
     {
-        Cerror::logAndDie("ERROR: A problem occured while saving the page in database. Here is more info from SQL query: \n"
-                         .print_r($q->info(), 1),
-                         'ERROR: A problem occured while saving the page in database. Please check your data and try again.');
+        Cerror::logAndDie("ERROR: A problem occured while saving the page in database. More info from SQL query:\n"
+                        . print_r($q->info(), 1),
+                        'ERROR: A problem occured while saving the page in database. Please check your data and try again.');
     }
 
     // Everything went fine.
@@ -144,7 +143,7 @@ function afterConsume($data)
     if (strpos($data, 'SUCCESS') === 0) $messageType = 'success';
     if (strpos($data, 'ERROR') === 0) $messageType = 'error';
 
-    new Message('Distant page said:'.$data, $messageType, $messageType, 'header', true);
+    new Message("Distant page said:<br>" . $data, $messageType, $messageType, 'header', true);
 }
 
 
@@ -165,7 +164,7 @@ function prepareData()
     $page = $q->run()->loadObject();
 
     $q = $db->query();
-    $q->select('articles', '*')->where()->col('id')->eq($page->article);
+    $q->select('articles', '*')->where()->col('id')->eq($page->article->id);
     $article = $q->run()->loadObject();
 
     return ['page' => $page, 'article' => $article];

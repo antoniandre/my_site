@@ -25,10 +25,10 @@ class Userdata
      */
     private function __construct()
     {
-        $this->post = $this->secureVars($_POST);
-        $this->get  = $this->secureVars($_GET);
+        $this->post   = $this->secureVars($_POST);
+        $this->get    = $this->secureVars($_GET);
         $this->cookie = $this->secureVars($_COOKIE);
-        $this->files = $_FILES;// Be careful with how you use, $_FILES is not a secure array...
+        $this->files  = $_FILES;// Be careful with how you use, $_FILES is not a secure array...
 
         // First and only time to start session in the whole page.
         session_start();
@@ -77,12 +77,13 @@ class Userdata
                 if (!$outputVar) $outputVar = $asObject && !is_numeric($key) ? new StdClass() : array();
                 $tmp = $value;// Init for all cases - like bool, float, int.
 
-                if (is_numeric($value)) $tmp = (int)$value;
-                elseif (is_string($value)) $tmp = self::secureString($value, $acceptHTML);
+                if     (is_numeric($value))                    $tmp = (int)$value;
+                elseif (is_string($value))                     $tmp = self::secureString($value, $acceptHTML);
                 elseif (is_object($value) || is_array($value)) $tmp = self::secureVars($value, $asObject, $acceptHTML);
 
-                // If array and numeric key, keep array form even if $asObject is set to true. Makes no sense.
+                // If array, keep array form even if $asObject is set to true. Makes no sense.
                 if ($asObject && !is_numeric($key)) $outputVar->$key = $tmp;
+                elseif ($asObject && is_numeric($key))  {}// Discard numeric entries.
                 else $outputVar[$key] = $tmp;
             }
         }

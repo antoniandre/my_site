@@ -84,7 +84,7 @@ function mainRouter()
 		}
 	}
 
-	return $includePath;
+    return $includePath;
 }
 
 function newPageTpl($tplName = '')

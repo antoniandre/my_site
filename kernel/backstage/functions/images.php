@@ -19,9 +19,9 @@ function displayImage()
 
     define('USE_IMAGICK_CLI',    true);
     define('LOCAL_CONVERT_PATH', '/usr/local/bin/convert');// A path to the convert command from Imagick CLI in Localhost.
-    define('IMAGES_PATH',        './');
-    define('UPLOADS_PATH',       '../uploads/');
-    define('THEME_PATH',         '../themes/' . $settings->theme . '/');
+    define('IMAGES_PATH',        ROOT . 'images/');
+    define('UPLOADS_PATH',       ROOT . 'uploads/');
+    define('THEME_PATH',         ROOT . 'themes/' . $settings->theme . '/');
     define('THEME_IMAGES',       THEME_PATH . 'images/');
 
     ob_start(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ? 'ob_gzhandler' : null);
@@ -102,8 +102,8 @@ function getImageAndMimeType()
  */
 function resizeImage($name, $size, $extension)
 {
-    $originalImagePath = __DIR__ . "/{$name}_o.$extension";
-    $newImagePath      = __DIR__ . "/{$name}_$size.$extension";
+    $originalImagePath = "{$name}_o.$extension";
+    $newImagePath      = "{$name}_$size.$extension";
 
     // Sizes by total number of pixels.
     /*$sizes = ['xs' => 152100,// 450*338
@@ -162,7 +162,7 @@ function resizeImage($name, $size, $extension)
 
         // $output contains the return (message) of the shell if any, 1 array entry per line returned.
         if (!count($output) || !$output[0]) $image = file_get_contents($newImagePath);
-        else dbg(implode("\n", $output));
+        else print_r(implode("\n", $output));
     }
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
