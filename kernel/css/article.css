@@ -66,30 +66,37 @@ article .floatRight {max-width: 100%;}
 
 ul.glyph .i-valid:before {color:green;content:'u';font-size:200%;}
 
-.i-comment
-{display: block;
-position: absolute;
-top: 0;
-width: 7em;
-padding: 1.4em 2em;
-color: #333;
-z-index: 3;
-font-size: 95%;}
-.i-comment.big {width: 8em;}
-.i-comment.rotate {position: absolute !important;}
-.i-comment.rotate.rotate175cw:before {-webkit-transform: rotate(175deg);-ms-transform: rotate(175deg);-o-transform: rotate(175deg);transform: rotate(175deg)}
-.i-comment.small:before{font-size: 9.5em;}
-.i-comment.big:before {font-size: 11em;}
-.i-comment:before
-{font-size: 10em;
-color: rgba(200, 250, 0, 0.7);
-z-index: -1;
-position: absolute;
-display: block;
-top: -0.14em;
-left: 0.05em;}
-.i-comment.green:before {color: rgba(200, 250, 0, 0.7);}
-.i-comment.blue:before {color: rgba(0, 250, 250, 0.7);}
+.i-comment, .i-thinking {
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 7em;
+    padding: 1.4em 2em;
+    color: #333;
+    z-index: 3;
+    font-size: 95%;
+}
+.i-comment.small, .i-thinking {padding: 1.6em 1.5em;}
+.i-comment.big, .i-thinking.big {width: 8em;}
+.i-comment.rotate, .i-thinking.rotate {position: absolute !important;}
+.i-comment:before, .i-thinking:before {
+    font-size: 10em;
+    color: rgba(200, 250, 0, 0.7);
+    z-index: -1;
+    position: absolute;
+    display: block;
+    top: -0.14em;
+    left: 0.05em;
+}
+.i-thinking:before {top: -0.2em;}
+.i-comment.yellow:before, .i-thinking.yellow:before {color: rgba(250, 229, 0, 0.7);}
+.i-comment.green:before, .i-thinking.green:before {color: rgba(200, 250, 0, 0.7);}
+.i-comment.blue:before, .i-thinking.blue:before {color: rgba(0, 250, 250, 0.7);}
+.i-comment.rotate.rotate175cw:before,
+.i-thinking.rotate.rotate175cw:before
+{-webkit-transform: rotate(175deg);-ms-transform: rotate(175deg);-o-transform: rotate(175deg);transform: rotate(175deg)}
+.i-comment.small:before, .i-thinking.small:before {font-size: 9em;}
+.i-comment.big:before, .i-thinking.big:before {font-size: 11em;}
 
 .hashtag {font-weight: bold;padding: 1px 2px;background: #eee;border-radius: 3px;color: #333;font-family: "Courier New", Courier, monospace;}
 
@@ -167,7 +174,7 @@ left: 0.05em;}
  -webkit-box-sizing: border-box;
  -moz-box-sizing: border-box;
  box-sizing: border-box;}
- article img, article iframe {width:450px;min-height:100px;}/* Default size. */
+ article img, article iframe {width:450px;min-height:100px;border: none;}/* Default size. */
  article img[src], article iframe[src] {min-height:60px;}
  article figure img,
  article figure iframe
