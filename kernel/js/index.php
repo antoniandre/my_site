@@ -33,6 +33,7 @@ if (!$page && !$getJs) die('// No JS requested.');
 
 list($files, $fileLocations) = getAllFiles();
 $requestedFiles              = getRequestedFiles();
+$requestedFilesLocations     = [];
 $contents                    = getFilesContents($requestedFiles);
 
 doOutput(INIT_ACTION ? addJsVars($contents) : $contents);
@@ -49,16 +50,16 @@ function getAllFiles()
     {
         $fileName = str_replace('.min', '', basename($file, '.js'));
         $files[$fileName] = 1;
-        $fileLocations["$fileName:k"] = 1;
+        $fileLocations[$fileName][] = 'k';
     }
     foreach (scandir(THEME_PATH) as $file) if (substr($file, -3, 3) === '.js')
     {
         $fileName = str_replace('.min', '', basename($file, '.js'));
         $files[$fileName] = 1;
-        $fileLocations["$fileName:t"] = 1;
+        $fileLocations[$fileName][] = 't';
     }
 
-    return [array_keys($files), array_keys($fileLocations)];
+    return [array_keys($files), $fileLocations];
 }
 
 function getRequestedFiles()
@@ -122,7 +123,7 @@ function getFilesContents($files)
 
 function getContents($fileName, $from = null)
 {
-    global $fileLocations;
+    global $fileLocations, $requestedFilesLocations;
 
     $settings = Settings::get();
     $min      = $settings->useMinified ? '.min' : '';
@@ -131,12 +132,14 @@ function getContents($fileName, $from = null)
     $v        = VENDOR_PATH;
     $fallback = null;
 
-    $ok =  ($from && in_array("$fileName:$from", $fileLocations))
-        || (!$from && ($fallback = 't') && in_array("$fileName:t", $fileLocations))
-        || (!$from && ($fallback = 'k') && in_array("$fileName:k", $fileLocations))
+    $ok =  ($from && in_array($from, $fileLocations[$fileName]))
+        || (!$from && ($fallback = 't') && in_array('t', $fileLocations[$fileName]))
+        || (!$from && ($fallback = 'k') && in_array('k', $fileLocations[$fileName]))
         || ($from === 'v' && is_file($$from . "$fileName$min.js"));
 
     $from = $from ? $from : $fallback;
+
+    if ($ok) $requestedFilesLocations[$fileName] = $from;
 
     return $ok ? "\n\n\n" . file_get_contents($$from . "$fileName$min.js") : null;
 }
@@ -144,7 +147,7 @@ function getContents($fileName, $from = null)
 
 function addJsVars($jsContents)
 {
-    global $readyFunctions, $loadedJs, $files;
+    global $readyFunctions, $loadedJs, $files, $requestedFilesLocations;
 
     $settings = Settings::get();
     $page     = Page::getCurrent();
@@ -169,13 +172,20 @@ function addJsVars($jsContents)
     //    ... List all the existing JS files.
     // }
     $scripts = [];
+
     foreach ($files as $file)
     {
         // Do not list backstage js files if user is not admin.
         if ((!$user->isAdmin() && strpos($file, 'backstage') !== false)) continue;
 
-        $fileName = basename($file, '.js');
-        $scripts[$fileName] = ['loaded' => in_array($fileName, $loadedJs), 'css' => is_file(ROOT."kernel/css/$filename.css")];
+        $fileName     = basename($file, '.js');
+        $fileLocation = $requestedFilesLocations[$fileName];
+
+        if ($fileLocation === 'k')     $cssDir = KERNEL_PATH . '../css/';
+        elseif ($fileLocation === 't') $cssDir = THEME_PATH . '../css/';
+        elseif ($fileLocation === 'v') $cssDir = VENDOR_PATH;
+
+        $scripts[$fileName] = ['loaded' => in_array($fileName, $loadedJs), 'css' => is_file("$cssDir$fileName.css")];
     }
 
     // Append few vars and array of ready functions to the output.

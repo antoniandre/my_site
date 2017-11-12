@@ -9,7 +9,7 @@
 define('SELF', $_SERVER['PHP_SELF']{0} == '/' ? substr($_SERVER['PHP_SELF'], 1) : $_SERVER['PHP_SELF']);
 $qs = $_SERVER['QUERY_STRING'];
 define('QUERY_STRING', @$qs{0} == '&' ? substr($qs, 1) : $qs/*preventing pb*/);
-define('URI', QUERY_STRING ? SELF.'?'.QUERY_STRING : SELF);
+define('URI', QUERY_STRING ? SELF . '?' . QUERY_STRING : SELF);
 //=====================================================//
 
 
@@ -34,7 +34,7 @@ ob_start(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && substr_count($_SERVER['HTTP_
 $error = Cerror::getInstance();
 
 // By default, the secured vars are converted to objects and they do not allow HTML.
-UserData::getInstance();
+Userdata::getInstance();
 $user = User::getCurrent();
 //============================================ end of MAIN =============================================//
 //======================================================================================================//
@@ -49,8 +49,15 @@ function checkInTheme($path)
     $settings  = class_exists('Settings') ? Settings::get() : null;
     if (!$settings) return $path;
 
-    $theme     = $settings->theme;
-    $themePath = str_replace(['kernel/backstage/', 'kernel/'], "themes/$theme/", $path);
+    $theme       = $settings->theme;
+    $themePath   = str_replace(['kernel/backstage/', 'kernel/'], "themes/$theme/", $path);
+
+    // If normal path is kernel/backstage/[file] look into theme/[theme]/backstage.[file].
+    if (strpos($path, 'kernel/backstage/') !== false)
+    {
+        $basename  = basename($themePath);
+        $themePath = str_replace($basename, "backstage.$basename", $themePath);
+    }
 
     return is_file($themePath) ? $themePath : $path;
 }
@@ -62,7 +69,7 @@ function checkInTheme($path)
  */
 function includeClass($class)
 {
-    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/classes/$class.php"));
+    $ok = is_file($file = checkInTheme(ROOT . "kernel/backstage/classes/$class.php"));
 
     if ($ok) include $file;
     else Cerror::add("The class '$class' was not found in '$file'.", 'NOT FOUND');
@@ -79,7 +86,7 @@ function includeClass($class)
 function includeFunction($function, $haltOnError = true)
 {
     $return = null;
-    $ok     = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
+    $ok     = is_file($file = checkInTheme(ROOT . "kernel/backstage/functions/$function.php"));
 
     if ($ok) $return = include $file;
     elseif ($haltOnError) Cerror::add("The function '$function' was not found in '$file'.", 'NOT FOUND');
@@ -89,7 +96,7 @@ function includeFunction($function, $haltOnError = true)
 function includeFunctionOnce($function, $haltOnError = true)
 {
     $return = null;
-    $ok     = is_file($file = checkInTheme(ROOT."kernel/backstage/functions/$function.php"));
+    $ok     = is_file($file = checkInTheme(ROOT . "kernel/backstage/functions/$function.php"));
 
     if ($ok) $return = include_once $file;
     elseif ($haltOnError) Cerror::add("The function '$function' was not found in '$file'.", 'NOT FOUND');
@@ -107,7 +114,7 @@ function includeFunctionOnce($function, $haltOnError = true)
 function includeWebservice($ws)
 {
     $return = null;
-    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
+    $ok = is_file($file = checkInTheme(ROOT . "kernel/backstage/webservices/$ws.php"));
 
     if ($ok) $return = include $file;
     else Cerror::add("The web service '$ws' was not found in '$file'.", 'NOT FOUND');
@@ -117,7 +124,7 @@ function includeWebservice($ws)
 function includeWebserviceOnce($ws)
 {
     $return = null;
-    $ok = is_file($file = checkInTheme(ROOT."kernel/backstage/webservices/$ws.php"));
+    $ok = is_file($file = checkInTheme(ROOT . "kernel/backstage/webservices/$ws.php"));
 
     if ($ok) $return = include_once $file;
     else Cerror::add("The web service '$ws' was not found in '$file", 'NOT FOUND');

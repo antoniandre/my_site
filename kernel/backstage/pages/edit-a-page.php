@@ -187,11 +187,11 @@ $page->setContent($form->render())->render();
  * It allows you to perform an extra check and block form with error if fails or validate form for good if everything alright.
  * If you don't need to check extra things, youcan just use this function as a callback to do other things on success.
  *
- * @param StdClass Object $result: the result of the validation process provided by the form validate() method.
+ * @param StdClass Object $info: the result of the validation process provided by the form validate() method.
  * @param Form Object $form: the current $form object, if you need
  * @return bool: true or false to agree to validate form or block it after an extra check.
  */
-function afterValidateForm($result, $form)
+function afterValidateForm($form, $info)
 {
 	$language = Language::getCurrent();
 	$return = false;
@@ -200,7 +200,7 @@ function afterValidateForm($result, $form)
 	$pageNameInDB = $form->getPostedData('page[nameInDB]');
 
 	// Do not perform a page update if page not found in DB.
-	$q->select('pages', [$q->col('article')])->relate('pages.typeId', 'articles.id')->where()->col('page')->eq($pageNameInDB);
+	$q->select('pages', [$q->col('typeId')])->relate('pages.typeId', 'articles.id')->where()->col('page')->eq($pageNameInDB);
 	$isInDB = $q->run()->info()->numRows;
 
 	if (!$isInDB)
@@ -233,12 +233,12 @@ function afterValidateForm($result, $form)
 				$GLOBALS["content_$lang"] = preg_replace('~(?<=src=\\\")'.$settings->root.'(images/\?(?:i|u)=[^"]+)(?=\\\")~i', '$1', $form->getPostedData("article[content][$lang]", true));
 			});
 
-			$q->update('articles', ['content_en' => $GLOBALS["content_en"],
-	                                'content_fr' => $GLOBALS["content_fr"],
-	                                'author'     => User::getCurrent()->getId(),
-	                                'category'   => (int)$form->getPostedData('article[category]'),
-	                                'image'      => $form->getPostedData('article[image]'),
-	                                'status'     => $form->getPostedData('article[status]')]);
+			$q->update('articles', ['content_en' => $GLOBALS['content_en'],
+            'content_fr' => $GLOBALS['content_fr'],
+            'author'     => User::getCurrent()->getId(),
+            'category'   => (int)$form->getPostedData('article[category]'),
+            'image'      => $form->getPostedData('article[image]'),
+            'status'     => $form->getPostedData('article[status]')]);
 			$w = $q->where()->col('id')->eq($articleId);
 			$q->run();
 			$affectedRows = $q->info()->affectedRows;
@@ -274,7 +274,7 @@ function afterValidateForm($result, $form)
 	                         'metaKey_en'  => $form->getPostedData('page[metaKey][en]'),
 	                         'metaKey_fr'  => $form->getPostedData('page[metaKey][fr]'),
 	                         'parent'      => $form->getPostedData('page[parent]')]);
-		$w = $q->where()->col('article')->eq($articleId);
+		$w = $q->where()->col('typeId')->eq($articleId);
 		$q->run();
 		$affectedRows += $q->info()->affectedRows;
 
@@ -321,15 +321,15 @@ function fetchPage($page, $form)
 		'page[url][fr]'      => $page->url->fr,
 		'page[title][en]'    => $page->title->en,
 		'page[title][fr]'    => $page->title->fr,
-		'page[metaKey][en]'  => $page->metaKey->en,
-		'page[metaKey][fr]'  => $page->metaKey->fr,
-		'page[metaDesc][en]' => $page->metaDesc->en,
-		'page[metaDesc][fr]' => $page->metaDesc->fr
+		'page[metaKey][en]'  => $page->metaKeywords->en,
+		'page[metaKey][fr]'  => $page->metaKeywords->fr,
+		'page[metaDesc][en]' => $page->metaDescription->en,
+		'page[metaDesc][fr]' => $page->metaDescription->fr
 	];
 
 	if ($page->article)// $page->article = Article id.
 	{
-		$article = getArticleInfo($page->article);
+		$article = getArticleInfo($page->article->id);
 		$array['article[category]']    = $article->category;
 		$array['article[status]']      = $article->status;
 		$array['article[content][en]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_en);
@@ -343,7 +343,7 @@ function fetchPage($page, $form)
         // $q->select('article_tags', [$q->col('id'), $q->col("text$language")->as('text')])
         $q->select('article_tags', [$q->col('tag')])
           ->relate('tags.id', 'article_tags.tag', true);
-        $w = $q->where()->col('article')->eq($page->article);
+        $w = $q->where()->col('article')->eq($page->article->id);
         $tags = array_keys($q->run()->loadObjects('tag'));
 		$array['article[tags]'] = $tags;
 	}

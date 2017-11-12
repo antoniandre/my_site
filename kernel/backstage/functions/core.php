@@ -18,13 +18,11 @@ includeClass('database');
 //======================================================================================================//
 //=============================================== MAIN =================================================//
 $language = Language::getCurrent();
-// $aliases  = getPagesAlias($pages);
 $page     = Page::getCurrent();
 
-// If required file is JS or CSS Include it and die.
-if (isset(UserData::get()->js)) include ROOT . 'kernel/js/index.php';
-elseif (isset(UserData::get()->css)) include ROOT . 'kernel/css/index.php';
-elseif (isset(UserData::get()->font)) include ROOT . 'kernel/css/index.php';
+// If required file is JS or CSS or Font, include it and die.
+if (isJS())                  include ROOT . 'kernel/js/index.php';
+elseif (isCss() || isFont()) include ROOT . 'kernel/css/index.php';
 else
 {
     if (Language::getTarget()) $page->refresh();
@@ -71,14 +69,25 @@ function mainRouter()
 
 	else// All the other pages (ending with .php).
 	{
+        $pageIsNotFound    = false;
 		$includePathKernel = "kernel/$page->path$page->page.php";
 		$includePath       = checkInTheme($includePathKernel);
 
 		// Fallback to 'not-found' if no matching page was found in theme.
-		if ($includePath === $includePathKernel && !is_file(ROOT.$includePathKernel))
-		{
-			$page        = Page::get('not-found');
+		if ($includePath === $includePathKernel && !is_file(ROOT . $includePathKernel)) $pageIsNotFound = true;
+
+        // If the requested page is in the backstage but the user is not an admin, pretend the page is not found.
+        if ($page->isBackstage())
+        {
+            $user = User::getCurrent();
+            if (!$user->isAdmin()) $pageIsNotFound = true;
+        }
+
+        if ($pageIsNotFound)
+        {
+			$page        = Page::set('not-found');
 			$includePath = "kernel/$page->path$page->page.php";
+
 			// Also check if the not-found page has an override.
 			$includePath = checkInTheme($includePath);
 		}
@@ -87,26 +96,29 @@ function mainRouter()
     return $includePath;
 }
 
+function isJs()
+{
+    return isset(UserData::get()->js);
+}
+
+function isCss()
+{
+    return isset(UserData::get()->css);
+}
+
+function isFont()
+{
+    return isset(UserData::get()->font);
+}
+
 function newPageTpl($tplName = '')
 {
     $page    = Page::getCurrent();
     $tpl     = new Template();
     $tplName = $tplName ? $tplName : $page->page;
-	$tpl->set_file($page->page, checkInTheme(ROOT."kernel/backstage/templates/$tplName.html"));
+	$tpl->set_file($page->page, checkInTheme(ROOT . "kernel/backstage/templates/$tplName.html"));
 
     return $tpl;
-}
-
-/**
- * Get the available page aliases for the current language.
- *
- * @return array of aliases made of '$page->alias => $page->id' pairs.
- */
-function getPagesAlias($pages)
-{
-    $aliases = array();
-    foreach($pages as $page) if (isset($page->alias)) $aliases[$page->alias] = $page->id;
-    return $aliases;
 }
 
 /**
@@ -128,7 +140,6 @@ function getArticleInfo($articleId)
     }
     return $return;
 }
-
 
 /**
  * Calculate the correct route of a URL.
@@ -370,7 +381,19 @@ function dbg()
  */
 function dbgd()
 {
-    if (!class_exists('Debug')) {echo '-- Class Debug not available --<br>';return;}
+    if (!class_exists('Debug'))
+    {
+        $trace     = debug_backtrace()[0];
+        $fileLines = file($trace['file']);
+        $comment   = isJS() || isCss() || isFont() ? ['/*', '*/'] : ['<!--', '-->'];
+
+        echo "$comment[0]\n"
+           . "'$trace[function]()' Class Debug not available.\nCalled at line $trace[line] in file $trace[file]:\n"
+           . implode("", array_slice($fileLines, $trace['line'] - 5, 10))
+           . "\n$comment[1]";
+
+        return;
+    }
     // 'Apply' concept: apply the arguments 'func_get_args()' to the method 'add' of the object 'Debug::getInstance()'
     // Doing only 'Debug::getInstance()->add(func_get_args())' would wrap the args into an array...
     call_user_func_array(array(Debug::getInstance(), 'add'), func_get_args());
