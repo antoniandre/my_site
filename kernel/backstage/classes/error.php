@@ -202,7 +202,7 @@ Class Cerror
 		}
 		$output .= "\n";
 
-		error_log($output, 3, ROOT.$settings->errorLogFile);
+		error_log($output, 3, ROOT . "$settings->theme/$settings->errorLogFile");
 	}
 
 
@@ -214,15 +214,15 @@ Class Cerror
 	public static function logTheLast()
 	{
 		$settings = Settings::get();
-        $self = self::getInstance();
+        $self     = self::getInstance();
 
 		// Extract the last error from the stack.
-		$error = $self->stack[count($self->stack)-1];
+		$error    = $self->stack[count($self->stack)-1];
 
-		$output = date('Y-m-d H:i:s')."\n"
-				 ."- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
+		$output   = date('Y-m-d H:i:s')."\n"
+				  . "- $error->type in file $error->file at line $error->line:\n  $error->text\n\n";
 
-		error_log($output, 3, ROOT.$settings->errorLogFile);
+		error_log($output, 3, ROOT . "$settings->theme/$settings->errorLogFile");
 
         return $self;
 	}
@@ -237,22 +237,22 @@ Class Cerror
      */
 	public static function logAndDie($logMessage, $dieMessage)
 	{
-		$settings = Settings::get();
-		$self = self::getInstance();
+		$settings    = Settings::get();
+		$self        = self::getInstance();
 
-		$trace = debug_backtrace();
-		$error = new StdClass();
+		$trace       = debug_backtrace();
+		$error       = new StdClass();
 		$error->type = 'USER CUSTOM ERROR';
 		$error->file = isset($trace[0]['file']) ? '/' . $self->pathFromSiteRoot($trace[0]['file']) : '';
 		$error->line = isset($trace[0]['line']) ? $trace[0]['line'] : '';
 		$error->text = $logMessage;
 
-		$output = date('Y-m-d H:i:s')."\n"
-				 ."- $error->type in file $error->file at line $error->line:\n  $error->text\nBacktrace:\n"
-				 // Array splice to limit backtrace to last 2 files.
-				 .print_r(array_splice($trace, 0, 2), 1)."\n";
+		$output      = date('Y-m-d H:i:s')."\n"
+				     . "- $error->type in file $error->file at line $error->line:\n  $error->text\nBacktrace:\n"
+				     // Array splice to limit backtrace to last 2 files.
+				     . print_r(array_splice($trace, 0, 2), 1)."\n";
 
-		error_log($output, 3, ROOT.$settings->errorLogFile);
+		error_log($output, 3, ROOT . "$settings->theme/$settings->errorLogFile");
 
 		die($dieMessage);
 	}
@@ -285,7 +285,7 @@ Class Cerror
 	 */
 	private function pathFromSiteRoot($path)
 	{
-		return str_replace([ROOT, dirname(dirname(__DIR__)).'/'], '', $path);
+		return str_replace([ROOT, dirname(dirname(__DIR__)) . '/'], '', $path);
 	}
 
 
