@@ -304,7 +304,7 @@ ul.checklist li:before {content:'y ';}
  .floatLeft {float:left;}
  .floatRight {float:right;}
  .clear {clear:both;}
- .clearfix:before, .clearfix:after {content: '';position:absolute;clear:both;}
+ .clearfix:before, .clearfix:after {content: '';display: table;clear:both;}
  br.clear {display:block;height:0;}
 
  a
@@ -1100,102 +1100,78 @@ ul.checklist li:before {content:'y ';}
 /*============================== end of SLIDESHOW ==========================*/
 
 /*================================== LIGHTBOX ==============================*/
- body > .overlay
- {display:none;
- width:100%;
- height:100%;
- top:0;
- left:0;
- position:fixed;
- background:transparent;/* Fallback useful for Microsoft.gradient */
- background:rgba(0,0,0,.7);
- -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000)";/* IE8 */
- filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000);/* IE6 & 7 */
- z-index:11;}
+ .overlay {
+    position: fixed;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background: transparent;/* Fallback useful for Microsoft.gradient */
+    background: rgba(255,255,255,.7);
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000)";/* IE8 */
+    filter:progid: DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000);/* IE6 & 7 */
+    -webkit-transition: z-index 0s 1s, opacity 1s ease;
+    -moz-transition: z-index 0s 1s, opacity 1s ease;
+    -o-transition: z-index 0s 1s, opacity 1s ease;
+    transition: z-index 0s 1s, opacity 1s ease;
+ }
+ .lightbox.show ~ #all #page {z-index: initial;}
+ .lightbox.show + .overlay {
+     opacity: 1;
+     z-index: 90;
+     -webkit-transition:z-index 0s, opacity 1s ease;
+     -moz-transition:z-index 0s, opacity 1s ease;
+     -o-transition:z-index 0s, opacity 1s ease;
+     transition:z-index 0s, opacity 1s ease;
+  }
 
- #lightbox
- {width:100%;
- height:100%;
- z-index:-1;
- position:absolute;
- display: table;
- opacity:0;
- filter:alpha(opacity=0);
- -webkit-transition:z-index 0s 1s, opacity 1s ease, -webkit-backface-visibility 0;
- -moz-transition:z-index 0s 1s, opacity 1s ease;
- -o-transition:z-index 0s 1s, opacity 1s ease;
- transition:z-index 0s 1s, opacity 1s ease, backface-visibility 0 1s;}
- #lightbox.show
- {z-index:100;
- opacity:1;
- filter:alpha(opacity=100);
- -webkit-backface-visibility:initial;
- backface-visibility:initial;
- -webkit-transition:z-index 0s, opacity 1s ease, -webkit-backface-visibility 0s 1s;
- -moz-transition:z-index 0s, opacity 1s ease;
- -o-transition:z-index 0s, opacity 1s ease;
- transition:z-index 0s, opacity 1s ease, backface-visibility 0s 1s;}
- #lightbox.hide {display:none;}
- #lightbox .overlay
- {width:100%;
- height:100%;
- background:transparent;/* Fallback useful for Microsoft.gradient */
- background:rgba(0,0,0,.7);
- -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000)";/* IE8 */
- filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#B2000000,endColorstr=#B2000000);/* IE6 & 7 */
- position:fixed;
- z-index:-1;}
- #lightbox > .wrapper
- {display: table-cell;
- vertical-align: middle;
- max-width: 90%;
- margin: auto;
- /* margin-left:50%;
- position:fixed;
- height:100%;
- */ -webkit-perspective:1000px;
- -moz-perspective:1000px;
- -ms-perspective:1000px;
- perspective:1000px;
- -webkit-perspective-origin:0% 0%;
- -moz-perspective-origin:0% 0%;
- -ms-perspective-origin:0% 0%;
- perspective-origin:0% 0%;}
- #lightbox > .wrapper > .inner
- {/*float:right;
- margin:10% 50% 10% 0;
- height:100%;
- */position:relative;
- -webkit-transform:translateY(30px) rotateX(95deg) scale(.7);
- -moz-transform:translateY(30px) rotateX(95deg) scale(.7);
- -ms-transform:translateY(30px) rotateX(95deg) scale(.7);
- -o-transform:translateY(30px) rotateX(95deg) scale(.7);
- transform:translateY(30px) rotateX(95deg) scale(.7);
- -webkit-transition:.7s ease-in-out;
- -moz-transition:.7s ease-in-out;
- -ms-transition:.7s ease-in-out;
- -o-transition:.7s ease-in-out;
- transition:.7s ease-in-out;}
- #lightbox.show > .wrapper > .inner
- {-webkit-transform:rotate(0);
- -moz-transform:rotate(0);
- -ms-transform:rotate(0);
- -o-transform:rotate(0);
- transform:rotate(0);}
- #lightbox > .wrapper > .inner > .content
- {height:auto;
- background:#000 url(../images/texture-bg.png);
- border:1px solid #333;
- overflow:hidden;
- position:relative;}
- #lightbox .close {position:absolute;top:-10px;right:-10px;z-index:1;}
- #lightbox .close:before
+ .lightbox {
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -webkit-transition:z-index 0s 1s, opacity 1s ease;
+    -moz-transition:z-index 0s 1s, opacity 1s ease;
+    -o-transition:z-index 0s 1s, opacity 1s ease;
+    transition:z-index 0s 1s, opacity 1s ease;
+ }
+ .lightbox.show {
+    z-index: 100;
+    opacity: 1;
+    filter: alpha(opacity=100);
+    -webkit-transition:z-index 0s, opacity 1s ease;
+    -moz-transition:z-index 0s, opacity 1s ease;
+    -o-transition:z-index 0s, opacity 1s ease;
+    transition:z-index 0s, opacity 1s ease;
+ }
+ .lightbox > .box {
+    max-width: 90%;
+    width: 400px;
+    height: 150px;
+    position: relative;
+ }
+ .lightbox > .box > .content {
+    height: 100%;
+    background:#000 url(../images/texture-bg.png);
+    border:1px solid #ddd;
+    overflow:hidden;
+    position:relative;
+ }
+ .lightbox .close {position:absolute;top:-10px;right:-10px;z-index:1;}
+ .lightbox .close:before
  {cursor:pointer;
  display:block;
  padding:2px;
  font-size:150%;
  line-height:20px;
- background:#333;
+ background:#eee;
+ border:1px solid #ddd;
  color:#666;
  -webkit-border-radius:25px;
  border-radius:25px;
@@ -1203,7 +1179,7 @@ ul.checklist li:before {content:'y ';}
  -moz-transition:.5s ease-out;
  -o-transition:.5s ease-out;
  transition:.5s ease-out;}
- #lightbox .close:hover:before
+ .lightbox .close:hover:before
  {background:#F00;
  color:#fff;
  -webkit-transform:rotate(360deg);
@@ -1584,14 +1560,21 @@ ul.checklist li:before {content:'y ';}
  #footer.stop {z-index: 9;}
  #footer > .bg {
     background: no-repeat bottom fixed;
-    -webkit-background-size: cover;
-    background-size: cover;
+    -webkit-background-size: 100%;
+    background-size: 100%;
     position: absolute;
     bottom: 0;
     height: 100%;
     left: 0;
     right: 0;
  }
+ @media screen and (max-width: 680px) {
+    #footer > .bg {
+        background: no-repeat 80% bottom fixed;
+        -webkit-background-size: auto;
+        background-size: auto;
+    }
+}
 
  #footer a, #footer a:hover {color: inherit;}
  #go-top
