@@ -1,7 +1,28 @@
 .content ul {margin-left: 0;}
-ul li {list-style-type: none;padding: 3px 0;}
-ul :before {font-size: 200%;padding-right: 10px;}
+.content ul li {list-style-type: none;}
 
-ul li .buttons {float: none;}
-ul li .buttons button {background: none;padding-left: 0;border: none;}
-ul li form span.error:before {border-width: .4em;}
+.content ul li a:before, .content ul li form button:before {
+    font-size: 200%;
+    padding-right: 10px;
+    margin-top: -.2em;
+    display: inline-block;
+}
+
+.content ul li .buttons {float: none;}
+.content ul li .buttons button {background: none;border: none;}
+.content ul li form span.error:before {border-width: .4em;}
+
+.content ul li a, .content ul li form button {
+    padding: 5px 12px;
+    border-radius: 4px;
+    color: #333;
+    line-height: 2;
+    display: inline-block;
+}
+.content ul li a:hover, .content ul li form button:hover {
+    background: greenyellow;
+}
+
+#send-article, #send-page {display: inline-block;}
+#send-article .buttons, #send-page .buttons {float: left;}
+#send-article .row, #send-page .row {float: right;line-height: 2.6;}

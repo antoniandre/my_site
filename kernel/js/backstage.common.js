@@ -1,6 +1,7 @@
 /*
  * This script contains backstage behaviors only.
  * The backstageReady() function is called after commonReady() when DOM is ready.
+ * The backstageReady() function is called after commonReady() when DOM is ready.
  */
 
 /**
@@ -9,7 +10,7 @@
 var backstagecommonReady = function()
 {
 	// Create a new text.
-	if ($('#create-new-text-page').length)
+	if ($('.page.create-new-text').length)
 	{
 		$('#form1pageselection2opt15').on('change', function()
 		{
@@ -18,7 +19,7 @@ var backstagecommonReady = function()
 	}
 
 	// Create a new page.
-	else if ($('#create-new-page-page').length)
+	else if ($('.page.create-new-page').length)
 	{
 		updateUrlFromTitle();
 
@@ -30,7 +31,7 @@ var backstagecommonReady = function()
 	}
 
 	// Edit a page.
-	else if ($('#edit-a-page-page').length)
+	else if ($('.page.edit-a-page').length)
 	{
 		loadStyleSheet('article');
 		bindEvents();
@@ -115,7 +116,7 @@ var updateUrlFromTitle = function()
 var submitViaAjax = function(form)
 {
 	var $waitingMessage = setMessage('Saving data...', 'info', 'info', 'header', [0, null]);
-	$.post(form.attr('action'), form.serialize()+'&task=save', function(response)
+	$.post(form.attr('action'), form.serialize() + '&task=save', function(response)
 	{
 		// In localhost the request rountrip is so short that we need to wait for the message
 		// to be first appended before removing it!

@@ -124,11 +124,11 @@ var // General vars. (g for general)
 							+ message + '</div>',
 			$message = $(message)[timeToSlideDown !== null ? 'hide' : 'show'](),
 			messageContainer = position== 'header' ? 'body' : '#contentWrapper .content';
-		if (!$('#' + position + 'Message').length)
+		if (!$('#' + position + '-message').length)
 		{
-			$(messageContainer).prepend('<div id="' + position + 'Message"/>');
+			$(messageContainer).prepend('<div id="' + position + '-message"/>');
 		}
-		$message.appendTo('#' + position + 'Message');
+		$message.appendTo('#' + position + '-message');
 		setTimeout(function()
 		{
 			// Show message.
@@ -195,7 +195,7 @@ var // General vars. (g for general)
 
     	//--------------------------- Messages --------------------------//
 		// Messages slide down and slide up animations.
-		$('#headerMessage').children()
+		$('#header-message').children()
 			.filter(function(){return $(this).is('[data-slidedown]') || $(this).is('[data-slideup]');})
 			.each(function(i, curr)
 			{
@@ -233,25 +233,7 @@ var // General vars. (g for general)
 	initForm = function()
     {
 		if ($('form').length) formReady();
-    },
-
-	handleLightbox = function()
-    {
-		$('#lightbox > *').on('click', function(e)
-		{
-			e.preventDefault();
-
-			if ($(e.target).is('#lightbox > .overlay, #lightbox > .wrapper, #lightbox .close'))
-			{
-				$(this).parent().removeClass('show');
-				setTimeout(function()
-				{
-					$('#lightbox .content').removeAttr('style').children('.content-inner').html('')
-					.parents('#lightbox').addClass('hide');
-				}, 1000);
-			}
-		});
-    },
+    }
 
 	handleCookieNotice = function()
     {
@@ -774,6 +756,7 @@ String.prototype.isLatin = function(){return this==this.toLatinChars()};
 //==================================================================================//
 
 
+
 //====================================== M A I N ===================================//
 //==================================================================================//
 var commonReady = function()
@@ -785,7 +768,6 @@ var commonReady = function()
 	// resizeHandler();
 	// new imagePreloader(['logo.jpg']);
 
-    if ($('#lightbox').length)               handleLightbox();
     if ($('#cookie-notice').length)          handleCookieNotice();
     if ($('[data-original]').length)         lazyload();
     if ($('.slideshow').length)              handleSlideshow();

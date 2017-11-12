@@ -19,22 +19,22 @@
 	<!-- END uploadItemBlock -->
 	{errorMessage}
 	<div class="buttons">
-	    <div class="discardAll i-x">{discardAll}</div>
-	    <div class="addImagesToArticle i-check">{addImagesToArticle}</div>
+	    <div class="discard-all i-x">{discardAll}</div>
+	    <div class="add-images-to-article i-check">{addImagesToArticle}</div>
 	</div>
 </div>
 <!-- END uploadBlock -->
 
 <!-- BEGIN textBlock -->
-<span class="{validation}{state}">
+<div class="{validation}{state}">
     <input type="text" name="{formId}{name}" id="{formId}{id}" class="text{class}" value="{value}"{attr} />{errorMessage}
-</span>
+</div>
 <!-- END textBlock -->
 
 <!-- BEGIN numberBlock -->
-<span class="{validation}{state}">
+<div class="{validation}{state}">
 	<input type="number" name="{formId}{name}" id="{formId}{id}" class="text number{class}" value="{value}"{attr} />{errorMessage}
-</span>
+</div>
 <!-- END numberBlock -->
 
 <!-- BEGIN sliderBlock -->
@@ -47,60 +47,60 @@
 <!-- END sliderBlock -->
 
 <!-- BEGIN emailBlock -->
-<span class="{validation}{state}">
+<div class="{validation}{state}">
 	<input type="email" name="{formId}{name}" id="{formId}{id}" class="text email{class}" value="{value}"{attr} />{errorMessage}
-</span>
+</div>
 <!-- END emailBlock -->
 
 <!-- BEGIN phoneBlock -->
-<span class="{validation}{state}">
+<div class="{validation}{state}">
 	<input type="text" name="{formId}{name}" id="{formId}{id}" class="text phone{class}" value="{value}"{attr} />{errorMessage}
-</span>
+</div>
 <!-- END phoneBlock -->
 
 <!-- BEGIN hiddenBlock -->
-<span class="{validation}{state}">
-	<input type="hidden" name="{formId}{name}" id="{formId}{id}" value="{value}" />{errorMessage}
-</span>
+<div class="{validation}{state}">
+	<input type="hidden" name="{formId}{name}" id="{formId}{id}" class="{class}" value="{value}" />{errorMessage}
+</div>
 <!-- END hiddenBlock -->
 
 <!-- BEGIN textareaBlock -->
-<span class="{validation}{state}">
-	<textarea name="{formId}{name}" id="{formId}{id}" class="text {class}"{attr}>{value}</textarea>{errorMessage}
-</span>
+<div class="{validation}{state}">
+	<textarea name="{formId}{name}" id="{formId}{id}" class="text{class}"{attr}>{value}</textarea>{errorMessage}
+</div>
 <!-- END textareaBlock -->
 
 <!-- BEGIN wysiwygBlock -->
 <article class="{validation}{state}">
-	<textarea name="{formId}{name}" id="{formId}{id}" class="text wysiwyg {class}"{attr}>{value}</textarea>{errorMessage}
+	<textarea name="{formId}{name}" id="{formId}{id}" class="text wysiwyg{class}"{attr}>{value}</textarea>{errorMessage}
 </article>
 <!-- END wysiwygBlock -->
 
 <!-- BEGIN selectBlock -->
-<span class="{validation}{state}">
-	<select name="{formId}{name}{ifMultiple}" id="{formId}{id}opt{opt}" class="text {class}"{multiple}{attr}>
+<div class="{validation}{state}">
+	<select name="{formId}{name}{ifMultiple}" id="{formId}{id}opt{opt}" class="text{class}"{multiple}{attr}>
 		<option value=""> - </option>
 		<!-- BEGIN selectOptionBlock -->
 		<option value="{value}"{selected}>{label}</option>
 		<!-- END selectOptionBlock -->
 	</select>{errorMessage}
-</span>
+</div>
 <!-- END selectBlock -->
 
 <!-- BEGIN checkboxBlock -->
-<span class="{validation}{state}{inline}">
-	<!-- BEGIN checkboxOptionBlock -->
-	<input type="checkbox" name="{formId}{name}{ifArray}" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{checked}{attr} /> {label}{br}
-	<!-- END checkboxOptionBlock -->{errorMessage}
-</span>
+<div class="{validation}{state}{inline}{class}">
+    <!-- BEGIN checkboxOptionBlock -->
+    <input type="checkbox" name="{formId}{name}{ifArray}" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} /> {label}{br}
+    <!-- END checkboxOptionBlock -->{errorMessage}
+</div>
 <!-- END checkboxBlock -->
 
 <!-- BEGIN radioBlock -->
-<span class="{validation}{state}{inline}">
+<div class="{validation}{state}{inline}{class}">
 	<!-- BEGIN radioOptionBlock -->
-	<input type="radio" name="{formId}{name}" id="{formId}{id}opt{opt}" class="text{class}" value="{value}"{checked}{attr} /> {label}{br}
-	<!-- END radioOptionBlock -->{errorMessage}
-</span>
+	<input type="radio" name="{formId}{name}" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} /> {label}{br}
+    <!-- END radioOptionBlock -->{errorMessage}
+</div>
 <!-- END radioBlock -->
 
 <!-- BEGIN headerBlock -->
