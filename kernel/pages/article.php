@@ -1,6 +1,7 @@
 <?php
 //======================= VARS ========================//
 define('USE_LAZY_FROM', -1);// If lazyload is activated in config.ini, use it from this image.
+define('BLANK_IMAGE', 'data:image/gif;base64,R0lGODlhAQABAIAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');// Blank 1x1 transparent gif image.
 $settings = Settings::get();
 
 // Initiate vars to default.
@@ -57,12 +58,12 @@ elseif ($article && $article->status === 'published')
 		$content = '';
 		if (count($translations))
 		{
-			$content = '<p>'.text(75).'</p><ul>';
+			$content = '<p>' . text(75) . '</p><ul>';
 			foreach ($translations as $lang => $translation)
 			{
 				$content .= "<li>In $translation->languageLabel: <a href=\""
-							.url($translation->article->page, ['language' => $lang])
-							."\">{$translation->article->title}</a></li>";
+						  . url($translation->article->page, ['language' => $lang])
+						  . "\">{$translation->article->title}</a></li>";
 			}
 			$content .= '</ul>';
 		}
@@ -91,14 +92,16 @@ elseif ($article && $article->status === 'published')
 		$dataLiked = isset($likes[$src]['liked']) ? intval($likes[$src]['liked']) : 0;
 
 		// Set correct src paths for img tags.
-		$src = strpos($src, 'images/?') === 0 ? $settings->root.$src : $src;
+		$src = strpos($src, 'images/?') === 0 ? $settings->root . $src : $src;
 
         if ($tag === 'audio' || $tag === 'iframe') $dontLazyload = true;
 
-		// Replace 'src' with 'data-original' from the image number (int)USE_LAZY_FROM if JS lazyload is active.
+        // Replace 'src' with 'data-original' from the image number (int)USE_LAZY_FROM if JS lazyload is active.
+        // When replacing src to data-original, set src to blank image to avoid server lookup.
 		return "<div class=\"imageWrapper\"><$tag$attributes"
-               .($settings->useLazyLoad && $cnt++ > USE_LAZY_FROM && !$dontLazyload ? 'data-original="' : 'src="')
-               ."$src\" data-likes=\"$dataLikes\" data-liked=\"$dataLiked\"$anything$closing</div>";
+               . ($settings->useLazyLoad && $cnt++ > USE_LAZY_FROM && !$dontLazyload ? 'src="' . BLANK_IMAGE . '" data-original="'
+                                                                                     : 'src="')
+               . "$src\" data-likes=\"$dataLikes\" data-liked=\"$dataLiked\"$anything$closing</div>";
 	}, $content);
 
 
