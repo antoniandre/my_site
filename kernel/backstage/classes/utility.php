@@ -215,6 +215,84 @@ Class Utility
 	  return sprintf("%.{$decimals}f", $filesize / pow(1024, $factor)) . @$sz[$factor];
 	}
 
+    // define('MAX_DEPTH', 1);
+    private static function buildDirContents($dir, $depth = 0, $dirId = '')
+    {
+        $files  = array_diff(scandir($dir), ['.', '..'/* , '.DS_Store' */]);
+        $output = '';
+
+        foreach ($files as $k => $file)
+        {
+            if (is_dir("$dir/$file"))
+            {
+                $dirId   = $dirId . $depth . $k;
+                $output .= "<input type='checkbox' class='hidden' name='dir' id='dir{$dirId}depth{$depth}'>\n"
+                         . "<label class='dir i-dir" . ($file{0} === '.' ? ' hidden' : '') . "' for='dir{$dirId}depth{$depth}'>$file</label>\n"
+                         . "<div class='dir-wrapper depth$depth'>\n"
+                         . self::buildDirContents("$dir/$file", $depth + 1, $dirId) . "</div>\n";
+            }
+            else
+            {
+                $fileExt = pathinfo("$dir/$file", PATHINFO_EXTENSION);
+                // $fileExt  = isset($fileInfo['extension']) ? $fileInfo['extension'] : '';
+
+                switch ($fileExt)
+                {
+                    case 'jpg':
+                    case 'jpeg':
+                    case 'gif':
+                    case 'png':
+                    case 'svg':
+                        $class = 'i-file-image';
+                        break;
+                    case 'php':
+                    case 'js':
+                    case 'ts':
+                    case 'json':
+                    case 'css':
+                    case 'less':
+                    case 'scss':
+                    case 'html':
+                    case 'xml':
+                    case 'sql':
+                    case 'htaccess':
+                    case 'htpasswd':
+                    case 'coffee':
+                    case 'rb':
+                        $class = 'i-file-code';
+                        break;
+                    case 'txt':
+                    case 'md':
+                        $class = 'i-file-text';
+                        break;
+                    case 'zip':
+                        $class = 'i-file-archive';
+                        break;
+                    case 'ini':
+                        $class = 'i-gear';
+                        break;
+                    default:
+                        $class = 'i-file';
+                        break;
+                }
+
+                $output .= "<div class='file $class" . ($file{0} === '.' ? ' hidden' : '') . "'>$file</div>\n";
+            }
+        }
+
+        return $output;
+    }
+    public static function showDirContents($dir, $rootDirLabel = '')
+    {
+        $rootDirLabel = $rootDirLabel ? $rootDirLabel : $dir;
+        $dirContents = self::buildDirContents($dir, $depth = 1, $dirId = 1);
+
+        return <<<HTML
+        <input type="checkbox" class="hidden" name="dir" id="root-dir" checked>
+        <label class="dir i-dir" for="root-dir">$rootDirLabel</label>
+        <div class="dir-wrapper depth0">$dirContents</div>
+HTML;
+    }
 	/*
 		Format a date.
 		@param (time) $timestamp: the timestamp to convert to date string. use current timestamp if none.
