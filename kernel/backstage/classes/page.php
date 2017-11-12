@@ -11,11 +11,12 @@ class Page
 	private static $instances = [];// Array of all the available (instanciated) Page instances.
 	private static $allPages  = [];// Array of stdCass pages straight out of DB.
 	private static $language  = null;
+	public  static $aliases   = [];
 
-	public $id;// Id of the current page (only one and shared among all languages).
-	public $page;// Can be different from a language to another.
-	public $url;
-	public $path;
+    public $id;// Id of the current page (only one and shared among all languages).
+    public $page;// Can be different from a language to another.
+    public $url;
+    public $path;
 	public $title;
 	public $h1;
 	public $content;
@@ -62,7 +63,7 @@ class Page
 		$this->id                = $page->id;
 		$this->page              = $page->page;
 		$this->url               = isset($page->url) ? $page->url : '';
-		$this->path              = $page->path;
+        $this->path              = $page->path;
 		$this->title             = isset($page->title) ? $page->title : '';
 		$this->h1                = '';//!\ Empty string is distinct from null in later var use.
         $this->headerHeight      = 60;
@@ -102,9 +103,9 @@ class Page
 		if (self::$current) return self::$current;
 		if (!count(self::$allPages)) self::fetchAll();
 
-		global $aliases;
 		$settings = Settings::get();
-		$language = self::$language;
+        $language = self::$language;
+        $aliases  = self::$aliases;
 
 		$allowedLanguages = array_keys(Language::allowedLanguages);
 		$pageId   = null;
@@ -132,7 +133,9 @@ class Page
 				// Detect if nothing is after the language in the path.
 				if ($path === "$language/" || $path === $language) $pageId = 'home';
 				elseif (strrpos($path, '.html') !== false) $page = self::getByProperty('url', $remainingUrl, $language);
-				elseif (array_key_exists($remainingUrl, $aliases)) $pageId = $aliases[$remainingUrl];
+
+                // Check page aliases.
+                elseif (array_key_exists($remainingUrl, $aliases)) $pageId = $aliases[$remainingUrl];
 			}
 
 			// If there is a themeRouter() function found in theme/[current_theme]/router.php,
@@ -155,7 +158,7 @@ class Page
 		else
 		{
 			$urlParts = parse_url($_SERVER['REQUEST_URI']);
-			$path     = str_replace('/'.dirname(SELF).'/', '', $urlParts['path']);
+			$path     = str_replace('/' . dirname(SELF) . '/', '', $urlParts['path']);
 
 			// Get the page from $gets if any.
 			$gets     = Userdata::get();
@@ -164,7 +167,7 @@ class Page
 		}
 
 		if ($pageId) self::$current = new self($pageId);
-		elseif (!empty($page)) self::$current = new self($page->page);
+        elseif (!empty($page)) self::$current = new self($page->page);
 		else self::$current = new self('not-found');
 
 		return self::$current;
@@ -210,8 +213,8 @@ class Page
 	 */
 	public static function getByProperty($property, $propertyValue, $language = null)
 	{
-		// global $aliases;
-		$pages = self::$allPages;
+        $pages   = self::$allPages;
+		$aliases = self::$aliases;
 
 		if (!$language) $language = Language::getCurrent();
 
@@ -223,8 +226,7 @@ class Page
 		}
 
 		// If not found, look in aliases.
-		// @todo: redo the aliases check.
-		// if (array_key_exists($propertyValue, $aliases)) return self::get($aliases[$propertyValue], $language);
+		if (array_key_exists($propertyValue, $aliases)) return self::get($aliases[$propertyValue], $language);
 
 		// Fallback if the page does not exist: return the 404 page.
 		return self::get('not-found');
@@ -260,12 +262,27 @@ class Page
 		}
 
 		self::$allPages = $pages;
+
+        // Get all the pages aliases.
+        self::getAllAliases();
 	}
 
 	public static function getAllPages()
 	{
 		return self::$allPages;
 	}
+
+    /**
+     * Get the available page aliases for the current language and fill in the static class var $aliases.
+     * The resulting array is made of '$page->alias => $page->id' pairs.
+     */
+    private static function getAllAliases()
+    {
+        $aliases = [];
+        foreach(self::$allPages as $page) if (isset($page->alias)) $aliases[$page->alias] = $page->id;
+
+        self::$aliases = $aliases;
+    }
 
 	/**
 	 * Set the language.
@@ -314,7 +331,11 @@ class Page
 	 */
 	public function setHeaderContent($html, $zone = 'bottom')
 	{
-		if (!in_array($zone, ['top', 'bottom'])) Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."(): The given zone \"$zone\" does not exist. Choose among 'top' or 'bottom'.", 'WRONG DATA', true);
+		if (!in_array($zone, ['top', 'bottom']))
+        {
+            Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__)
+                      . "(): The given zone \"$zone\" does not exist. Choose among 'top' or 'bottom'.", 'WRONG DATA', true);
+        }
 		else $this->{$zone.'ZoneContent'} = $html;
 	}
 
@@ -394,7 +415,7 @@ class Page
 		{
 			header('HTTP/1.1 503 Service Temporarily Unavailable', true);
 			//header('Retry-After: Sat, 8 Oct 2011 18:27:00 GMT');//<== optional but better to provide
-			header('location: '.url('maintenance'));
+			header('location: ' . url('maintenance'));
 			exit;
 		}
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -418,7 +439,7 @@ class Page
 	 */
 	public function refresh()
 	{
-		header('location:'.url($this->page));
+		header('location:' . url($this->page));
 		exit;
 	}
 
@@ -448,7 +469,7 @@ class Page
 		$expires = 60*60*24*7;//1 week.
 		header("Pragma: public");
 		header("Cache-Control: maxage=$expires");
-		header('Expires: '.gmdate('D, d M Y H:i:s', time()+$expires).' GMT');
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires).' GMT');
 		header('Content-Type: text/html; charset=utf-8');
 		header('Content-language: '.strtolower($language));
 
@@ -512,7 +533,9 @@ class Page
 					   'pageClass'         => $page->type,
 					   'metaDesc'          => $page->metaDescription->$language ? $page->metaDescription->$language : '',
 					   'metaKey'           => $page->metaKeywords->$language ? $page->metaKeywords->$language : '',
-					   'siteName'          => $settings->siteName,
+                       'siteName'          => $settings->siteName,
+                       'cssVersion'        => $settings->cssVersion,
+					   'jsVersion'         => $settings->jsVersion,
 					   'languageFull'      => Language::getCurrentFull(),
 					   'author'            => $settings->author,
 					   'siteUrl'           => $settings->siteUrl,
