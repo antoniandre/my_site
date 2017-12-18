@@ -17,6 +17,7 @@ function doMenu($items = [], $params)
     $ariaLabel     = $params['ariaLabel'];
     $showChildren  = $params['showChildren'];
     $showIcons     = $params['showIcons'];
+    $excludeArray  = $params['exclude'];
 
     if (count($items))
     {
@@ -26,11 +27,11 @@ function doMenu($items = [], $params)
             $submenu = '';
             $linkIconClass = $showIcons ? " class=\"$page->icon\"" : '';
 
-            if ($showChildren && $sub = displayTree(getChildrenPages($pageId)))
+            if ($showChildren && $sub = displayTree(getChildrenPages($pageId, $excludeArray)))
             {
                 $submenu = '<ul>' . $sub . '</ul>';
             }
-			$html .= "<li class=\"$pageId".($submenu ? ' parent' : '')."\"><a href=\"".url($pageId)."\"$linkIconClass><span>{$pages[$pageId]->title->$language}</span></a>$submenu</li>";
+			$html .= "<li class=\"$pageId" . ($submenu ? ' parent' : '') . "\"><a href=\"" . url($pageId) . "\"$linkIconClass><span>{$pages[$pageId]->title->$language}</span></a>$submenu</li>";
 		}
 
         return "<nav class='menu $class' role='navigation' aria-label='$ariaLabel'><ul>$html</ul></nav>";

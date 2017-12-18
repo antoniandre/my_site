@@ -38,26 +38,28 @@ Class Utility
 		$tpl = newPageTpl('comments');
 		$tpl->set_block($page->page, 'commentBlock', 'theCommentBlock');
 
-		$form = new Form(['class' => 'leaveComment']);
+        $introText = text(88);
+		$form = new Form(['id' => textu(88), 'class' => 'clearfix leave-comment']);
 		$form->addElement('paragraph',
-						  ['class' => 'intro floatLeft'],
-						  ['text' => text(88).' ', 'rowSpan' => 2]);// Leave a comment.
+						  ['class' => 'intro'],
+						  ['text' => $introText,
+                           'rowClass' => 'floatLeft']);// Leave a comment.
 		$form->addElement('radio',
 		                  ['name' => 'gender'],
 		                  ['validation' => 'required', 'inline' => true, 'options' => ['female' => text(90), 'male' => text(91)], 'rowClass' => 'floatLeft']);
 		$form->addElement('textarea',
 		                  ['name' => 'comment', 'placeholder' => text(89), 'cols' => 70, 'rows' => 4],
-		                  ['validation' => 'required', 'rowClass' => 'clear']);
+		                  ['validation' => 'required', 'rowClass' => 'clearfix']);
 		$form->addElement('text',
 		                  ['name' => 'firstName', 'placeholder' => text(27)],
-		                  ['validation' => 'required', 'rowClass' => 'floatLeft'/*, 'rowSpan' => 2*/]);
+		                  ['validation' => 'required'/*, 'rowSpan' => 2*/]);
 		/*$form->addElement('email',
 		                  ['name' => 'email', 'placeholder' => text('Email : restera invisible sur le site')],
 		                  ['validation' => 'required']);*/
 
         $form->addRobotCheck(text(95));
 		$form->addButton('validate', text(18));
-		$form->validate(function($result, $form)
+		$form->validate(function($form, $info)
 		{
 			$return = false;
 			$db = database::getInstance();
@@ -81,16 +83,16 @@ Class Utility
 			}
 			else
 			{
-				$q->insert('users', ['login' => $form->getPostedData('firstName'),
+				$q->insert('users', ['login'     => $form->getPostedData('firstName'),
 									 'firstName' => $form->getPostedData('firstName'),
-									 'email' => $form->getPostedData('email'),
-									 'type' => 3,
-									 'gender' => $form->getPostedData('gender')]);
+									 'email'     => $form->getPostedData('email'),
+									 'type'      => 3,
+									 'gender'    => $form->getPostedData('gender')]);
 				$q->run();
 				if ($userId = $q->info()->insertId)
 				{
-					$q->insert('comments', ['page' => $page->isArticle() ? $page->article->id : $page->id,
-											'author' => $userId,
+					$q->insert('comments', ['page'    => $page->isArticle() ? $page->article->id : $page->id,
+											'author'  => $userId,
 											'comment' => $comment]);
 					$q->run();
 
@@ -105,8 +107,8 @@ Class Utility
 											<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 										</head>
 										<body>
-											<p>'.$form->getPostedData('firstName').' (email: '.$form->getPostedData('email').') a laissé un commentaire sur l\'article <a href="'.url($page->getUrl()).'">'.$page->getTitle().'</a> :</p>
-											<p>'.nl2br(stripslashes($comment)).'</p>
+											<p>' . $form->getPostedData('firstName') . ' (email: ' . $form->getPostedData('email') . ') a laissé un commentaire sur l\'article <a href="' . url($page->getUrl()) . '">' . $page->getTitle() . '</a> :</p>
+											<p>' . nl2br(stripslashes($comment)) . '</p>
 										</body>
 									</html>';
 						self::mailAdmin($subject, $message);
@@ -350,22 +352,74 @@ HTML;
 	/*
 		Generates an alphabetic index.
 	*/
-	public static function alphaIndex($showDigits = false, $enableLetters= [])
-	{
-		$page       = Page::getCurrent();
-		$urlBase    = str_replace('.html', '', url($page->page));
-		$alphaIndex = '';
-		$alphabet   = str_split('abcdefghijklmnopqrstuvwxyz');
-		if ($showDigits) $alphabet[] = '#0-9';
+    public static function alphaIndex($showDigits = false, $enableLetters= [])
+    {
+        $page       = Page::getCurrent();
+        $urlBase    = str_replace('.html', '', url($page->page));
+        $alphaIndex = '';
+        $alphabet   = str_split('abcdefghijklmnopqrstuvwxyz');
+        if ($showDigits) $alphabet[] = '#0-9';
 
-		foreach($alphabet as $letter)
-		{
-			if (!count($enableLetters) || array_key_exists($letter, $enableLetters))
+        foreach($alphabet as $letter)
+        {
+            if (!count($enableLetters) || array_key_exists($letter, $enableLetters))
                 $alphaIndex.= '<a href="' . "$urlBase/" . text(100) . "/$letter.html\">$letter</a>";
-			else $alphaIndex .= "<span>$letter</span>";
-		}
+            else $alphaIndex .= "<span>$letter</span>";
+        }
 
-	    return '<div class="index-alpha">'.$alphaIndex.'</div>';
+        return '<div class="index-alpha">' . $alphaIndex . '</div>';
+    }
+
+	public static function handleRatings()
+	{
+		$gets = Userdata::get();
+        $numberOfStars = 5;
+        $newRatingPercentage = 0;
+
+        if (isset($gets->rating) && isset($gets->rating->targetType) && isset($gets->rating->targetId))
+        {
+            $rating     = (int)$gets->rating->value;
+            $targetType = $gets->rating->targetType;
+            $targetId   = (int)$gets->rating->targetId;
+            $db = database::getInstance();
+            $q = $db->query();
+
+            $q->select('ratings', [$q->col('total'), $q->col('number'), $q->col('ip')])
+              ->where()->col('targetId')->eq($targetId)->and()->col('targetType')->eq($targetType);
+            $existingRating = $q->run()->loadObject();
+
+
+            if (is_object($existingRating))
+            {
+                $currentRating       = $existingRating->total * $existingRating->number;
+                $newRating           = $rating / $numberOfStars;
+                $newRatingPercentage = ($currentRating + $newRating) / ($existingRating->number + 1);
+                $ipsArray            = isset($existingRating->ip) ? unserialize($existingRating->ip) : [];
+                $ipsArray[]          = User::getCurrent()->getIp();
+                $ipsArray = array_unique($ipsArray);
+
+                $q->update('ratings',
+                           ['total'      => $newRatingPercentage,
+                            'number'     => $existingRating->number + 1,
+                            'ip'         => serialize($ipsArray),
+                            'targetType' => $targetType,
+                            'targetId'   => (int)$targetId])
+                  ->where()->col('targetId')->eq($targetId)->and()->col('targetType')->eq($targetType);
+            }
+            else
+            {
+                $newRatingPercentage = $rating / $numberOfStars;
+                $q->insert('ratings', ['total'      => $newRatingPercentage,
+                                       'number'     => 1,
+                                       'ip'         => serialize([User::getCurrent()->getIp()]),
+                                       'targetType' => $targetType,
+                                       'targetId'   => (int)$targetId]);
+            }
+            $q->run();
+
+            return $q->info()->affectedRows ? $newRatingPercentage : -1;
+            // return $newRatingPercentage;
+        }
 	}
 
 	/*

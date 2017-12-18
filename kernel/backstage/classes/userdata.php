@@ -81,9 +81,9 @@ class Userdata
                 elseif (is_string($value))                     $tmp = self::secureString($value, $acceptHTML);
                 elseif (is_object($value) || is_array($value)) $tmp = self::secureVars($value, $asObject, $acceptHTML);
 
-                // If array, keep array form even if $asObject is set to true. Makes no sense.
+                // If array with numeric indexes, keep array form even if $asObject is set to true.
                 if ($asObject && !is_numeric($key)) $outputVar->$key = $tmp;
-                elseif ($asObject && is_numeric($key))  {}// Discard numeric entries.
+                // elseif ($asObject && is_numeric($key))  {}// Discard numeric entries.
                 else $outputVar[$key] = $tmp;
             }
         }

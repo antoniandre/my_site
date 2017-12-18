@@ -101,10 +101,10 @@ function getFilesContents($files)
     $jsContents = '';
     foreach ((array)$files as $file)
     {
-        $v = null;
-        $k = null;
-        $t = null;
-        $c = null;
+        $v = null;// Vendor.
+        $k = null;// Kernel.
+        $t = null;// Theme.
+        $c = null;// File Content.
         list($file, $from) = array_pad(explode(':', $file), 2, null);
 
         if ($file)
@@ -158,7 +158,7 @@ function addJsVars($jsContents)
     $onReady  = '';
     if (count($readyFunctions)) foreach ($readyFunctions as $function)
     {
-        if (in_array($function, $files)) $onReady .= str_replace(['-', '.'], '', $function).'Ready();';
+        if (in_array($function, $files)) $onReady .= str_replace(['-', '.'], '', $function) . 'Ready();';
     }
 
     // Prepare an array that lists all the scripts available and whether they have an associated CSS or not
@@ -191,9 +191,9 @@ function addJsVars($jsContents)
     // Append few vars and array of ready functions to the output.
     $jsOutput = "var l         = '$language',\n"
               . "    ROOT      = '$settings->root',\n"
-              . "    localhost = ".(int)IS_LOCAL.",\n"
+              . "    localhost = " . (int)IS_LOCAL . ",\n"
               . "    page      = '$page->page',\n"
-              . "    scripts   = ".json_encode($scripts).";\n\n"
+              . "    scripts   = " . json_encode($scripts) . ";\n\n"
               . "$jsContents\n\n"
               . "\$(document).ready(function(){commonReady();$onReady});";
 

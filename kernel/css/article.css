@@ -264,10 +264,10 @@ ul.glyph .i-valid:before {color:green;content:'u';font-size:200%;}
     transform: none !important;
     margin-right: 0;}
  }
- .transform article .rotate.z0 {z-index: 0;}
- .transform article .rotate.z1 {z-index: 1;}
- .transform article .rotate.z2 {z-index: 2;}
- .transform article .rotate.z3 {z-index: 3;}
+ article figure.z0 {z-index: 0;}
+ article figure.z1 {z-index: 1;}
+ article figure.z2 {z-index: 2;}
+ article figure.z3 {z-index: 3;}
 
  article figcaption .i-quote-l:before,
  article figcaption .i-quote-r:before {font-size: 120%;color: #ccc;padding: 0 10px;}
@@ -412,38 +412,3 @@ ul.glyph .i-valid:before {color:green;content:'u';font-size:200%;}
 
  .likes .spinner-s {margin: -16px -17px -16px -13px;}
 /*========================================================================*/
-
-
-/*============================== comments ================================*/
- .comments
- {position: relative;
- padding: 20px 50px 50px;
- margin: 50px -50px -50px;
- background: #f8f8f8;}
- @media screen and (max-width: 550px) {
-    .comments {padding-left: 10px;padding-right: 10px;margin-left: -10px;margin-right: -10px;}
- }
- .comments::before,
- .comments::after
- {position: absolute;
- content: '';
- pointer-events: none;
- right: 0;
- left: 0;
- z-index: 10;
- display: block;
- height: 90px;
- background-size: 50px 100%;
- top: -90px;
- background-image: -webkit-gradient(linear, 0 0, 300% 100%, color-stop(0.25, transparent), color-stop(0.25, #f8f8f8));
- background-image: linear-gradient(315deg, #f8f8f8 25%, transparent 25%), linear-gradient( 45deg, #f8f8f8 25%, transparent 25%);
- background-position: 50%;}
- .comments::before
- {top: -92px;
- background-image: -webkit-gradient(linear, 0 0, 300% 100%, color-stop(0.25, transparent), color-stop(0.25, #f2f2f2));
- background-image: linear-gradient(315deg, #f2f2f2 25%, transparent 25%), linear-gradient( 45deg, #f2f2f2 25%, transparent 25%);}
- /*========================================================================*/
-
-
-/*======================== SPECIFIC ARTICLE RULES ========================*/
-/*==================== End of SPECIFIC ARTICLE RULES =====================*/

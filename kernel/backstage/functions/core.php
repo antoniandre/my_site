@@ -6,7 +6,7 @@
 
 //======================= INCLUDES ====================//
 // Minimum required core. (the min for js/, css/, images/).
-require __DIR__.'/minicore.php';
+require __DIR__ . '/minicore.php';
 
 includeClass('debug');
 includeClass('page');

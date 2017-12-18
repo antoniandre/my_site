@@ -240,8 +240,8 @@ Class Article
 
 		if ($returnHtml)
 		{
-			$prev = $prev ? '<a href="'.url($prev->page).'">'.text(73).'</a>' : '';
-			$next = $next ? '<a href="'.url($next->page).'">'.text(74).'</a>' : '';
+			$prev = $prev ? '<a href="' . url($prev->page) . '">' . text(73) . '</a>' : '';
+			$next = $next ? '<a href="' . url($next->page) . '">' . text(74) . '</a>' : '';
 		}
 
 		return [$prev, $next];
