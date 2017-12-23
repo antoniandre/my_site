@@ -21,32 +21,38 @@ function getTree($page = 'sitemap', $exclude = [], $params = [])
  * getChildrenPages() function retrieves the tree of children pages recursively.
  * The tree is constructed with or without backstage branch according to the user rights,
  * and without the pages in array $skipPages.
+ * You can exclude a whole page type by wrapping it in '[]'.
+ * E.g. '[article]' will exclude all the articles.
  *
  * @param string $page: the starting page to look for children recursively.
  * @return array: the new pages tree.
  */
-function getChildrenPages($page, $exclude = [])
+function getChildrenPages($page, $excludeArray = [])
 {
 	global $user;
 	$pages     = Page::getAllPages();
 	$language  = Language::getCurrent();
 	$pagesTree = [];
+    $excludedTypes = [];
+    $excludedPages = [];
 
-	// If '[article]' is in exclude, exclude all the articles.
-	$excludeArticles = array_search('[article]', $exclude);
-	if ($excludeArticles !== false) unset($exclude[$excludeArticles]);
+    if (count($excludeArray)) foreach ($excludeArray as $exclude)
+    {
+        if ($exclude{0} === '[') $excludedTypes[] = substr($exclude, 1, -1);
+        else $excludedPages[] = $exclude;
+    }
 
 	foreach ($pages as $pageId => $thePage)
 	{
-		if ($thePage->parent === $page && (!in_array($pageId, $exclude)
+		if ($thePage->parent === $page && (!in_array($pageId, $excludedPages)
 			&& ($pageId !== 'backstage' || ($pageId == 'backstage' && $user->isAdmin()))))
 		{
-			if ($excludeArticles !== false && $thePage->type === 'article') continue;
+			if (count($excludedTypes) && in_array($thePage->type, $excludedTypes)) continue;
 
 			$pagesTree[$pageId]['id']    = $pageId;
 			$pagesTree[$pageId]['icon']  = $thePage->icon;
 			$pagesTree[$pageId]['title'] = $thePage->title->$language;
-			$count                       = count($children = getChildrenPages($pageId, $exclude));
+			$count                       = count($children = getChildrenPages($pageId, $excludeArray));
 
 			if ($count) $pagesTree[$pageId]['children'] = $children;
 		}
