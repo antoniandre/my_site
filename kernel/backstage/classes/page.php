@@ -211,7 +211,28 @@ class Page
 	 * @param string $language: the target language for the wanted page.
 	 * @return object: the wanted page informations (page/id/path/title).
 	 */
-	public static function getByProperty($property, $propertyValue, $language = null)
+    public static function getByProperty($property, $propertyValue, $language = null)
+    {
+        $pages   = self::$allPages;
+        $aliases = self::$aliases;
+
+        if (!$language) $language = Language::getCurrent();
+
+        foreach($pages as $page)
+        {
+            if (is_object($page->$property) && $page->$property !== 'id'
+                && $page->$property->$language == Userdata::unsecureString($propertyValue)) return self::get($page->page);
+            elseif ($page->$property == Userdata::unsecureString($propertyValue)) return self::get($page->page);
+        }
+
+        // If not found, look in aliases.
+        if (array_key_exists($propertyValue, $aliases)) return self::get($aliases[$propertyValue], $language);
+
+        // Fallback if the page does not exist: return the 404 page.
+        return self::get('not-found');
+    }
+
+	public static function getByTypeAndTypeId($type, $typeId, $language = null)
 	{
         $pages   = self::$allPages;
 		$aliases = self::$aliases;
@@ -220,13 +241,8 @@ class Page
 
 		foreach($pages as $page)
 		{
-			if (is_object($page->$property) && $page->$property !== 'id'
-				&& $page->$property->$language == Userdata::unsecureString($propertyValue)) return self::get($page->page);
-			elseif ($page->$property == Userdata::unsecureString($propertyValue)) return self::get($page->page);
+			if ($page->type === $type && $page->typeId === $typeId) return self::get($page->page);
 		}
-
-		// If not found, look in aliases.
-		if (array_key_exists($propertyValue, $aliases)) return self::get($aliases[$propertyValue], $language);
 
 		// Fallback if the page does not exist: return the 404 page.
 		return self::get('not-found');

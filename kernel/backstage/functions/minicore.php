@@ -49,11 +49,11 @@ function checkInTheme($path)
     $settings  = class_exists('Settings') ? Settings::get() : null;
     if (!$settings) return $path;
 
-    $theme       = $settings->theme;
-    $themePath   = str_replace(['kernel/backstage/', 'kernel/'], "themes/$theme/", $path);
+    $theme     = $settings->theme;
+    $themePath = str_replace(['kernel/backstage/', 'kernel/'], "themes/$theme/", $path);
 
     // If normal path is kernel/backstage/[file] look into theme/[theme]/backstage.[file].
-    if (strpos($path, 'kernel/backstage/') !== false)
+    if (strpos($path, 'kernel/backstage/pages/') !== false)
     {
         $basename  = basename($themePath);
         $themePath = str_replace($basename, "backstage.$basename", $themePath);

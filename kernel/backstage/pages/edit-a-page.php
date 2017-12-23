@@ -215,7 +215,7 @@ function afterValidateForm($form, $info)
 						 ['formats' => ['sef']]);
 
         // PHP file.
-		if ($form->getPostedData('page[type]') === 'php') renamePhpFile($form->getPostedData('page[path]')."/$pageNameInDB", $form->getPostedData('page[path]')."/$pageName");
+		if ($form->getPostedData('page[type]') === 'php') renamePhpFile($form->getPostedData('page[path]') . "/$pageNameInDB", $form->getPostedData('page[path]') . "/$pageName");
 
         // Article.
         elseif ($form->getPostedData('page[type]') === 'article')
@@ -230,16 +230,15 @@ function afterValidateForm($form, $info)
 				$settings = Settings::get();
 
 				// Don't forget there will be backslashes here.
-				$GLOBALS["content_$lang"] = preg_replace('~(?<=src=\\\")'.$settings->root.'(images/\?(?:i|u)=[^"]+)(?=\\\")~i', '$1', $form->getPostedData("article[content][$lang]", true));
-			});
+                $GLOBALS['content']["content_$lang"] = preg_replace('~(?<=src=\\\")' . $settings->root . '(images/\?(?:i|u)=[^"]+)(?=\\\")~i', '$1', $form->getPostedData("article[content][$lang]", true));
+            });
 
-			$q->update('articles', ['content_en' => $GLOBALS['content_en'],
-            'content_fr' => $GLOBALS['content_fr'],
-            'author'     => User::getCurrent()->getId(),
-            'category'   => (int)$form->getPostedData('article[category]'),
-            'image'      => $form->getPostedData('article[image]'),
-            'status'     => $form->getPostedData('article[status]')]);
-			$w = $q->where()->col('id')->eq($articleId);
+            $fields = array_merge($GLOBALS['content'], ['author'   => User::getCurrent()->getId(),
+                                                        'category' => (int)$form->getPostedData('article[category]'),
+                                                        'image'    => $form->getPostedData('article[image]'),
+                                                        'status'   => $form->getPostedData('article[status]')]);
+			$q->update('articles', $fields)
+              ->where()->col('id')->eq($articleId);
 			$q->run();
 			$affectedRows = $q->info()->affectedRows;
 
@@ -274,7 +273,7 @@ function afterValidateForm($form, $info)
 	                         'metaKey_en'  => $form->getPostedData('page[metaKey][en]'),
 	                         'metaKey_fr'  => $form->getPostedData('page[metaKey][fr]'),
 	                         'parent'      => $form->getPostedData('page[parent]')]);
-		$w = $q->where()->col('typeId')->eq($articleId);
+		$w = $q->where()->col('typeId')->eq($articleId)->and()->col('type')->eq('article');
 		$q->run();
 		$affectedRows += $q->info()->affectedRows;
 
@@ -283,7 +282,7 @@ function afterValidateForm($form, $info)
 			$pages = Page::getAllPages();
 			$GLOBALS['pages'] = $pages;// Update the $pages global var.
 
-			new Message(nl2br(textf(67, $pageName, url($pageName), stripslashes($form->getPostedData('page[title]['.$language.']')))), 'valid', 'success', 'content');
+			new Message(nl2br(textf(67, $pageName, url($pageName), stripslashes($form->getPostedData('page[title][' . $language . ']')))), 'valid', 'success', 'content');
 			$return = true;
 		}
 		else new Message(68, 'info', 'info', 'content');
@@ -332,8 +331,8 @@ function fetchPage($page, $form)
 		$article = getArticleInfo($page->article->id);
 		$array['article[category]']    = $article->category;
 		$array['article[status]']      = $article->status;
-		$array['article[content][en]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_en);
-		$array['article[content][fr]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="'.$settings->root.'images/?$1=', $article->content_fr);
+		$array['article[content][en]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="' . $settings->root . 'images/?$1=', $article->content_en);
+		$array['article[content][fr]'] = preg_replace('~src="images\/\?(i|u)=~i', 'src="' . $settings->root . 'images/?$1=', $article->content_fr);
 		$array['article[image]']       = $article->image;
 		$array['article[created]']     = $article->created;
         $array['article[author]']      = $article->author;
