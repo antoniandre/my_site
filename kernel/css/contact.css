@@ -12,4 +12,6 @@
 }
 
 .contact-form-wrapper .row.textarea,
-.contact-form-wrapper .buttons {margin-top: 2em;}
+.contact-form-wrapper .buttons,
+.contact-form-wrapper .robot-check {margin-top: 2em;}
+.contact-form-wrapper .robot-check {margin-right: .6em;}
