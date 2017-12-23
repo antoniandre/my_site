@@ -311,7 +311,7 @@ function validateForm1($form, $info)
 			// If everything went fine.
 			if ($pageId)
 			{
-                $savedTags = saveTagsInDB();// Array of inserted ids.
+                saveTagsInDB($form, $articleId);
 
                 // Display a success message.
                 new Message
@@ -383,26 +383,6 @@ function saveArticleInDB($form)
 
     if (!$articleId) new Message('A problem occured while saving the article in database. Please check your data and try again.', 'error', 'error', 'content');
 
-    else
-    {
-        //--------------------- Save article tags ---------------------//
-        // First delete all the article tags from DB.
-        $q = $db->query()
-                ->delete('article_tags');
-        $w = $q->where()->col('article')->eq($articleId);
-        $q->run();
-
-        // Now for each tag create a new entry in the article_tags database table.
-        $tags = $form->getPostedData('article[tags]');
-        if ($tags) foreach ($tags as $tag)
-        {
-            $q = $db->query()
-                    ->insert('article_tags', ['article' => $articleId, 'tag' => $tag])
-                    ->run();
-        }
-        //-------------------------------------------------------------//
-    }
-
     return $articleId;
 }
 
@@ -437,35 +417,42 @@ function savePageInDB($form, $pageName, $articleId)
 
 function saveTagsInDB($form, $articleId)
 {
-    $tagIdList = [];
+    $db = database::getInstance();
+
+    // First delete all the article tags from DB.
+    $q  = $db->query()
+             ->delete('article_tags');
+    $w  = $q->where()->col('article')->eq($articleId);
+    $q->run();
+
+
+    //---------------- Add an existing tag ------------------//
+    // Now for each tag create a new entry in the article_tags database table.
+    $tagIdList  = [];
+    $q          = $db->query();
+    $postedTags = $form->getPostedData('article[tags]');
+
+    if (is_array($postedTags) && count($postedTags)) foreach ($postedTags as $tagId)
+    {
+        $q->insert('article_tags', ['article' => $articleId, 'tag' => $tagId])
+          ->run();
+        $tagIdList[] = $q->info()->insertId;
+
+        if (!$q->info()->affectedRows) new Message('A problem occured while saving the article tags in database. Please try again.', 'error', 'error', 'content');
+    }
+    //-------------------------------------------------------//
+
 
     /* Create a new tag:
+    //-------------------------------------------------------//
     // @todo: finish implementing.
     $q = $db->query();
     $q->insert('article_tags', ['article' => isset($articleId) ? $articleId : null,
                                 'tag' => $form->getPostedData('article[tags]')]);
     $q->run();
     if (!$q->info()->affectedRows) new Message('The tag could not be associated to this article. Please try again.', 'error', 'error', 'content');*/
+    //-------------------------------------------------------//
 
-    // Add an existing tag.
-    $db = database::getInstance();
-    $q = $db->query();
-    foreach ((array)$form->getPostedData('article[tags]') as $tagId)
-    {
-        // before inserting row check if not already in database.
-        $q->select('article_tags', $q->count('tag'));
-        $w = $q->where()->col('tag')->eq($tagId)->and()->col('article')->eq($articleId);
-        $existing = $q->run()->loadResult();
-
-        if (!$q->info()->affectedRows) new Message('A problem occured while saving the article tags in database. Please try again.', 'error', 'error', 'content');
-
-        if (!$existing)
-        {
-            $q->insert('article_tags', ['article' => $articleId, 'tag' => $tagId], true);
-            $q->run();
-            $tagIdList[] = $q->info()->insertId;
-        }
-    }
 
     return $tagIdList;
 }

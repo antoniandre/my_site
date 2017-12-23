@@ -63,7 +63,7 @@ function distantCode($data)
                             'author'     => $article->author,
                             'category'   => (int)$article->category,
                             'image'      => $article->image,
-                            'status'     => (int)$article->status]);
+                            'status'     => $article->status]);
     $q->run();
     $articleId = $q->info()->insertId;
 
@@ -162,7 +162,7 @@ function afterConsume($data)
 function prepareData()
 {
     $posts  = Userdata::get('post');
-    $pageId = $posts->sendPage->page;
+    $pageId = $posts->{"send-page"}->page;
 
     // Fetch page from DB.
     $db = database::getInstance();
