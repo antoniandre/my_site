@@ -39,7 +39,9 @@ class Form
 	public  $class;// Custom class.
 	public  $captcha;// Captcha presence.
 	private $enctype;// Add enctype="multipart/form-data" to the form tag if an upload element is found.
-	private $dontClearForm;// If set to true the form will not clear the userdata after a successful submission.
+    private $dontClearForm;// If set to true the form will not clear the userdata after a successful submission.
+    private $thankYou;// If set to true the form will display a thank you message.
+	private $success;// A flag for the state of the form submission.
     private $elements = [];
 
 	// Store the elements indexes, indexed by element name, for conveniance and performances.
@@ -63,17 +65,25 @@ class Form
 	 */
     public function __construct($options = [])
     {
-        $this->id            = isset($options['id'])     ? $options['id'] : ('form'.(self::$idCounter++));
-        $this->method        = isset($options['method']) ? $options['method'] : 'POST';
-        $this->action        = isset($options['action']) ? $options['action'] : url('SELF');
-        $this->hash          = isset($options['hash'])   ? $options['hash'] : null;
-        $this->class         = isset($options['class'])  ? $options['class'] : null;
+        $this->id            = isset($options['id'])       ? $options['id']
+                                                           : ('form' . (self::$idCounter++));
+        $this->method        = isset($options['method'])   ? $options['method'] : 'POST';
+        $this->action        = isset($options['action'])   ? $options['action'] : url('SELF');
+        $this->hash          = isset($options['hash'])     ? $options['hash'] : null;
+        $this->class         = isset($options['class'])    ? $options['class'] : null;
+        $this->success       = false;
+        $this->thankyou      = isset($options['thankyou']) ? $options['thankyou'] : null;
         $this->enctype       = false;
         $this->dontClearForm = false;
 
         if (Userdata::isAjax()) $this->handleAjax();
     }
 
+    /**
+     * [addOption description]
+     *
+     * @return void.
+     */
     public function addOption($options = [])
 	{
         foreach ($options as $optName => $optValue)
@@ -123,6 +133,11 @@ class Form
 		});
 	}
 
+    /**
+     * [ajaxTrackProgress description]
+     *
+     * @return void.
+     */
 	private function ajaxTrackProgress()
 	{
 		$progress = $_SESSION['ajaxProgressUpdate'] ? $_SESSION['ajaxProgressUpdate'] : 0;
@@ -137,6 +152,12 @@ class Form
 		die(json_encode(['progress' => $progress]));
 	}
 
+    /**
+     * [removeFile description]
+     *
+     * @param  [type] $fileSrc [description]
+     * @return void.
+     */
 	private function removeFile($fileSrc)
 	{
 		$urlParts = parse_url($fileSrc);dbgd($urlParts);
@@ -362,33 +383,45 @@ HTML;
 
 		// Error if no element type provided.
 		if (!is_string($type))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . '(): You must provide the type of the element you want to add in the form.', 'MISSING DATA', true);
 
 		// Error if provided element type does not exist.
 		elseif (!in_array($type, self::existingElements))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__).'(): You must select an existing element type among: '.implode(', ', self::existingElements).'.', 'WRONG DATA', true);
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . '(): You must select an existing element type among: '.implode(', ', self::existingElements) . '.', 'WRONG DATA', true);
 
 		// Error if no attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& (!is_array($attributes) || !count($attributes)))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide an array of attributes containing element name and other html attributes.", 'MISSING DATA', true);
 
 		// Error if no name attribute is found. Except for elements: wrapper, header, paragraph.
 		elseif (!in_array($type, ['wrapper', 'header', 'paragraph'])
 				&& !isset($attributes['name']))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide (through the attributes array) a name for the $type form element.", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif ($type === 'wrapper' && !isset($options->numberElements))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide (through the options array) a number of elements to wrap: 'numberElements' => (int).", 'MISSING DATA');
 
 		// Error if no name numberElements is found for wrapper element.
 		elseif (($type === 'header' || $type === 'paragraph') && !isset($options->text))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide (through the options array) a text to write: 'text' => (string).", 'MISSING DATA');
 
-		// Error if no name numberElements is found for wrapper element.
-		elseif (($type === 'header') && !isset($options->level))
-			Cerror::add(__CLASS__.'::'.ucfirst(__FUNCTION__)."($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
+        // Error if no name numberElements is found for wrapper element.
+        elseif (($type === 'header') && !isset($options->level))
+            Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide (through the options array) a level for the header (h1 - h6): 'level' => (int).", 'MISSING DATA');
+
+        // Error if adding checkbox with no options.
+        elseif (($type === 'checkbox') && !isset($options->options))
+            Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide an array of checkboxes options.\noptions = [\n\t'checkbox_name_1' => 'Checkbox label 1',\n\t'checkbox_name_2' => 'Checkbox label 2',\n\t...\n]", 'MISSING DATA');
+
+        // Error if adding select with no options.
+        elseif (($type === 'select') && !isset($options->options))
+            Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide an array of select options options.\noptions = [\n\t'option_name_1' => 'option label 1',\n\t'option_name_2' => 'option label 2',\n\t...\n]", 'MISSING DATA');
+
+		// Error if adding radio with no options.
+		elseif (($type === 'radio') && !isset($options->options))
+			Cerror::add(__CLASS__ . '::' . ucfirst(__FUNCTION__) . "($type): You must provide an array of radio buttons options.\noptions = [\n\t'radio_name_1' => 'radio label 1',\n\t'radio_name_2' => 'radio label 2',\n\t...\n]", 'MISSING DATA');
 
 		// Elements for which attributes are not required:
 		else
@@ -522,7 +555,7 @@ HTML;
 		$tpl->set_block('rowBlock', 'elementBlock', 'theElementBlock');
 		foreach (self::existingElements as $existingElement) if ($existingElement !== 'wrapper')
 		{
-			$tpl->set_block('form-element-tpl', $existingElement.'Block', 'the'.ucfirst($existingElement).'Block');
+			$tpl->set_block('form-element-tpl', "{$existingElement}Block", 'the' . ucfirst($existingElement) . 'Block');
 		}
 		$tpl->set_block('form-element-tpl', 'labelBlock', 'theLabelBlock');
 		$tpl->set_block('form-tpl', 'robotCheck', 'theRobotCheck');
@@ -537,9 +570,11 @@ HTML;
                        'hash'             => $this->hash === null ? "#$this->id" : ($this->hash ? "#$this->hash" : ''),
 					   'method'           => $this->method,
 					   'action'           => $this->action,
-					   'formClass'        => $this->class ? " class=\"$this->class\"" : '',
-					   'formWrapperClass' => $this->class ? " class=\"{$this->class}-wrapper\"" : '',
-					   'enctype'          => $this->enctype ? " enctype=\"multipart/form-data\"" : '']);
+					   'formClass'        => $this->class   ? " $this->class" : '',
+					   'formWrapperClass' => $this->class   ? " {$this->class}-wrapper" : '',
+					   'enctype'          => $this->enctype ? " enctype=\"multipart/form-data\"" : '',
+                       'thankYou'         => $this->success && $this->thankyou ?
+                                             "<div class='thank-you'>$this->thankyou<span class='close i-cross'></span></div>" : '']);
 
 		//========================= ELEMENTS RENDERING =========================//
 		$rowSpan = 0;
@@ -743,12 +778,14 @@ HTML;
                 $onInit    = isset($element->options->onInit)    ? "'{$element->options->onInit}'"    : 'null';
                 $onDrag    = isset($element->options->onDrag)    ? "'{$element->options->onDrag}'"    : 'null';
                 $afterDrag = isset($element->options->afterDrag) ? "'{$element->options->afterDrag}'" : 'null';
-                $value     = isset($element->options->value)     ? $element->options->value           : 'null';
+                $value     = isset($element->options->value)     ? $element->options->value           :
+                             (isset($element->options->default)  ? $element->options->default         : 'null');
 
                 $tpl->set_var(['graduation' => json_encode($graduation),
                                'onInit'     => $onInit,
                                'onDrag'     => $onDrag,
                                'afterDrag'  => $afterDrag,
+                               'value'      => $value,
                                'class'      => isset($element->attributes->class) ? $element->attributes->class : $element->id]);
                 break;
 		 	case 'upload':
@@ -1148,6 +1185,7 @@ HTML;
 		// If all the posts are valid.
 		if (!$countInvalidElements)
 		{
+            $this->success = true;
             // By default clear form if successfull submission. Don't if prevented from $dontClearForm var.
             $grantClearing = !$this->dontClearForm;
 
