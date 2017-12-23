@@ -36,7 +36,7 @@ var reallyReady = function()
 	var mainTable = $("#mainTable");
 
 	// Example of scrollbar use:
-	//loadScript('perfect-scrollbar', function(){$('#tableWrapper').css({height:1000, overflow:'hidden', position:'relative'}).perfectScrollbar();});
+	//loadScript('perfect-scrollbar:v', function(){$('#tableWrapper').css({height:1000, overflow:'hidden', position:'relative'}).perfectScrollbar();});
 
 	// Bind events
 	$(document).on('keydown', function(e)
@@ -381,6 +381,6 @@ makeTasksSortable = function()
 	}).disableSelection();
 },
 
-todolistReady = function(){loadScript('jquery.ui', reallyReady)};
+todolistReady = function(){loadScript('jquery.ui:v', reallyReady)};
 //=====================================================================================================//
 

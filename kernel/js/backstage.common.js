@@ -33,7 +33,7 @@ var backstagecommonReady = function()
 	// Edit a page.
 	else if ($('.page.edit-a-page').length)
 	{
-		loadStyleSheet('article');
+		loadStyleSheet('article:k');
 		bindEvents();
 		saveWithKeyStroke();
 
@@ -177,7 +177,7 @@ var cleanFigures = function(callback)
 		fig.children('br').remove();
 
 		// Leftover editor removal.
-		fig.filter('.edit').removeClass('edit').children('.editPanel').remove();
+		fig.filter('.edit').removeClass('edit').children('.edit-panel').remove();
 
 		if (callback && i+1 >= length) callback();
 	});

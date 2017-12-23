@@ -103,14 +103,21 @@ function addCssContents($css)
     $cssContents = '';
     if (count($css)) foreach($css as $fileName) if ($fileName)
     {
-        // If in vendor.
-        if (strpos($fileName, 'vendor') === 0 && $v = getContents($fileName, 'v')) $cssContents .= $v;
+        $v = null;// Vendor.
+        $k = null;// Kernel.
+        $t = null;// Theme.
+        $c = null;// File Content.
+        list($fileName, $from) = array_pad(explode(':', $fileName), 2, null);
 
-        // If in normal css folder.
-        elseif ($k = getContents($fileName, 'k')) $cssContents .= $k;
+        if ($fileName)
+        {
+            if (!$from && ($c = getContents($fileName, null))) $cssContents .= $c;
+            if (strpos($from, 'v') !== false && ($v = getContents($fileName, 'v'))) $cssContents .= $v;
+            if (strpos($from, 'k') !== false && ($k = getContents($fileName, 'k'))) $cssContents .= $k;
+            if (strpos($from, 't') !== false && ($t = getContents($fileName, 't'))) $cssContents .= $t;
 
-        // If in theme css folder.
-        if ($t = getContents($fileName, 't')) $cssContents .= $t;
+            // if ($v || $k || $t || $c) $loadedCss = array_merge($loadedCss, (array)$fileName);
+        }
     }
 
     return $cssContents;
@@ -150,9 +157,9 @@ function doOutput($cssContents)
 
     // Preg_replace to replace css 'url(/path)' with 'url(ROOT.'css/path)' except if 'data:' is found.
     $cssOutput = preg_replace('~url\( ?(?:([\'"])(?!data:|\{THEME_IMAGES\})(.+?)\1|(?!data:)([^\'" ]+?)) ?\)~',
-                              'url("'.$settings->root.'css/$2$3")',
+                              'url("' . $settings->root . 'css/$2$3")',
                               trim($cssContents));
-    $cssOutput = str_replace('{THEME_IMAGES}', $settings->root.'images?t=', $cssOutput);
+    $cssOutput = str_replace('{THEME_IMAGES}', $settings->root . 'images?t=', $cssOutput);
     $cssOutput = "@charset \"UTF-8\";\n$cssOutput";
 
     // The right caching is done in the main .htaccess.
@@ -170,6 +177,7 @@ function getFont($font)
     $src = null;
     if     (is_file($t = THEME_PATH  . "fonts/$font")) $src = $t;
     elseif (is_file($k = KERNEL_PATH . "fonts/$font")) $src = $k;
+    elseif (is_file($v = VENDOR_PATH . $font)) $src = $v;
 
     return $src ? file_get_contents($src) : '';
 }
