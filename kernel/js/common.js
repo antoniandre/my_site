@@ -58,15 +58,15 @@ var // General vars. (g for general)
 	// Load a defered css file.
 	loadStyleSheet = function(src)
 	{
-	    if (document.createStyleSheet) document.createStyleSheet('?css=1&o='+src);
-	    else $("head").append($('<link rel="stylesheet" href="?css=1&o='+src+'" type="text/css" media="screen" />'));
+	    if (document.createStyleSheet) document.createStyleSheet('?css=1&o=' + src);
+	    else $("head").append($('<link rel="stylesheet" href="?css=1&o=' + src + '" type="text/css" media="screen" />'));
 	},
 
 	imagePreloader = function(arrayOfImages)
 	{
 		var self = this;
 		this.loadedImages = 0;
-		this.imagesDir = ROOT+'images/';
+		this.imagesDir = ROOT + 'images/';
 		this.init = function()
 		{
 			var img = null;
@@ -317,6 +317,30 @@ var // General vars. (g for general)
 				})
 			}, parseInt(duration)+parseInt(animDuration));
 		});
+    },
+
+    handleRatings = function()
+    {
+        $('.rating form')
+            .on('submit', function(e)
+            {
+                e.preventDefault();
+            })
+            .on('click', 'button', function(e)
+            {
+                var ratingEl = $(this).parents('.rating');
+                e.preventDefault();
+                $.get
+                (
+                    $(this).parents('form').attr('action'),
+                    $(this).parents('form').serialize() + '&' + $(this).attr('name') + '=' + $(this).attr('value'),
+                    function(data)
+                    {
+                        ratingEl.find('.current').css('width', data.rating + '%')
+                        setMessage(data.message, data.error ? 'error' : 'success', data.error ? 'error' : 'success', 'header');
+                    }
+                );
+            });
 	},
 
 	handleMobileMenu = function()
@@ -773,6 +797,7 @@ var commonReady = function()
     if ($('.slideshow').length)              handleSlideshow();
 	if ($('.social').length && !localhost)   handleSocials();
     if ($('.comments').length)               handleComments();
+    if ($('.rating').length)                 handleRatings();
     if (g.screenWidth <= 550)                handleMobileMenu();
     if ($('.main-slideshow').length)         initSlickSlider();
 };
