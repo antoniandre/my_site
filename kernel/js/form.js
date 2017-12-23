@@ -1,9 +1,53 @@
 // This function will be called each time you change the page to edit in dropdown.
-var formReady = function()
+var contentEditor,
+onContentEditorSave = function(ev)
+{
+    var name, payload, regions, xhr;
+
+    // Check that something changed
+    regions = ev.detail().regions;
+    if (Object.keys(regions).length == 0) {
+        return;
+    }
+
+    // Set the editor as busy while we save our changes
+    this.busy(true);
+
+    // Collect the contents of each region into a FormData instance
+    payload = new FormData();
+    for (name in regions) {
+        if (regions.hasOwnProperty(name)) {
+            payload.append(name, regions[name]);
+        }
+    }
+
+    // Send the update content to the server to be saved
+    function onStateChange(ev) {
+        // Check if the request is finished
+        if (ev.target.readyState == 4) {
+            contentEditor.busy(false);
+            if (ev.target.status == '200') {
+                // Save was successful, notify the user with a flash
+                new ContentTools.FlashUI('ok');
+            } else {
+                // Save failed, notify the user with a flash
+                new ContentTools.FlashUI('no');
+            }
+        }
+    };
+
+    xhr = new XMLHttpRequest();
+    xhr.addEventListener('readystatechange', onStateChange);
+    xhr.open('POST', '/save-my-page');
+    xhr.send(payload);
+},
+
+formReady = function()
 {
 	// Using jQuery Dropzone plugin: http://www.dropzonejs.com/#installation
-	if ($(".Dropzone").length) loadScript('dropzone', function()
+    if ($(".Dropzone").length) loadScript('dropzone:v', function()
 	{
+        loadStyleSheet('dropzone:v')
 		var formAction = $(".Dropzone").parents('form').attr('action');
 		Dropzone.autoDiscover = false;
 
@@ -64,46 +108,60 @@ var formReady = function()
 
 	if ($('.wysiwyg').length)
 	{
-		loadScript('redactor', function()
+        loadScript('content-tools/content-tools.min:v', function()
+        {
+            loadStyleSheet('content-tools/content-tools.min:v');
+            contentEditor = ContentTools.EditorApp.get();
+            ContentTools.StylePalette.add([
+                new ContentTools.Style('Author', 'author', ['p'])
+            ]);
+            contentEditor.init('*[data-editable]', 'data-name');
+            contentEditor.addEventListener('saved', onContentEditorSave);
+        });
+		/*loadScript('redactor:v', function()
 		{
+            loadStyleSheet('redactor:v');
 			new editPanel();
 
-			$('textarea.wysiwyg').redactor(
-			{
-				// fixed: true,
-				imageUpload: ROOT + 'uploads/',
-				imageEditable: false,
-				// linebreaks: true,
-				paragraphize: false,
-				replaceDivs: false,
-				focus: true,
-				toolbarFixedTopOffset: $('#sticky-bar').height(),
-				formatting: ['p', 'blockquote', 'h2', 'h3'],
-				formattingAdd: [
-			    {
-			        tag: 'p',
-			        title: 'Paragraph: force align left',
-			        class: 'left'
-			    },
-			    {
-			        tag: 'mark',
-			        title: 'marked',
-			        class: 'marked'
-			    },
-			    {
-			        tag: 'ul',
-			        title: 'ul glyph',
-			        class: 'glyph'
-			    }],
-				plugins: ['youtube', 'imagepx']
-				/*autosave: window.location,
-				interval: 30,
-				autosaveCallback: function(data, redactor_obj)
-				{
-					cl(data);
-				}*/
-			});
-		});
+            $('textarea.wysiwyg').each(function(i, curr)
+            {
+                $(curr).redactor(
+                {
+                    // fixed: true,
+                    imageUpload: ROOT + 'uploads/',
+                    imageEditable: false,
+                    // linebreaks: true,
+                    paragraphize: false,
+                    replaceDivs: false,
+                    focus: true,
+                    toolbarFixedTopOffset: $('#sticky-bar').height(),
+                    formatting: ['p', 'blockquote', 'h2', 'h3'],
+                    formattingAdd: [
+                    {
+                        tag: 'p',
+                        title: 'Paragraph: force align left',
+                        class: 'left'
+                    },
+                    {
+                        tag: 'mark',
+                        title: 'marked',
+                        class: 'marked'
+                    },
+                    {
+                        tag: 'ul',
+                        title: 'ul glyph',
+                        class: 'glyph'
+                    }],
+                    plugins: ['youtube']
+                    /*autosave: window.location,
+                    interval: 30,
+                    autosaveCallback: function(data, redactor_obj)
+                    {
+                        cl(data);
+                    }*\/
+                });
+            });
+		});*/
 	}
 
 	// Handle show/hide state of a form element if a data-toggle attribute is set (in form definition in PHP file).
@@ -241,7 +299,7 @@ var editPanel = function()
 
 	self.createPanel = function()
 	{
-		return $('<div class="editPanel">\
+		return $('<div class="edit-panel">\
 				<span class="duplicate i-plus" title="Duplicate"></span>\
 				<span class="rotate i-rot-r children_5" title="Rotate">\
 					<span class="rotate10ccw i-rot-l" title="Rotate left 10 degrees">10<br>º</span>\
@@ -336,22 +394,25 @@ var editPanel = function()
 			}
 		});
 
-		$('article').off().on('mouseenter', 'figure', function()
-		{
-			var figEditPanel = self.panel.clone(true);
-			// bindEditEvents(figEditPanel);
-			$(this).addClass('edit hover').append(figEditPanel);
-			$(this).find('.editPanel').stop(true, true).toggle('slide', 'easeInOutQuad', {direction:'left'}, 300);
-		})
-		.on('mouseleave', 'figure', function()
-		{
-			var figure = $(this);
-			figure.removeClass('hover').find('.editPanel').stop(true, true).toggle('slide', 'easeInOutQuad', function()
-			{
-				// Check again if not hover before removing editPanel.
-				if (!figure.hasClass('hover')) $(this).parent().removeClass('edit').end().remove();
-			}, {direction:'left'}, 300);
-		});
+		$('article').off()
+            .on('mouseenter', 'figure', function()
+    		{
+    			var figEditPanel = self.panel.clone(true);
+    			// bindEditEvents(figEditPanel);
+    			$(this).addClass('edit hover').append(figEditPanel);
+    			$(this).find('.edit-panel').stop(true, true).toggle('slide', 'easeInOutQuad', {direction:'left'}, 300);
+    		})
+    		.on('mouseleave', 'figure', function()
+    		{
+    			var figure = $(this);
+    			figure.removeClass('hover').find('.edit-panel').stop(true, true).toggle('slide', 'easeInOutQuad', function()
+    			{
+    				// Check again if not hover before removing editPanel.
+    				if (!figure.hasClass('hover')) $(this).parent().removeClass('edit').end().remove();
+    			}, {direction:'left'}, 300);
+    		});
+
+        // setTimeout(function(){$('.redactor-editor').sortable({items: 'figure,p', placeholder: 'figure-placeholder', handle: false})}, 1000);
 	};
 
 	self.init = function()

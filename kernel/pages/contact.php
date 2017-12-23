@@ -28,7 +28,7 @@ $form->addElement('email',
                   ['name'        => 'email',
                    'placeholder' => text(28),
                    'required'    => 'required'],
-                  ['validation'  => 'required', 'label' =>  text(28)]);
+                  ['validation'  => 'required', 'label' => text(28)]);
 $form->addElement('textarea',
                   ['name'        => 'message',
                    'placeholder' => text(30),

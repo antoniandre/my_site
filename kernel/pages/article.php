@@ -129,7 +129,7 @@ elseif ($article && $article->status === 'published')
 					  ]);
 
 	// Now get the image representing the article for Facebook.
-	$image = preg_replace('~(u(?=ploads)|i(?=mages))(?:mages|ploads)%2F~', $settings->root.'images/?$1=', urlencode($article->image));
+	$image = preg_replace('~(u(?=ploads)|i(?=mages))(?:mages|ploads)%2F~', $settings->root . 'images/?$1=', urlencode($article->image));
 	$page->addSocial($image);
 
     // Render the previous and next article buttons at the end of the article.

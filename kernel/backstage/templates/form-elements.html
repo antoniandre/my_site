@@ -71,9 +71,13 @@
 <!-- END textareaBlock -->
 
 <!-- BEGIN wysiwygBlock -->
-<article class="{validation}{state}">
-	<textarea name="{formId}{name}" id="{formId}{id}" class="text wysiwyg{class}"{attr}>{value}</textarea>{errorMessage}
-</article>
+<!-- <article class="{validation}{state}">
+    <textarea name="{formId}{name}" id="{formId}{id}" class="text wysiwyg{class}"{attr}>{value}</textarea>{errorMessage}
+</article> -->
+<div class="{validation}{state}">
+    <article class="wysiwyg{class}" data-editable data-name="{formId}{id}" id="{formId}{id}">{value}</article>
+    {errorMessage}
+</div>
 <!-- END wysiwygBlock -->
 
 <!-- BEGIN selectBlock -->
@@ -90,15 +94,17 @@
 <!-- BEGIN checkboxBlock -->
 <div class="{validation}{state}{inline}{class}">
     <!-- BEGIN checkboxOptionBlock -->
-    <input type="checkbox" name="{formId}{name}{ifArray}" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} /> {label}{br}
+    <input type="checkbox" name="{formId}{name}{ifArray}" class="hidden" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} />
+    <label for="{formId}{id}opt{opt}" class="checkbox"><span class="i-check"></span></label> {label}{br}
     <!-- END checkboxOptionBlock -->{errorMessage}
 </div>
 <!-- END checkboxBlock -->
 
 <!-- BEGIN radioBlock -->
 <div class="{validation}{state}{inline}{class}">
-	<!-- BEGIN radioOptionBlock -->
-	<input type="radio" name="{formId}{name}" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} /> {label}{br}
+    <!-- BEGIN radioOptionBlock -->
+    <input type="radio" name="{formId}{name}" class="hidden" id="{formId}{id}opt{opt}" value="{value}"{checked}{attr} />
+    <label for="{formId}{id}opt{opt}" class="radiobox"></label> {label}{br}
     <!-- END radioOptionBlock -->{errorMessage}
 </div>
 <!-- END radioBlock -->
