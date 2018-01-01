@@ -13,6 +13,14 @@ RewriteEngine On
 #==================== PRD =====================#
 # ErrorDocument 404 kernel/pages/not-found.php
 # ErrorDocument 403 kernel/pages/forbidden.php
+
+# Redirect http to https for ssl certificate. Only if not on localhost.
+RewriteCond %{HTTP_HOST} !=localhost
+RewriteCond %{HTTP_HOST} !^.+\.local [NC]
+RewriteCond %{HTTP_HOST} !^.+\.test [NC]
+RewriteCond %{HTTP_HOST} !^.+\.dev [NC]
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 #==============================================#
 
 #================= robots.txt =================#
@@ -176,10 +184,6 @@ RewriteRule . kernel/abuse.txt [L]
 
 
 #================= SEO rules ==================#
-# Redirect http to https for ssl certificate.
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
 # Let go through the images, uploads and vendor and send everything else to index.php.
 RewriteRule ^(vendor|images|uploads)/.*$ - [NC,QSA,L]
 RewriteRule ^css/fonts/(.*)$ kernel/css/fonts/$1 [NC,QSA,L]

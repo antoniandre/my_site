@@ -34,7 +34,7 @@ class Webservice
 {
 	private static $instance = null;
 	private $distantUrl = '';
-	// private $distantUrl = 'http://travel.dev';
+	// private $distantUrl = 'http://travel.test';
 	private $exchangePassword = 'be$tKeyword∑ver-Yop!';
 
 
