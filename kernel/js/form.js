@@ -1,48 +1,5 @@
 // This function will be called each time you change the page to edit in dropdown.
-var contentEditor,
-onContentEditorSave = function(ev)
-{
-    var name, payload, regions, xhr;
-
-    // Check that something changed
-    regions = ev.detail().regions;
-    if (Object.keys(regions).length == 0) {
-        return;
-    }
-
-    // Set the editor as busy while we save our changes
-    this.busy(true);
-
-    // Collect the contents of each region into a FormData instance
-    payload = new FormData();
-    for (name in regions) {
-        if (regions.hasOwnProperty(name)) {
-            payload.append(name, regions[name]);
-        }
-    }
-
-    // Send the update content to the server to be saved
-    function onStateChange(ev) {
-        // Check if the request is finished
-        if (ev.target.readyState == 4) {
-            contentEditor.busy(false);
-            if (ev.target.status == '200') {
-                // Save was successful, notify the user with a flash
-                new ContentTools.FlashUI('ok');
-            } else {
-                // Save failed, notify the user with a flash
-                new ContentTools.FlashUI('no');
-            }
-        }
-    };
-
-    xhr = new XMLHttpRequest();
-    xhr.addEventListener('readystatechange', onStateChange);
-    xhr.open('POST', '/save-my-page');
-    xhr.send(payload);
-},
-
-formReady = function()
+var formReady = function()
 {
 	// Using jQuery Dropzone plugin: http://www.dropzonejs.com/#installation
     if ($(".Dropzone").length) loadScript('dropzone:v', function()
@@ -108,17 +65,7 @@ formReady = function()
 
 	if ($('.wysiwyg').length)
 	{
-        loadScript('content-tools/content-tools.min:v', function()
-        {
-            loadStyleSheet('content-tools/content-tools.min:v');
-            contentEditor = ContentTools.EditorApp.get();
-            ContentTools.StylePalette.add([
-                new ContentTools.Style('Author', 'author', ['p'])
-            ]);
-            contentEditor.init('*[data-editable]', 'data-name');
-            contentEditor.addEventListener('saved', onContentEditorSave);
-        });
-		/*loadScript('redactor:v', function()
+		loadScript('redactor:v', function()
 		{
             loadStyleSheet('redactor:v');
 			new editPanel();
@@ -158,10 +105,10 @@ formReady = function()
                     autosaveCallback: function(data, redactor_obj)
                     {
                         cl(data);
-                    }*\/
+                    }*/
                 });
             });
-		});*/
+		});
 	}
 
 	// Handle show/hide state of a form element if a data-toggle attribute is set (in form definition in PHP file).
@@ -412,7 +359,7 @@ var editPanel = function()
     			}, {direction:'left'}, 300);
     		});
 
-        // setTimeout(function(){$('.redactor-editor').sortable({items: 'figure,p', placeholder: 'figure-placeholder', handle: false})}, 1000);
+        setTimeout(function(){$('.redactor-editor').sortable({items: 'figure,p', placeholder: 'figure-placeholder', handle: false})}, 1000);
 	};
 
 	self.init = function()
